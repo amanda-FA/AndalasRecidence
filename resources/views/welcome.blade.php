@@ -24,12 +24,24 @@
             @if (Route::has('login'))
                 <nav class="flex items-center justify-end gap-4">
                     @auth
+                        <span class="text-sm text-[#706f6c] dark:text-[#A1A09A]">
+                            {{ auth()->user()->name }}
+                        </span>
                         <a
                             href="{{ url('/dashboard') }}"
                             class="inline-block px-5 py-1.5 dark:text-[#EDEDEC] border-[#19140035] hover:border-[#1915014a] border text-[#1b1b18] dark:border-[#3E3E3A] dark:hover:border-[#62605b] rounded-sm text-sm leading-normal"
                         >
                             Dashboard
                         </a>
+                        <form method="POST" action="{{ route('logout') }}" class="inline">
+                            @csrf
+                            <button
+                                type="submit"
+                                class="inline-block px-5 py-1.5 bg-[#1b1b18] text-white dark:bg-[#eeeeec] dark:text-[#1C1C1A] border border-transparent hover:bg-black dark:hover:bg-white rounded-sm text-sm leading-normal cursor-pointer"
+                            >
+                                Logout
+                            </button>
+                        </form>
                     @else
                         <a
                             href="{{ route('login') }}"

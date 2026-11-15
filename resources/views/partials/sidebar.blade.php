@@ -1,0 +1,93 @@
+@php
+    $user = auth()->user();
+    $roleLabel = $user ? ($user->getRoleNames()->first() ?? 'Pengguna') : 'Tamu';
+    $activeClass = 'bg-secondary text-on-secondary shadow-[0_2px_8px_rgba(18,32,86,0.12)] font-body-md-medium';
+    $inactiveClass = 'text-primary-fixed hover:bg-secondary/40 hover:text-surface-container-lowest';
+@endphp
+
+<aside id="app-sidebar" class="fixed left-0 top-0 h-full w-64 bg-primary-container z-50 flex flex-col justify-between shadow-[0_1px_8px_rgba(0,0,0,0.04)] -translate-x-full lg:translate-x-0 transition-transform duration-200">
+    <div class="flex flex-col overflow-y-auto">
+        {{-- Brand Header --}}
+        <div class="h-20 px-space-lg flex items-center justify-between bg-primary/20 shrink-0">
+            <a href="{{ url('/') }}" class="flex items-center gap-space-sm">
+                <div class="w-10 h-10 rounded-xl bg-secondary flex items-center justify-center shrink-0">
+                    <span class="material-symbols-outlined text-on-secondary text-[24px]">apartment</span>
+                </div>
+                <div class="flex flex-col">
+                    <span class="font-headline-sm text-headline-sm text-surface-container-lowest leading-none">Andalas</span>
+                    <span class="font-caption-sm text-caption-sm text-secondary-fixed-dim uppercase tracking-wider">Residence</span>
+                </div>
+            </a>
+            <button type="button" class="lg:hidden text-primary-fixed hover:text-on-primary p-1" onclick="toggleSidebar(false)" aria-label="Tutup Menu">
+                <span class="material-symbols-outlined text-[22px]">close</span>
+            </button>
+        </div>
+
+        {{-- Navigation Label --}}
+        <div class="px-space-md py-space-sm">
+            <div class="px-space-sm py-space-xs text-secondary-fixed-dim font-caption-sm-medium text-caption-sm-medium uppercase tracking-wider">
+                Navigasi Utama
+            </div>
+        </div>
+
+        {{-- Navigation Links --}}
+        <nav class="flex flex-col px-space-sm gap-space-xs">
+            @role('Pimpinan')
+                @if (Route::has('dashboard.okupansi'))
+                    <a href="{{ route('dashboard.okupansi') }}"
+                       class="flex items-center gap-space-sm px-space-md py-space-sm rounded-xl transition-all {{ request()->routeIs('dashboard.okupansi') ? $activeClass : $inactiveClass }}">
+                        <span class="material-symbols-outlined text-[20px]">space_dashboard</span>
+                        <span class="font-body-md text-body-md">Dashboard Okupansi</span>
+                    </a>
+                @endif
+            @endrole
+
+            @role('Fasilitator')
+                @if (Route::has('gedung.index'))
+                    <a href="{{ route('gedung.index') }}"
+                       class="flex items-center gap-space-sm px-space-md py-space-sm rounded-xl transition-all {{ request()->routeIs('gedung.*') ? $activeClass : $inactiveClass }}">
+                        <span class="material-symbols-outlined text-[20px]">domain</span>
+                        <span class="font-body-md text-body-md">Manajemen Gedung</span>
+                    </a>
+                @endif
+
+                @if (Route::has('kamar.index'))
+                    <a href="{{ route('kamar.index') }}"
+                       class="flex items-center gap-space-sm px-space-md py-space-sm rounded-xl transition-all {{ request()->routeIs('kamar.*') ? $activeClass : $inactiveClass }}">
+                        <span class="material-symbols-outlined text-[20px]">bed</span>
+                        <span class="font-body-md text-body-md">Manajemen Kamar</span>
+                    </a>
+                @endif
+            @endrole
+
+            @yield('sidebar-items')
+        </nav>
+    </div>
+
+    {{-- Bottom Role & Logout Card --}}
+    <div class="p-space-md m-space-sm rounded-xl bg-primary/40 flex flex-col gap-space-sm">
+        <div class="flex items-center gap-space-sm">
+            <div class="w-8 h-8 rounded-full bg-secondary-fixed flex items-center justify-center shrink-0">
+                <span class="material-symbols-outlined text-on-secondary-fixed text-[18px]">verified_user</span>
+            </div>
+            <div class="flex flex-col overflow-hidden">
+                <span class="font-caption-sm-medium text-caption-sm-medium text-surface-container-lowest truncate">
+                    {{ $user?->name ?? 'Pengguna' }}
+                </span>
+                <span class="font-caption-sm text-caption-sm text-secondary-fixed-dim truncate">
+                    Role: {{ $roleLabel }}
+                </span>
+            </div>
+        </div>
+
+        @auth
+            <form action="{{ route('logout') }}" method="POST">
+                @csrf
+                <button type="submit" class="w-full flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-lg bg-primary-container/80 hover:bg-error text-primary-fixed hover:text-on-error font-caption-sm-medium text-caption-sm-medium transition-colors cursor-pointer">
+                    <span class="material-symbols-outlined text-[16px]">logout</span>
+                    <span>Keluar Sistem</span>
+                </button>
+            </form>
+        @endauth
+    </div>
+</aside>

@@ -25,8 +25,8 @@ class AuthRegistrationTest extends TestCase
             'password_confirmation' => 'Password123!',
         ]);
 
-        $response->assertRedirect('/');
-        $this->assertAuthenticated();
+        $response->assertRedirect(route('login'));
+        $this->assertGuest();
 
         $user = User::where('email', 'client@example.com')->firstOrFail();
 

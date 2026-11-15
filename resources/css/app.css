@@ -6,6 +6,149 @@
 @source '../**/*.js';
 
 @theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
+    /* Colors - Stitch Design System */
+    --color-inverse-on-surface: #f0efff;
+    --color-inverse-surface: #2a2f48;
+    --color-on-tertiary: #ffffff;
+    --color-secondary-fixed-dim: #bec2ff;
+    --color-on-surface: #151a32;
+    --color-on-primary-fixed: #06164d;
+    --color-on-background: #151a32;
+    --color-on-secondary-fixed-variant: #2d36ae;
+    --color-background: #fbf8ff;
+    --color-outline: #767680;
+    --color-tertiary-fixed-dim: #c4c6d3;
+    --color-primary-fixed-dim: #b8c3ff;
+    --color-tertiary-fixed: #e0e2ef;
+    --color-tertiary-container: #22252f;
+    --color-surface-container: #ececff;
+    --color-on-secondary-fixed: #00036b;
+    --color-surface: #fbf8ff;
+    --color-inverse-primary: #b8c3ff;
+    --color-secondary: #4750c7;
+    --color-on-error-container: #93000a;
+    --color-surface-variant: #dde1ff;
+    --color-on-primary-fixed-variant: #37437a;
+    --color-surface-bright: #fbf8ff;
+    --color-error-container: #ffdad6;
+    --color-surface-container-lowest: #ffffff;
+    --color-surface-container-high: #e5e7ff;
+    --color-on-tertiary-container: #8a8c98;
+    --color-secondary-fixed: #e0e0ff;
+    --color-error: #ba1a1a;
+    --color-on-primary-container: #7c89c5;
+    --color-on-primary: #ffffff;
+    --color-surface-container-low: #f3f2ff;
+    --color-surface-dim: #d4d8f9;
+    --color-secondary-container: #7b85fe;
+    --color-surface-container-highest: #dde1ff;
+    --color-on-surface-variant: #45464f;
+    --color-primary-fixed: #dde1ff;
+    --color-on-secondary-container: #000794;
+    --color-on-tertiary-fixed: #181b25;
+    --color-primary-container: #122056;
+    --color-primary: #000a39;
+    --color-on-error: #ffffff;
+    --color-tertiary: #0d1019;
+    --color-outline-variant: #c6c5d1;
+    --color-surface-tint: #4f5b94;
+    --color-on-tertiary-fixed-variant: #444651;
+    --color-on-secondary: #ffffff;
+
+    /* Spacing */
+    --spacing-space-xs: 0.25rem;
+    --spacing-space-sm: 0.5rem;
+    --spacing-space-md: 1rem;
+    --spacing-space-lg: 1.5rem;
+    --spacing-space-xl: 2rem;
+    --spacing-space-2xl: 3rem;
+    --spacing-margin: 2rem;
+    --spacing-margin-mobile: 1rem;
+    --spacing-gutter: 1.5rem;
+    --spacing-gutter-mobile: 1rem;
+
+    /* Font Families */
+    --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-caption-sm: 'Inter', ui-sans-serif, system-ui, sans-serif;
+    --font-caption-sm-medium: 'Inter', ui-sans-serif, system-ui, sans-serif;
+    --font-label-md: 'Inter', ui-sans-serif, system-ui, sans-serif;
+    --font-body-md: 'Inter', ui-sans-serif, system-ui, sans-serif;
+    --font-body-md-medium: 'Inter', ui-sans-serif, system-ui, sans-serif;
+    --font-body-lg: 'Inter', ui-sans-serif, system-ui, sans-serif;
+    --font-title-md: 'Inter', ui-sans-serif, system-ui, sans-serif;
+    --font-headline-sm: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
+    --font-headline-md: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
+    --font-headline-lg: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
+    --font-headline-lg-mobile: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
+    --font-headline-xl: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
+    --font-headline-xl-mobile: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
+
+    /* Typography Scale */
+    --text-caption-sm: 12px;
+    --text-caption-sm--line-height: 16px;
+    --text-caption-sm--font-weight: 400;
+
+    --text-caption-sm-medium: 12px;
+    --text-caption-sm-medium--line-height: 16px;
+    --text-caption-sm-medium--font-weight: 500;
+
+    --text-label-md: 13px;
+    --text-label-md--line-height: 18px;
+    --text-label-md--letter-spacing: 0.01em;
+    --text-label-md--font-weight: 600;
+
+    --text-body-md: 14px;
+    --text-body-md--line-height: 22px;
+    --text-body-md--font-weight: 400;
+
+    --text-body-md-medium: 14px;
+    --text-body-md-medium--line-height: 22px;
+    --text-body-md-medium--font-weight: 500;
+
+    --text-body-lg: 16px;
+    --text-body-lg--line-height: 26px;
+    --text-body-lg--font-weight: 400;
+
+    --text-title-md: 16px;
+    --text-title-md--line-height: 24px;
+    --text-title-md--font-weight: 600;
+
+    --text-headline-sm: 20px;
+    --text-headline-sm--line-height: 28px;
+    --text-headline-sm--font-weight: 600;
+
+    --text-headline-md: 26px;
+    --text-headline-md--line-height: 34px;
+    --text-headline-md--letter-spacing: -0.01em;
+    --text-headline-md--font-weight: 600;
+
+    --text-headline-lg-mobile: 26px;
+    --text-headline-lg-mobile--line-height: 34px;
+    --text-headline-lg-mobile--letter-spacing: -0.01em;
+    --text-headline-lg-mobile--font-weight: 700;
+
+    --text-headline-lg: 34px;
+    --text-headline-lg--line-height: 42px;
+    --text-headline-lg--letter-spacing: -0.015em;
+    --text-headline-lg--font-weight: 700;
+
+    --text-headline-xl-mobile: 32px;
+    --text-headline-xl-mobile--line-height: 40px;
+    --text-headline-xl-mobile--letter-spacing: -0.01em;
+    --text-headline-xl-mobile--font-weight: 700;
+
+    --text-headline-xl: 44px;
+    --text-headline-xl--line-height: 52px;
+    --text-headline-xl--letter-spacing: -0.02em;
+    --text-headline-xl--font-weight: 700;
+}
+
+@layer base {
+    html, body {
+        margin: 0;
+        padding: 0;
+    }
+    body {
+        overscroll-behavior: none;
+    }
 }
