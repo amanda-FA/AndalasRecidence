@@ -5,19 +5,19 @@ namespace App\Http\Controllers\Gedung;
 use App\Http\Controllers\Controller;
 use App\Models\Gedung;
 use App\Models\Kamar;
+use App\Models\TipeKamar;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 
 class KamarController extends Controller
 {
     public function index(Request $request)
     {
-        $gedungs = Gedung::orderBy('nama')->get();
+        $gedungs = Gedung::orderBy('nama_gedung')->get();
 
-        $query = Kamar::with('gedung');
+        $query = Kamar::with(['gedung', 'tipeKamar']);
 
         if ($gedungId = $request->query('gedung_id')) {
-            $query->where('gedung_id', $gedungId);
+            $query->where('id_gedung', $gedungId);
         }
 
         if ($lantai = $request->query('lantai')) {
@@ -25,24 +25,24 @@ class KamarController extends Controller
         }
 
         if ($tipe = $request->query('tipe_kamar')) {
-            $query->where('tipe_kamar', $tipe);
+            $query->whereHas('tipeKamar', fn ($tk) => $tk->where('nama_tipe', 'like', "%{$tipe}%"));
         }
 
         if ($status = $request->query('status')) {
-            $query->where('status', $status);
+            $query->where('status_kamar', $status);
         }
 
         if ($search = $request->query('q')) {
             $query->where(function ($q) use ($search) {
                 $q->where('nomor_kamar', 'like', "%{$search}%")
-                  ->orWhere('tipe_kamar', 'like', "%{$search}%")
-                  ->orWhereHas('gedung', fn ($g) => $g->where('nama', 'like', "%{$search}%"));
+                  ->orWhereHas('tipeKamar', fn ($tk) => $tk->where('nama_tipe', 'like', "%{$search}%"))
+                  ->orWhereHas('gedung', fn ($g) => $g->where('nama_gedung', 'like', "%{$search}%"));
             });
         }
 
-        $kamars = $query->orderBy('gedung_id')->orderBy('lantai')->orderBy('nomor_kamar')->get();
+        $kamars = $query->orderBy('id_gedung')->orderBy('lantai')->orderBy('nomor_kamar')->get();
 
-        $allKamars = Kamar::all();
+        $allKamars = Kamar::with('tipeKamar')->get();
         $totalBed = $allKamars->sum('kapasitas_bed');
         $bedTerisi = $allKamars->sum('bed_terisi');
         $totalKamar = $allKamars->count();
@@ -54,9 +54,9 @@ class KamarController extends Controller
             'kamar_terisi' => $kamarTerisi,
             'kamar_terisi_persen' => $totalKamar > 0 ? round(($kamarTerisi / $totalKamar) * 100) : 0,
             'bed_terisi' => $bedTerisi,
-            'kamar_tersedia' => $allKamars->where('status', 'tersedia')->count(),
+            'kamar_tersedia' => $allKamars->where('status_kamar', 'tersedia')->count(),
             'bed_kosong' => max(0, $totalBed - $bedTerisi),
-            'kamar_perbaikan' => $allKamars->where('status', 'perbaikan')->count(),
+            'kamar_perbaikan' => $allKamars->where('status_kamar', 'perbaikan')->count(),
         ];
 
         return view('kamar.index', compact('kamars', 'gedungs', 'stats'));
@@ -64,21 +64,29 @@ class KamarController extends Controller
 
     public function create(Request $request)
     {
-        $gedungs = Gedung::orderBy('nama')->get();
+        $gedungs = Gedung::orderBy('nama_gedung')->get();
+        $tipeKamars = TipeKamar::orderBy('nama_tipe')->get();
         $selectedGedungId = $request->query('gedung_id');
 
-        return view('kamar.create', compact('gedungs', 'selectedGedungId'));
+        return view('kamar.create', compact('gedungs', 'tipeKamars', 'selectedGedungId'));
     }
 
     public function store(Request $request)
     {
         $data = $this->validatedData($request);
 
-        if ($request->hasFile('foto')) {
-            $data['foto'] = $request->file('foto')->store('kamar', 'public');
-        }
+        $defaultTipe = TipeKamar::firstOrCreate(
+            ['nama_tipe' => $data['tipe_kamar']],
+            ['kapasitas' => $data['kapasitas_bed'] ?? 4, 'tarif' => $data['tarif'] ?? 0]
+        );
 
-        Kamar::create($data);
+        Kamar::create([
+            'id_gedung' => $data['gedung_id'],
+            'id_tipeKamar' => $defaultTipe->id_tipeKamar,
+            'nomor_kamar' => $data['nomor_kamar'],
+            'lantai' => $data['lantai'],
+            'status_kamar' => $data['status'] ?? 'tersedia',
+        ]);
 
         return redirect()
             ->route('kamar.index', ['gedung_id' => $data['gedung_id']])
@@ -87,23 +95,28 @@ class KamarController extends Controller
 
     public function edit(Kamar $kamar)
     {
-        $gedungs = Gedung::orderBy('nama')->get();
+        $gedungs = Gedung::orderBy('nama_gedung')->get();
+        $tipeKamars = TipeKamar::orderBy('nama_tipe')->get();
 
-        return view('kamar.edit', compact('kamar', 'gedungs'));
+        return view('kamar.edit', compact('kamar', 'gedungs', 'tipeKamars'));
     }
 
     public function update(Request $request, Kamar $kamar)
     {
         $data = $this->validatedData($request);
 
-        if ($request->hasFile('foto')) {
-            if ($kamar->foto) {
-                Storage::disk('public')->delete($kamar->foto);
-            }
-            $data['foto'] = $request->file('foto')->store('kamar', 'public');
-        }
+        $defaultTipe = TipeKamar::firstOrCreate(
+            ['nama_tipe' => $data['tipe_kamar']],
+            ['kapasitas' => $data['kapasitas_bed'] ?? 4, 'tarif' => $data['tarif'] ?? 0]
+        );
 
-        $kamar->update($data);
+        $kamar->update([
+            'id_gedung' => $data['gedung_id'],
+            'id_tipeKamar' => $defaultTipe->id_tipeKamar,
+            'nomor_kamar' => $data['nomor_kamar'],
+            'lantai' => $data['lantai'],
+            'status_kamar' => $data['status'] ?? 'tersedia',
+        ]);
 
         return redirect()
             ->route('kamar.index', ['gedung_id' => $data['gedung_id']])
@@ -112,10 +125,7 @@ class KamarController extends Controller
 
     public function destroy(Kamar $kamar)
     {
-        $gedungId = $kamar->gedung_id;
-        if ($kamar->foto) {
-            Storage::disk('public')->delete($kamar->foto);
-        }
+        $gedungId = $kamar->id_gedung;
         $kamar->delete();
 
         return redirect()
@@ -126,24 +136,14 @@ class KamarController extends Controller
     private function validatedData(Request $request): array
     {
         $validated = $request->validate([
-            'gedung_id' => ['required', 'exists:gedungs,id'],
-            'nomor_kamar' => ['required', 'string', 'max:30'],
+            'gedung_id' => ['required', 'exists:gedung,id_gedung'],
+            'nomor_kamar' => ['required', 'string', 'max:20'],
             'lantai' => ['required', 'integer', 'min:1', 'max:20'],
-            'sayap' => ['nullable', 'string', 'max:60'],
-            'tipe_kamar' => ['required', 'string', 'max:50'],
-            'kapasitas_bed' => ['required', 'integer', 'min:1', 'max:20'],
-            'bed_terisi' => ['required', 'integer', 'min:0', 'lte:kapasitas_bed'],
-            'tarif' => ['nullable', 'integer', 'min:0'],
-            'status' => ['required', 'in:tersedia,penuh,perbaikan'],
-            'fasilitas' => ['nullable', 'array'],
-            'fasilitas.*' => ['string', 'max:100'],
-            'foto' => ['nullable', 'image', 'max:5120'],
-            'catatan' => ['nullable', 'string'],
+            'tipe_kamar' => ['required', 'string', 'max:100'],
+            'kapasitas_bed' => ['nullable', 'integer', 'min:1', 'max:20'],
+            'tarif' => ['nullable', 'numeric', 'min:0'],
+            'status' => ['required', 'string', 'max:30'],
         ]);
-
-        $validated['rfid_enabled'] = $request->boolean('rfid_enabled');
-        $validated['tarif'] = $validated['tarif'] ?? 0;
-        $validated['fasilitas'] = $validated['fasilitas'] ?? [];
 
         return $validated;
     }

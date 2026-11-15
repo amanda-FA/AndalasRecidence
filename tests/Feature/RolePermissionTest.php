@@ -2,8 +2,9 @@
 
 namespace Tests\Feature;
 
+use App\Models\Pengguna;
+use App\Models\Role;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
 class RolePermissionTest extends TestCase
@@ -17,47 +18,35 @@ class RolePermissionTest extends TestCase
         $this->seed();
     }
 
-    public function test_client_permissions(): void
+    public function test_expected_roles_exist(): void
     {
-        $role = Role::findByName('Client', 'web');
+        $expectedRoles = [
+            'Client',
+            'Admin Layanan',
+            'Fasilitator',
+            'Teknisi',
+            'GO',
+            'Pimpinan',
+        ];
 
-        $this->assertTrue($role->hasPermissionTo('pendaftaran.create'));
-        $this->assertFalse($role->hasPermissionTo('pendaftaran.manage'));
+        foreach ($expectedRoles as $roleName) {
+            $this->assertDatabaseHas('role', [
+                'nama_role' => $roleName,
+            ]);
+        }
     }
 
-    public function test_admin_layanan_permissions(): void
+    public function test_user_has_correct_role(): void
     {
-        $role = Role::findByName('Admin Layanan', 'web');
+        $pimpinan = Pengguna::where('email', 'pimpinan@unand.ac.id')->firstOrFail();
+        $this->assertTrue($pimpinan->hasRole('Pimpinan'));
+        $this->assertFalse($pimpinan->hasRole('Client'));
 
-        $this->assertTrue($role->hasPermissionTo('pendaftaran.manage'));
-        $this->assertTrue($role->hasPermissionTo('bebas_asrama.verify'));
-    }
+        $fasilitator = Pengguna::where('email', 'fasilitator@unand.ac.id')->firstOrFail();
+        $this->assertTrue($fasilitator->hasRole('Fasilitator'));
 
-    public function test_fasilitator_permissions(): void
-    {
-        $role = Role::findByName('Fasilitator', 'web');
-
-        $this->assertTrue($role->hasPermissionTo('penempatan.manage'));
-    }
-
-    public function test_teknisi_permissions(): void
-    {
-        $role = Role::findByName('Teknisi', 'web');
-
-        $this->assertTrue($role->hasPermissionTo('kerusakan.manage'));
-    }
-
-    public function test_go_permissions(): void
-    {
-        $role = Role::findByName('GO', 'web');
-
-        $this->assertTrue($role->hasPermissionTo('kamar.inspect'));
-    }
-
-    public function test_pimpinan_permissions(): void
-    {
-        $role = Role::findByName('Pimpinan', 'web');
-
-        $this->assertTrue($role->hasPermissionTo('dashboard.view'));
+        $client = Pengguna::where('email', 'client@unand.ac.id')->firstOrFail();
+        $this->assertTrue($client->hasRole('Client'));
+        $this->assertNotNull($client->client);
     }
 }

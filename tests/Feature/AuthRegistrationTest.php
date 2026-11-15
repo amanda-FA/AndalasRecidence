@@ -2,9 +2,9 @@
 
 namespace Tests\Feature;
 
-use App\Models\User;
+use App\Models\Pengguna;
+use App\Models\Role;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
 class AuthRegistrationTest extends TestCase
@@ -13,10 +13,7 @@ class AuthRegistrationTest extends TestCase
 
     public function test_client_gets_role_after_registration(): void
     {
-        Role::firstOrCreate([
-            'name' => 'Client',
-            'guard_name' => 'web',
-        ]);
+        Role::firstOrCreate(['nama_role' => 'Client']);
 
         $response = $this->post('/register', [
             'name' => 'Test Client',
@@ -28,8 +25,9 @@ class AuthRegistrationTest extends TestCase
         $response->assertRedirect(route('login'));
         $this->assertGuest();
 
-        $user = User::where('email', 'client@example.com')->firstOrFail();
+        $user = Pengguna::where('email', 'client@example.com')->firstOrFail();
 
         $this->assertTrue($user->hasRole('Client'));
+        $this->assertNotNull($user->client);
     }
 }

@@ -3,12 +3,15 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\Client;
+use App\Models\JenisClient;
+use App\Models\Pengguna;
+use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
-use Spatie\Permission\Models\Role;
 
 class AuthController extends Controller
 {
@@ -22,14 +25,23 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         $credentials = $request->validate([
-            'email' => ['required', 'email'],
+            'email' => ['required'],
             'password' => ['required'],
         ]);
 
-        if (!Auth::attempt($credentials, $request->boolean('remember'))) {
+        // Dukung login menggunakan email ataupun username
+        $loginField = filter_var($credentials['email'], FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
+
+        $authAttempt = [
+            $loginField => $credentials['email'],
+            'password' => $credentials['password'],
+        ];
+
+        // Tabel pengguna pada skema ERD tidak memiliki kolom remember_token
+        if (!Auth::attempt($authAttempt, false)) {
             return back()
                 ->withErrors([
-                    'email' => 'Email atau password salah.',
+                    'email' => 'Email/Username atau password salah.',
                 ])
                 ->onlyInput('email');
         }
@@ -42,7 +54,7 @@ class AuthController extends Controller
     /**
      * Tentukan tujuan redirect awal berdasarkan role pengguna.
      */
-    private function redirectPathForUser(User $user): string
+    private function redirectPathForUser(Pengguna $user): string
     {
         if ($user->hasRole('Pimpinan')) {
             return route('dashboard.okupansi');
@@ -52,8 +64,6 @@ class AuthController extends Controller
             return route('gedung.index');
         }
 
-        // Role lain (Admin Layanan, Teknisi, GO, Client) sementara diarahkan ke beranda
-        // hingga dashboard/halaman modul masing-masing tersedia.
         return '/';
     }
 
@@ -67,29 +77,43 @@ class AuthController extends Controller
     public function register(Request $request)
     {
         $data = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'applicant_category' => ['nullable', 'string', 'in:reguler,kipk,summer_course,guest'],
-            'identity_number' => ['nullable', 'string', 'max:32'],
-            'email' => ['required', 'email', 'max:255', 'unique:users,email'],
-            'phone' => ['nullable', 'string', 'max:25'],
+            'name' => ['required', 'string', 'max:150'],
+            'applicant_category' => ['nullable', 'string'],
+            'identity_number' => ['nullable', 'string', 'max:50'],
+            'email' => ['required', 'email', 'max:150', 'unique:pengguna,email'],
+            'phone' => ['nullable', 'string', 'max:20'],
             'password' => ['required', 'confirmed', Password::defaults()],
         ]);
 
-        $user = User::create([
-            'name' => $data['name'],
-            'applicant_category' => $data['applicant_category'] ?? null,
-            'identity_number' => $data['identity_number'] ?? null,
+        $clientRole = Role::firstOrCreate(['nama_role' => 'Client']);
+
+        // Generate username unik dari bagian depan email
+        $baseUsername = strtolower(preg_replace('/[^a-zA-Z0-9_]/', '', explode('@', $data['email'])[0]));
+        $username = $baseUsername;
+        $counter = 1;
+        while (Pengguna::where('username', $username)->exists()) {
+            $username = $baseUsername . $counter;
+            $counter++;
+        }
+
+        $user = Pengguna::create([
+            'id_role' => $clientRole->id_role,
+            'nama_lengkap' => $data['name'],
             'email' => $data['email'],
-            'phone' => $data['phone'] ?? null,
+            'username' => $username,
+            'no_hp' => $data['phone'] ?? null,
             'password' => Hash::make($data['password']),
+            'status_aktif' => 1,
         ]);
 
-        Role::firstOrCreate([
-            'name' => 'Client',
-            'guard_name' => 'web',
-        ]);
+        $jenisClient = JenisClient::firstOrCreate(['jenis' => 'Mahasiswa Reguler']);
 
-        $user->assignRole('Client');
+        Client::create([
+            'id_jenis_client' => $jenisClient->id_jenis_client,
+            'id_pengguna' => $user->id_pengguna,
+            'nomor_identitas' => $data['identity_number'] ?? null,
+            'pekerjaan' => $data['applicant_category'] ?? 'Mahasiswa',
+        ]);
 
         return redirect()->route('login')
             ->with('status', 'Akun Client berhasil dibuat! Silakan masuk menggunakan email dan kata sandi Anda.');

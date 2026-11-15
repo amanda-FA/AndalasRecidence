@@ -13,24 +13,24 @@ class DashboardController extends Controller
     {
         $klasterFilter = $request->query('klaster', 'all');
 
-        $query = Gedung::with('kamars')->where('status', '!=', 'draf');
+        $query = Gedung::with(['kamars.tipeKamar']);
 
         if ($klasterFilter === 'putra') {
-            $query->where('peruntukan', 'putra');
+            $query->where('jenis_penghuni', 'putra');
         } elseif ($klasterFilter === 'putri') {
-            $query->where('peruntukan', 'putri');
+            $query->where('jenis_penghuni', 'putri');
         } elseif ($klasterFilter === 'khusus') {
-            $query->whereIn('peruntukan', ['campuran', 'tamu']);
+            $query->whereIn('jenis_penghuni', ['campuran', 'tamu']);
         }
 
-        $gedungModels = $query->orderBy('nama')->get();
+        $gedungModels = $query->orderBy('nama_gedung')->get();
 
         $gedungList = $gedungModels->map(function (Gedung $gedung) {
-            $totalBed = $gedung->kamars->sum('kapasitas_bed') ?: $gedung->kapasitas_bed;
+            $totalBed = $gedung->kamars->sum('kapasitas_bed');
             $terisi = $gedung->kamars->sum('bed_terisi');
             $tersedia = max(0, $totalBed - $terisi);
             $persentase = $totalBed > 0 ? round(($terisi / $totalBed) * 100, 1) : 0;
-            $jumlahKamar = $gedung->kamars->count() ?: $gedung->estimasi_kamar;
+            $jumlahKamar = $gedung->kamars->count();
 
             if ($persentase >= 93) {
                 $status = 'Hampir Penuh';
@@ -43,22 +43,22 @@ class DashboardController extends Controller
                 $statusStyle = 'bg-secondary-fixed text-on-secondary-fixed-variant';
             }
 
-            $klasterColor = match ($gedung->peruntukan) {
+            $klasterColor = match ($gedung->jenis_penghuni) {
                 'putra' => 'text-secondary',
                 'putri' => 'text-[#C97D1A]',
                 default => 'text-on-surface-variant',
             };
 
-            $namaSingkat = trim(str_ireplace('Gedung ', '', $gedung->nama));
+            $namaSingkat = trim(str_ireplace('Gedung Asrama ', '', str_ireplace('Gedung ', '', $gedung->nama_gedung)));
             $kodeSingkat = strtoupper(substr(preg_replace('/[^A-Za-z]/', '', $namaSingkat), 0, 2));
 
             return [
-                'id' => $gedung->id,
+                'id' => $gedung->id_gedung,
                 'kode' => $kodeSingkat ?: 'GD',
-                'nama' => $gedung->nama,
+                'nama' => $gedung->nama_gedung,
                 'nama_singkat' => $namaSingkat,
-                'blok' => $gedung->klaster_wilayah ?? '-',
-                'klaster_grup' => $gedung->peruntukan,
+                'blok' => 'Sektor Limau Manis',
+                'klaster_grup' => $gedung->jenis_penghuni,
                 'klaster_label' => $gedung->peruntukan_label,
                 'klaster_color' => $klasterColor,
                 'kamar' => $jumlahKamar,
@@ -83,7 +83,7 @@ class DashboardController extends Controller
             'total_tersedia' => $totalTersedia,
             'persentase_okupansi' => $persentaseOkupansi,
             'persentase_tersedia' => $persentaseTersedia,
-            'kamar_perbaikan' => Kamar::where('status', 'perbaikan')->count(),
+            'kamar_perbaikan' => Kamar::where('status_kamar', 'perbaikan')->count(),
             'total_gedung' => $gedungList->count(),
         ];
 

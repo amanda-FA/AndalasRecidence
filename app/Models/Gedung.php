@@ -10,53 +10,73 @@ class Gedung extends Model
 {
     use HasFactory;
 
+    protected $table = 'gedung';
+    protected $primaryKey = 'id_gedung';
+    public $timestamps = false;
+
     protected $fillable = [
-        'kode',
-        'nama',
-        'peruntukan',
-        'status',
-        'klaster_wilayah',
+        'nama_gedung',
+        'jenis_penghuni',
         'jumlah_lantai',
-        'estimasi_kamar',
-        'kapasitas_bed',
-        'fasilitas',
-        'foto',
-        'deskripsi',
+        'keterangan',
     ];
 
     protected function casts(): array
     {
         return [
-            'fasilitas' => 'array',
             'jumlah_lantai' => 'integer',
-            'estimasi_kamar' => 'integer',
-            'kapasitas_bed' => 'integer',
         ];
     }
 
     public function kamars(): HasMany
     {
-        return $this->hasMany(Kamar::class);
+        return $this->hasMany(Kamar::class, 'id_gedung', 'id_gedung');
+    }
+
+    public function fasilitas(): HasMany
+    {
+        return $this->hasMany(Fasilitas::class, 'id_gedung', 'id_gedung');
+    }
+
+    // Accessors for UI compatibility
+    public function getIdAttribute(): int
+    {
+        return $this->id_gedung;
+    }
+
+    public function getNamaAttribute(): string
+    {
+        return $this->nama_gedung ?? '';
+    }
+
+    public function getPeruntukanAttribute(): string
+    {
+        return $this->jenis_penghuni ?? 'putra';
+    }
+
+    public function getStatusAttribute(): string
+    {
+        return 'aktif';
+    }
+
+    public function getKlasterWilayahAttribute(): string
+    {
+        return 'Kampus Limau Manis';
+    }
+
+    public function getDeskripsiAttribute(): ?string
+    {
+        return $this->keterangan;
     }
 
     public function getPeruntukanLabelAttribute(): string
     {
-        return match ($this->peruntukan) {
+        return match ($this->jenis_penghuni) {
             'putra' => 'Khusus Putra',
             'putri' => 'Khusus Putri',
             'campuran' => 'Campuran / Pascasarjana',
             'tamu' => 'Guest House / Tamu',
-            default => ucfirst($this->peruntukan),
-        };
-    }
-
-    public function getStatusLabelAttribute(): string
-    {
-        return match ($this->status) {
-            'aktif' => 'Aktif Operasional',
-            'persiapan' => 'Persiapan / Renovasi',
-            'draf' => 'Draf Tersimpan',
-            default => ucfirst($this->status),
+            default => ucfirst($this->jenis_penghuni ?? 'Reguler'),
         };
     }
 }
