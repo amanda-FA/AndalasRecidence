@@ -33,17 +33,15 @@
 
         {{-- Action Footer --}}
         <div class="bg-surface-container-lowest p-space-lg rounded-xl shadow-sm flex flex-col sm:flex-row items-center justify-between gap-space-md">
-            <div class="flex items-center gap-space-sm text-on-surface-variant font-caption-sm text-caption-sm">
-                <span class="material-symbols-outlined text-[18px] text-secondary">verified_user</span>
-                <span>Pastikan kode gedung unik dan kapasitas bed sesuai standar operasional.</span>
-            </div>
+            <p class="text-on-surface-variant font-caption-sm text-caption-sm">
+                Pastikan kode gedung unik dan kapasitas bed sesuai standar operasional.
+            </p>
             <div class="flex flex-wrap items-center justify-end gap-space-sm w-full sm:w-auto">
                 <a href="{{ route('gedung.index') }}" class="px-space-lg py-2.5 rounded-lg bg-surface-container text-on-surface hover:bg-surface-container-high transition-all font-label-md text-label-md">
                     Batal
                 </a>
-                <button class="px-space-xl py-2.5 rounded-lg bg-secondary text-on-primary hover:bg-[#4650C7] shadow-sm hover:shadow transition-all font-label-md text-label-md flex items-center gap-space-xs cursor-pointer" type="submit">
-                    <span class="material-symbols-outlined text-[18px]">domain_add</span>
-                    <span>Simpan &amp; Daftarkan Gedung Baru</span>
+                <button class="px-space-xl py-2.5 rounded-lg bg-secondary text-on-primary hover:bg-[#4650C7] shadow-sm hover:shadow transition-all font-label-md text-label-md cursor-pointer" type="submit">
+                    Simpan &amp; Daftarkan Gedung Baru
                 </button>
             </div>
         </div>

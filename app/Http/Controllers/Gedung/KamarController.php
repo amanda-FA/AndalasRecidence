@@ -14,7 +14,7 @@ class KamarController extends Controller
     {
         $gedungs = Gedung::orderBy('nama_gedung')->get();
 
-        $query = Kamar::with(['gedung', 'tipeKamar']);
+        $query = Kamar::with(['gedung', 'tipeKamar', 'fasilitas']);
 
         if ($gedungId = $request->query('gedung_id')) {
             $query->where('id_gedung', $gedungId);
@@ -40,7 +40,7 @@ class KamarController extends Controller
             });
         }
 
-        $kamars = $query->orderBy('id_gedung')->orderBy('lantai')->orderBy('nomor_kamar')->get();
+        $kamars = $query->orderBy('id_gedung')->orderBy('lantai')->orderBy('nomor_kamar')->paginate(15)->withQueryString();
 
         $allKamars = Kamar::with('tipeKamar')->get();
         $totalBed = $allKamars->sum('kapasitas_bed');

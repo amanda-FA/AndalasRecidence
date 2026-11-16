@@ -156,7 +156,7 @@
         <div class="px-space-lg py-space-md flex items-center justify-between">
             <div class="flex items-center gap-2">
                 <span class="font-title-md text-title-md text-primary font-semibold">Daftar Inventaris Unit Kamar</span>
-                <span class="px-2 py-0.5 rounded-full bg-surface-container-low text-secondary font-caption-sm-medium text-caption-sm-medium">{{ $kamars->count() }} Ditampilkan</span>
+                <span class="px-2 py-0.5 rounded-full bg-surface-container-low text-secondary font-caption-sm-medium text-caption-sm-medium">{{ $kamars->total() }} Total</span>
             </div>
         </div>
 
@@ -228,14 +228,15 @@
                                 </div>
                             </td>
                             <td class="py-4 px-space-md">
+                                @php $fasilitasItems = collect($kamar->fasilitas ?? []); @endphp
                                 <div class="flex flex-wrap gap-1 max-w-xs">
-                                    @forelse (array_slice($kamar->fasilitas ?? [], 0, 3) as $fas)
-                                        <span class="inline-flex items-center text-[11px] px-2 py-0.5 rounded bg-surface-container-low text-on-surface-variant">{{ $fas }}</span>
+                                    @forelse ($fasilitasItems->take(3) as $fas)
+                                        <span class="inline-flex items-center text-[11px] px-2 py-0.5 rounded bg-surface-container-low text-on-surface-variant">{{ is_object($fas) ? $fas->nama_fasilitas : $fas }}</span>
                                     @empty
                                         <span class="font-caption-sm text-caption-sm text-outline">Standar</span>
                                     @endforelse
-                                    @if (count($kamar->fasilitas ?? []) > 3)
-                                        <span class="text-[11px] px-2 py-0.5 rounded bg-surface-container text-secondary">+{{ count($kamar->fasilitas) - 3 }}</span>
+                                    @if ($fasilitasItems->count() > 3)
+                                        <span class="text-[11px] px-2 py-0.5 rounded bg-surface-container text-secondary">+{{ $fasilitasItems->count() - 3 }}</span>
                                     @endif
                                 </div>
                             </td>
@@ -269,6 +270,17 @@
                 </tbody>
             </table>
         </div>
+
+        @if ($kamars->hasPages())
+            <div class="px-space-lg py-space-md border-t border-surface-container-low flex flex-col sm:flex-row items-center justify-between gap-space-sm">
+                <span class="font-caption-sm text-caption-sm text-on-surface-variant">
+                    Menampilkan {{ $kamars->firstItem() ?? 0 }}–{{ $kamars->lastItem() ?? 0 }} dari {{ $kamars->total() }} unit kamar
+                </span>
+                <div>
+                    {{ $kamars->onEachSide(1)->links() }}
+                </div>
+            </div>
+        @endif
     </div>
 </div>
 @endsection

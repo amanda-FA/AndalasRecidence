@@ -64,30 +64,16 @@
         </nav>
     </div>
 
-    {{-- Bottom Role & Logout Card --}}
-    <div class="p-space-md m-space-sm rounded-xl bg-primary/40 flex flex-col gap-space-sm">
-        <div class="flex items-center gap-space-sm">
-            <div class="w-8 h-8 rounded-full bg-secondary-fixed flex items-center justify-center shrink-0">
-                <span class="material-symbols-outlined text-on-secondary-fixed text-[18px]">verified_user</span>
-            </div>
-            <div class="flex flex-col overflow-hidden">
-                <span class="font-caption-sm-medium text-caption-sm-medium text-surface-container-lowest truncate">
-                    {{ $user?->name ?? 'Pengguna' }}
-                </span>
-                <span class="font-caption-sm text-caption-sm text-secondary-fixed-dim truncate">
-                    Role: {{ $roleLabel }}
-                </span>
-            </div>
-        </div>
-
-        @auth
+    {{-- Bottom Logout --}}
+    @auth
+        <div class="p-space-md">
             <form action="{{ route('logout') }}" method="POST">
                 @csrf
-                <button type="submit" class="w-full flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-lg bg-primary-container/80 hover:bg-error text-primary-fixed hover:text-on-error font-caption-sm-medium text-caption-sm-medium transition-colors cursor-pointer">
+                <button type="submit" class="w-full flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg bg-primary/40 hover:bg-error text-primary-fixed hover:text-on-error font-caption-sm-medium text-caption-sm-medium transition-colors cursor-pointer">
                     <span class="material-symbols-outlined text-[16px]">logout</span>
                     <span>Keluar Sistem</span>
                 </button>
             </form>
-        @endauth
-    </div>
+        </div>
+    @endauth
 </aside>

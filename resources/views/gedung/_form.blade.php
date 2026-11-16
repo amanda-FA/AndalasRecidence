@@ -15,14 +15,9 @@
 <div class="flex flex-col gap-space-lg">
     {{-- Bagian 1: Identitas & Informasi Umum --}}
     <section class="bg-surface-container-lowest rounded-xl p-space-xl shadow-sm flex flex-col gap-space-lg">
-        <div class="flex items-center gap-space-sm pb-space-sm border-b border-surface-container">
-            <div class="w-8 h-8 rounded-lg bg-secondary-fixed flex items-center justify-center text-secondary">
-                <span class="material-symbols-outlined text-[20px]">apartment</span>
-            </div>
-            <div>
-                <h2 class="font-title-md text-title-md text-primary">Identitas &amp; Informasi Umum</h2>
-                <p class="font-caption-sm text-caption-sm text-on-surface-variant">Konfigurasi label resmi dan kode unik inventaris gedung.</p>
-            </div>
+        <div class="pb-space-sm border-b border-surface-container">
+            <h2 class="font-title-md text-title-md text-primary">Identitas &amp; Informasi Umum</h2>
+            <p class="font-caption-sm text-caption-sm text-on-surface-variant">Konfigurasi label resmi dan kode unik inventaris gedung.</p>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-space-md">
@@ -31,22 +26,16 @@
                     <span>Nama Gedung Resmi <span class="text-error">*</span></span>
                     <span class="font-caption-sm text-caption-sm text-outline">Maks. 100 Karakter</span>
                 </label>
-                <div class="relative">
-                    <input class="w-full px-space-md py-3 rounded-lg bg-surface-container-low text-on-surface font-body-md text-body-md focus:bg-surface-container-lowest outline-none focus:ring-2 focus:ring-secondary/30 transition-all placeholder:text-outline"
-                           id="nama" name="nama" value="{{ old('nama', $gedung?->nama) }}" placeholder="Contoh: Gedung Rusunawa Mandiri" required type="text">
-                    <span class="material-symbols-outlined absolute right-3.5 top-1/2 -translate-y-1/2 text-secondary text-[20px]">domain</span>
-                </div>
+                <input class="w-full px-space-md py-3 rounded-lg bg-surface-container-low text-on-surface font-body-md text-body-md focus:bg-surface-container-lowest outline-none focus:ring-2 focus:ring-secondary/30 transition-all placeholder:text-outline"
+                       id="nama" name="nama" value="{{ old('nama', $gedung?->nama) }}" placeholder="Contoh: Gedung Rusunawa Mandiri" required type="text">
             </div>
 
             <div class="flex flex-col gap-1.5">
                 <label class="font-label-md text-label-md text-primary" for="kode">
                     Kode Gedung Unik <span class="text-error">*</span>
                 </label>
-                <div class="relative">
-                    <input class="w-full px-space-md py-3 rounded-lg bg-surface-container-low text-on-surface font-body-md-medium text-body-md-medium focus:bg-surface-container-lowest outline-none focus:ring-2 focus:ring-secondary/30 uppercase tracking-wider transition-all placeholder:text-outline"
-                           id="kode" name="kode" value="{{ old('kode', $gedung?->kode) }}" placeholder="Contoh: GD-UNAND-E" required type="text">
-                    <span class="material-symbols-outlined absolute right-3.5 top-1/2 -translate-y-1/2 text-secondary text-[20px]">tag</span>
-                </div>
+                <input class="w-full px-space-md py-3 rounded-lg bg-surface-container-low text-on-surface font-body-md-medium text-body-md-medium focus:bg-surface-container-lowest outline-none focus:ring-2 focus:ring-secondary/30 uppercase tracking-wider transition-all placeholder:text-outline"
+                       id="kode" name="kode" value="{{ old('kode', $gedung?->kode) }}" placeholder="Contoh: GD-UNAND-E" required type="text">
             </div>
 
             <div class="flex flex-col gap-1.5">
@@ -99,14 +88,9 @@
 
     {{-- Bagian 2: Spesifikasi Fisik & Kapasitas --}}
     <section class="bg-surface-container-lowest rounded-xl p-space-xl shadow-sm flex flex-col gap-space-lg">
-        <div class="flex items-center gap-space-sm pb-space-sm border-b border-surface-container">
-            <div class="w-8 h-8 rounded-lg bg-secondary-fixed flex items-center justify-center text-secondary">
-                <span class="material-symbols-outlined text-[20px]">straighten</span>
-            </div>
-            <div>
-                <h2 class="font-title-md text-title-md text-primary">Spesifikasi Fisik &amp; Kapasitas</h2>
-                <p class="font-caption-sm text-caption-sm text-on-surface-variant">Parameter volumetrik daya tampung dan lokasi geografis klaster.</p>
-            </div>
+        <div class="pb-space-sm border-b border-surface-container">
+            <h2 class="font-title-md text-title-md text-primary">Spesifikasi Fisik &amp; Kapasitas</h2>
+            <p class="font-caption-sm text-caption-sm text-on-surface-variant">Parameter volumetrik daya tampung dan lokasi geografis klaster.</p>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-space-md">
@@ -127,7 +111,7 @@
                             <option value="{{ $lokasi }}" {{ $klasterVal === $lokasi ? 'selected' : '' }}>{{ $lokasi }}</option>
                         @endforeach
                     </select>
-                    <span class="material-symbols-outlined absolute right-3.5 top-1/2 -translate-y-1/2 text-outline pointer-events-none text-[20px]">pin_drop</span>
+                    <span class="material-symbols-outlined absolute right-3.5 top-1/2 -translate-y-1/2 text-outline pointer-events-none text-[20px]">expand_more</span>
                 </div>
             </div>
 
@@ -159,26 +143,16 @@
 
     {{-- Bagian 3: Fasilitas Bersama --}}
     <section class="bg-surface-container-lowest rounded-xl p-space-xl shadow-sm flex flex-col gap-space-lg">
-        <div class="flex items-center justify-between pb-space-sm border-b border-surface-container">
-            <div class="flex items-center gap-space-sm">
-                <div class="w-8 h-8 rounded-lg bg-secondary-fixed flex items-center justify-center text-secondary">
-                    <span class="material-symbols-outlined text-[20px]">room_service</span>
-                </div>
-                <div>
-                    <h2 class="font-title-md text-title-md text-primary">Fasilitas Bersama &amp; Proteksi</h2>
-                    <p class="font-caption-sm text-caption-sm text-on-surface-variant">Centang semua amenitas gedung yang siap difungsikan.</p>
-                </div>
-            </div>
+        <div class="pb-space-sm border-b border-surface-container">
+            <h2 class="font-title-md text-title-md text-primary">Fasilitas Bersama &amp; Proteksi</h2>
+            <p class="font-caption-sm text-caption-sm text-on-surface-variant">Centang semua amenitas gedung yang siap difungsikan.</p>
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
             @foreach ($fasilitasList as $item)
                 <label class="flex items-center gap-3 p-3 rounded-lg bg-surface-container-low hover:bg-surface-container transition-all cursor-pointer select-none">
                     <input name="fasilitas[]" value="{{ $item['label'] }}" {{ in_array($item['label'], $selectedFasilitas) ? 'checked' : '' }} class="w-4 h-4 rounded text-secondary accent-secondary cursor-pointer" type="checkbox">
-                    <div class="flex items-center gap-2 text-primary">
-                        <span class="material-symbols-outlined text-[18px] text-secondary">{{ $item['icon'] }}</span>
-                        <span class="font-body-md-medium text-body-md-medium">{{ $item['label'] }}</span>
-                    </div>
+                    <span class="font-body-md-medium text-body-md-medium text-primary">{{ $item['label'] }}</span>
                 </label>
             @endforeach
         </div>
@@ -186,14 +160,9 @@
 
     {{-- Bagian 4: Foto & Deskripsi --}}
     <section class="bg-surface-container-lowest rounded-xl p-space-xl shadow-sm flex flex-col gap-space-lg">
-        <div class="flex items-center gap-space-sm pb-space-sm border-b border-surface-container">
-            <div class="w-8 h-8 rounded-lg bg-secondary-fixed flex items-center justify-center text-secondary">
-                <span class="material-symbols-outlined text-[20px]">notes</span>
-            </div>
-            <div>
-                <h2 class="font-title-md text-title-md text-primary">Foto Fasad &amp; Deskripsi Gedung</h2>
-                <p class="font-caption-sm text-caption-sm text-on-surface-variant">Opsional: unggah foto tampak depan (JPG/PNG maks. 5MB) dan catatan gedung.</p>
-            </div>
+        <div class="pb-space-sm border-b border-surface-container">
+            <h2 class="font-title-md text-title-md text-primary">Foto Tampak Depan &amp; Deskripsi Gedung</h2>
+            <p class="font-caption-sm text-caption-sm text-on-surface-variant">Opsional: unggah foto tampak depan (JPG/PNG maks. 5MB) dan catatan gedung.</p>
         </div>
 
         <div class="flex flex-col gap-1.5">

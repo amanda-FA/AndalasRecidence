@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Collection;
 
 class Pengguna extends Authenticatable
 {
@@ -73,6 +74,11 @@ class Pengguna extends Authenticatable
     public function hasAnyRole(string|array $roles): bool
     {
         return $this->hasRole($roles);
+    }
+
+    public function getRoleNames(): Collection
+    {
+        return collect($this->role?->nama_role ? [$this->role->nama_role] : []);
     }
 
     public function assignRole(string|Role $role): static

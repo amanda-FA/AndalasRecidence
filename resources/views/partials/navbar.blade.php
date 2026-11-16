@@ -13,11 +13,6 @@
         {{-- Optional Left Slot (e.g. Periode Akademik selector) --}}
         @hasSection('navbar-left')
             @yield('navbar-left')
-        @else
-            <div class="flex items-center gap-space-xs px-space-md py-space-xs rounded-full bg-surface-container text-secondary font-caption-sm-medium text-caption-sm-medium">
-                <span class="w-2 h-2 rounded-full bg-secondary animate-pulse"></span>
-                <span>Andalas Residence Portal</span>
-            </div>
         @endif
     </div>
 
