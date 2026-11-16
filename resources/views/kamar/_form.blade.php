@@ -11,20 +11,15 @@
         ['label' => 'WiFi Eduroam High-Speed', 'desc' => 'Coverage Access Point', 'icon' => 'wifi'],
         ['label' => 'Balkon Pribadi', 'desc' => 'Akses ventilasi teras luar', 'icon' => 'deck'],
     ];
-    $selectedFasilitas = old('fasilitas', $kamar?->fasilitas ?? []);
+    $selectedFasilitas = old('fasilitas', $kamar ? $kamar->fasilitas->pluck('nama_fasilitas')->all() : []);
 @endphp
 
 <div class="flex flex-col gap-space-lg">
     {{-- Bagian 1: Identitas & Penempatan Kamar --}}
     <div class="bg-surface-container-lowest rounded-2xl p-space-lg md:p-space-xl shadow-sm flex flex-col gap-space-lg">
-        <div class="flex items-center gap-space-sm pb-space-sm border-b border-surface-container">
-            <div class="w-10 h-10 rounded-xl bg-surface-container flex items-center justify-center text-secondary shrink-0">
-                <span class="material-symbols-outlined text-[22px]">apartment</span>
-            </div>
-            <div class="flex flex-col">
-                <h2 class="font-headline-sm text-headline-sm text-primary">Bagian 1: Identitas &amp; Penempatan Kamar</h2>
-                <p class="font-caption-sm text-caption-sm text-on-surface-variant">Tentukan penempatan gedung, lantai, dan jenis tata letak ruang kamar.</p>
-            </div>
+        <div class="pb-space-sm border-b border-surface-container">
+            <h2 class="font-headline-sm text-headline-sm text-primary">Identitas &amp; Penempatan Kamar</h2>
+            <p class="font-caption-sm text-caption-sm text-on-surface-variant">Tentukan penempatan gedung, lantai, dan jenis tata letak ruang kamar.</p>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-space-md">
@@ -91,14 +86,9 @@
 
     {{-- Bagian 2: Kapasitas, Tarif & Status Hunian --}}
     <div class="bg-surface-container-lowest rounded-2xl p-space-lg md:p-space-xl shadow-sm flex flex-col gap-space-lg">
-        <div class="flex items-center gap-space-sm pb-space-sm border-b border-surface-container">
-            <div class="w-10 h-10 rounded-xl bg-surface-container flex items-center justify-center text-secondary shrink-0">
-                <span class="material-symbols-outlined text-[22px]">payments</span>
-            </div>
-            <div class="flex flex-col">
-                <h2 class="font-headline-sm text-headline-sm text-primary">Bagian 2: Kapasitas, Tarif &amp; Status Hunian</h2>
-                <p class="font-caption-sm text-caption-sm text-on-surface-variant">Atur kapasitas alokasi bed, jumlah terisi saat ini, tarif, serta kontrol akses.</p>
-            </div>
+        <div class="pb-space-sm border-b border-surface-container">
+            <h2 class="font-headline-sm text-headline-sm text-primary">Kapasitas, Tarif &amp; Status Hunian</h2>
+            <p class="font-caption-sm text-caption-sm text-on-surface-variant">Atur kapasitas alokasi bed, jumlah terisi saat ini, tarif, serta kontrol akses.</p>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-space-md">
@@ -129,11 +119,8 @@
 
             <div class="flex flex-col gap-1.5">
                 <label class="font-label-md text-label-md text-primary">Sistem Akses Pintu</label>
-                <label class="flex items-center justify-between p-2.5 rounded-xl bg-surface-container-low h-[48px] cursor-pointer">
-                    <div class="flex items-center gap-2">
-                        <span class="material-symbols-outlined text-secondary text-[20px]">nfc</span>
-                        <span class="font-caption-sm-medium text-caption-sm-medium text-primary">Tag RFID</span>
-                    </div>
+                <label class="flex items-center justify-between p-2.5 px-space-md rounded-xl bg-surface-container-low h-[48px] cursor-pointer">
+                    <span class="font-caption-sm-medium text-caption-sm-medium text-primary">Tag RFID</span>
                     <input type="checkbox" name="rfid_enabled" value="1" {{ old('rfid_enabled', $kamar?->rfid_enabled ?? true) ? 'checked' : '' }} class="w-4 h-4 accent-secondary cursor-pointer">
                 </label>
             </div>
@@ -142,14 +129,9 @@
 
     {{-- Bagian 3: Kelengkapan Fasilitas Kamar --}}
     <div class="bg-surface-container-lowest rounded-2xl p-space-lg md:p-space-xl shadow-sm flex flex-col gap-space-lg">
-        <div class="flex items-center gap-space-sm pb-space-sm border-b border-surface-container">
-            <div class="w-10 h-10 rounded-xl bg-surface-container flex items-center justify-center text-secondary shrink-0">
-                <span class="material-symbols-outlined text-[22px]">inventory_2</span>
-            </div>
-            <div class="flex flex-col">
-                <h2 class="font-headline-sm text-headline-sm text-primary">Bagian 3: Kelengkapan Fasilitas Kamar</h2>
-                <p class="font-caption-sm text-caption-sm text-on-surface-variant">Pilih inventaris dan sarana yang terpasang di kamar ini.</p>
-            </div>
+        <div class="pb-space-sm border-b border-surface-container">
+            <h2 class="font-headline-sm text-headline-sm text-primary">Kelengkapan Fasilitas Kamar</h2>
+            <p class="font-caption-sm text-caption-sm text-on-surface-variant">Pilih inventaris dan sarana yang terpasang di kamar ini.</p>
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-space-md">
@@ -157,10 +139,7 @@
                 <label class="flex items-start gap-3 p-3.5 rounded-xl bg-surface-container-low hover:bg-surface-container transition-all cursor-pointer">
                     <input name="fasilitas[]" value="{{ $item['label'] }}" {{ in_array($item['label'], $selectedFasilitas) ? 'checked' : '' }} class="mt-0.5 w-4 h-4 rounded text-secondary accent-secondary cursor-pointer" type="checkbox">
                     <div class="flex flex-col">
-                        <div class="flex items-center gap-1.5 text-primary">
-                            <span class="material-symbols-outlined text-[18px] text-secondary">{{ $item['icon'] }}</span>
-                            <span class="font-body-md-medium text-body-md-medium">{{ $item['label'] }}</span>
-                        </div>
+                        <span class="font-body-md-medium text-body-md-medium text-primary">{{ $item['label'] }}</span>
                         <span class="font-caption-sm text-caption-sm text-outline">{{ $item['desc'] }}</span>
                     </div>
                 </label>
@@ -168,21 +147,11 @@
         </div>
     </div>
 
-    {{-- Bagian 4: Foto & Catatan Teknis --}}
+    {{-- Bagian 4: Catatan Teknis --}}
     <div class="bg-surface-container-lowest rounded-2xl p-space-lg md:p-space-xl shadow-sm flex flex-col gap-space-lg">
-        <div class="flex items-center gap-space-sm pb-space-sm border-b border-surface-container">
-            <div class="w-10 h-10 rounded-xl bg-surface-container flex items-center justify-center text-secondary shrink-0">
-                <span class="material-symbols-outlined text-[22px]">notes</span>
-            </div>
-            <div class="flex flex-col">
-                <h2 class="font-headline-sm text-headline-sm text-primary">Bagian 4: Foto Kamar &amp; Catatan Teknis</h2>
-                <p class="font-caption-sm text-caption-sm text-on-surface-variant">Foto interior opsional dan catatan penting bagi teknisi / penghuni.</p>
-            </div>
-        </div>
-
-        <div class="flex flex-col gap-1.5">
-            <label class="font-label-md text-label-md text-primary" for="foto">Foto Interior Kamar (JPG/PNG maks 5MB)</label>
-            <input id="foto" name="foto" type="file" accept="image/*" class="w-full p-2.5 rounded-lg bg-surface-container-low text-on-surface font-body-md text-body-md file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-secondary file:text-on-secondary file:font-label-md file:cursor-pointer">
+        <div class="pb-space-sm border-b border-surface-container">
+            <h2 class="font-headline-sm text-headline-sm text-primary">Catatan Teknis</h2>
+            <p class="font-caption-sm text-caption-sm text-on-surface-variant">Catatan penting bagi teknisi atau penghuni kamar.</p>
         </div>
 
         <div class="flex flex-col gap-1.5">

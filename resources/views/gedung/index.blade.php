@@ -7,10 +7,6 @@
     {{-- Top Action & Title Bar --}}
     <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-space-md">
         <div class="flex flex-col gap-1 min-w-0">
-            <div class="flex items-center gap-space-xs text-secondary">
-                <span class="material-symbols-outlined text-[18px]">domain</span>
-                <span class="font-caption-sm-medium text-caption-sm-medium uppercase tracking-wider">Fasilitas Kampus · Master Data</span>
-            </div>
             <h1 class="font-headline-lg text-headline-lg text-on-surface tracking-tight">Manajemen Gedung</h1>
             <p class="font-body-md text-body-md text-on-surface-variant max-w-2xl">
                 Kelola informasi master data gedung hunian, lantai, fasilitas bersama, dan status operasional real-time di lingkungan asrama Andalas.
@@ -255,7 +251,7 @@
                                 <a href="{{ route('gedung.edit', $gedung) }}" class="w-9 h-9 rounded-lg flex items-center justify-center text-on-surface-variant hover:text-secondary hover:bg-surface-container-low transition-colors" title="Edit Gedung">
                                     <span class="material-symbols-outlined text-[20px]">edit</span>
                                 </a>
-                                <form method="POST" action="{{ route('gedung.destroy', $gedung) }}" onsubmit="return confirm('Hapus {{ $gedung->nama }} beserta seluruh kamarnya?');">
+                                <form method="POST" action="{{ route('gedung.destroy', $gedung) }}" data-confirm-title="Hapus Data Gedung" data-confirm="Apakah Anda yakin ingin menghapus {{ $gedung->nama }} beserta seluruh kamarnya?">
                                     @csrf
                                     @method('DELETE')
                                     <button class="w-9 h-9 rounded-lg flex items-center justify-center text-outline hover:text-error hover:bg-error-container/40 transition-colors cursor-pointer" title="Hapus Gedung" type="submit">

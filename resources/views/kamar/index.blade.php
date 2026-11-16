@@ -6,23 +6,18 @@
 <div class="space-y-space-xl">
     {{-- Top Action & Title Bar --}}
     <div class="flex flex-col xl:flex-row xl:items-center justify-between gap-space-lg bg-surface-container-lowest p-space-lg rounded-xl shadow-[0_2px_8px_rgba(18,32,86,0.04)]">
-        <div class="flex flex-col space-y-1">
-            <div class="flex items-center gap-2">
-                <span class="px-2 py-0.5 rounded-full bg-surface-container-high text-secondary font-caption-sm-medium text-caption-sm-medium tracking-wide">PMS Inventaris</span>
-                <span class="text-outline-variant">•</span>
-                <span class="font-caption-sm text-caption-sm text-on-surface-variant">Real-time Database</span>
-            </div>
+        <div class="flex flex-col space-y-1 min-w-0">
             <h1 class="font-headline-lg text-headline-lg text-primary tracking-tight">Manajemen Kamar</h1>
             <p class="font-body-md text-body-md text-on-surface-variant max-w-2xl">
                 Kelola seluruh inventaris kamar, kapasitas bed, fasilitas unit, dan status ketersediaan secara real-time.
             </p>
         </div>
-        <div class="flex items-center flex-wrap gap-space-sm">
-            <a href="{{ route('gedung.index') }}" class="flex items-center gap-1.5 px-space-md py-2.5 rounded-lg bg-surface-container-low text-primary font-label-md text-label-md hover:bg-surface-container transition-all">
+        <div class="flex items-center gap-space-sm shrink-0">
+            <a href="{{ route('gedung.index') }}" class="inline-flex items-center gap-1.5 px-space-md py-2.5 rounded-lg bg-surface-container-low text-primary font-label-md text-label-md hover:bg-surface-container transition-all whitespace-nowrap">
                 <span class="material-symbols-outlined text-[18px]">domain</span>
                 <span>Manajemen Gedung</span>
             </a>
-            <a href="{{ route('kamar.create', ['gedung_id' => request('gedung_id')]) }}" class="flex items-center gap-2 px-space-md py-2.5 rounded-lg bg-secondary text-on-secondary font-label-md text-label-md hover:bg-on-secondary-fixed-variant active:translate-y-px transition-all shadow-[0_2px_8px_rgba(71,80,199,0.25)]">
+            <a href="{{ route('kamar.create', ['gedung_id' => request('gedung_id')]) }}" class="inline-flex items-center gap-2 px-space-md py-2.5 rounded-lg bg-secondary text-on-secondary font-label-md text-label-md hover:bg-on-secondary-fixed-variant active:translate-y-px transition-all shadow-[0_2px_8px_rgba(71,80,199,0.25)] whitespace-nowrap">
                 <span class="material-symbols-outlined text-[20px]">add_circle</span>
                 <span>Tambah Kamar Baru</span>
             </a>
@@ -32,11 +27,8 @@
     {{-- 4 Stats Summary Cards --}}
     <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-space-md">
         <div class="bg-surface-container-lowest p-space-lg rounded-xl shadow-[0_2px_8px_rgba(18,32,86,0.04)] flex flex-col justify-between">
-            <div class="flex items-center justify-between mb-space-sm">
+            <div class="mb-space-sm">
                 <span class="font-label-md text-label-md text-on-surface-variant">Total Kamar</span>
-                <div class="w-10 h-10 rounded-lg bg-surface-container-high text-secondary flex items-center justify-center">
-                    <span class="material-symbols-outlined text-[22px]">meeting_room</span>
-                </div>
             </div>
             <div class="flex items-baseline gap-2">
                 <span class="font-headline-lg text-headline-lg text-primary font-bold">{{ $stats['total_kamar'] }}</span>
@@ -49,11 +41,8 @@
         </div>
 
         <div class="bg-surface-container-lowest p-space-lg rounded-xl shadow-[0_2px_8px_rgba(18,32,86,0.04)] flex flex-col justify-between">
-            <div class="flex items-center justify-between mb-space-sm">
+            <div class="mb-space-sm">
                 <span class="font-label-md text-label-md text-on-surface-variant">Kamar Berpenghuni</span>
-                <div class="w-10 h-10 rounded-lg bg-primary text-on-primary flex items-center justify-center">
-                    <span class="material-symbols-outlined text-[22px]">group</span>
-                </div>
             </div>
             <div class="flex items-baseline gap-2">
                 <span class="font-headline-lg text-headline-lg text-primary font-bold">{{ $stats['kamar_terisi'] }}</span>
@@ -68,11 +57,8 @@
         </div>
 
         <div class="bg-surface-container-lowest p-space-lg rounded-xl shadow-[0_2px_8px_rgba(18,32,86,0.04)] flex flex-col justify-between">
-            <div class="flex items-center justify-between mb-space-sm">
+            <div class="mb-space-sm">
                 <span class="font-label-md text-label-md text-on-surface-variant">Kamar Tersedia</span>
-                <div class="w-10 h-10 rounded-lg bg-surface-container-low text-secondary flex items-center justify-center">
-                    <span class="material-symbols-outlined text-[22px]">check_circle</span>
-                </div>
             </div>
             <div class="flex items-baseline gap-2">
                 <span class="font-headline-lg text-headline-lg text-primary font-bold">{{ $stats['kamar_tersedia'] }}</span>
@@ -86,11 +72,8 @@
         </div>
 
         <div class="bg-surface-container-lowest p-space-lg rounded-xl shadow-[0_2px_8px_rgba(18,32,86,0.04)] flex flex-col justify-between">
-            <div class="flex items-center justify-between mb-space-sm">
+            <div class="mb-space-sm">
                 <span class="font-label-md text-label-md text-on-surface-variant">Dalam Perbaikan</span>
-                <div class="w-10 h-10 rounded-lg bg-error-container text-on-error-container flex items-center justify-center">
-                    <span class="material-symbols-outlined text-[22px]">handyman</span>
-                </div>
             </div>
             <div class="flex items-baseline gap-2">
                 <span class="font-headline-lg text-headline-lg text-primary font-bold">{{ $stats['kamar_perbaikan'] }}</span>
@@ -164,7 +147,6 @@
             <table class="w-full text-left border-collapse">
                 <thead>
                     <tr class="bg-surface-container-low/70 text-on-surface-variant font-caption-sm-medium text-caption-sm-medium uppercase tracking-wider">
-                        <th class="py-3.5 px-space-md">Unit</th>
                         <th class="py-3.5 px-space-md">Nomor Kamar</th>
                         <th class="py-3.5 px-space-md">Gedung &amp; Lantai</th>
                         <th class="py-3.5 px-space-md">Tipe Kamar</th>
@@ -184,21 +166,12 @@
                                 default => $persen > 0 ? 'bg-secondary' : 'bg-[#2E9E5B]',
                             };
                             $statusBadge = match($kamar->status) {
-                                'penuh' => ['bg' => 'bg-error-container/60 text-error', 'dot' => 'bg-error', 'label' => 'Penuh'],
-                                'perbaikan' => ['bg' => 'bg-[#C97D1A]/15 text-[#C97D1A]', 'dot' => 'bg-[#C97D1A]', 'label' => 'Dalam Perbaikan'],
-                                default => ['bg' => 'bg-[#2E9E5B]/15 text-[#2E9E5B]', 'dot' => 'bg-[#2E9E5B]', 'label' => 'Tersedia'],
+                                'penuh' => ['bg' => 'bg-[#DC2626] text-white', 'label' => 'Penuh'],
+                                'perbaikan' => ['bg' => 'bg-[#D97706] text-white', 'label' => 'Dalam Perbaikan'],
+                                default => ['bg' => 'bg-[#169B4A] text-white', 'label' => 'Tersedia'],
                             };
                         @endphp
                         <tr class="hover:bg-surface-container-low/40 transition-colors {{ $kamar->status === 'perbaikan' ? 'bg-error-container/10' : '' }}">
-                            <td class="py-4 px-space-md">
-                                <div class="w-16 h-12 rounded-lg overflow-hidden bg-surface-container relative shadow-sm shrink-0 flex items-center justify-center">
-                                    @if ($kamar->foto)
-                                        <img class="w-full h-full object-cover" src="{{ asset('storage/' . $kamar->foto) }}" alt="Kamar {{ $kamar->nomor_kamar }}">
-                                    @else
-                                        <span class="material-symbols-outlined text-secondary/50 text-[24px]">bed</span>
-                                    @endif
-                                </div>
-                            </td>
                             <td class="py-4 px-space-md">
                                 <div class="flex flex-col">
                                     <span class="font-headline-sm text-headline-sm text-primary">#{{ $kamar->nomor_kamar }}</span>
@@ -241,8 +214,8 @@
                                 </div>
                             </td>
                             <td class="py-4 px-space-md">
-                                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-caption-sm-medium font-caption-sm-medium {{ $statusBadge['bg'] }}">
-                                    <span class="w-1.5 h-1.5 rounded-full {{ $statusBadge['dot'] }}"></span> {{ $statusBadge['label'] }}
+                                <span class="inline-flex items-center px-3.5 py-1 rounded-full text-caption-sm-medium font-caption-sm-medium whitespace-nowrap {{ $statusBadge['bg'] }}">
+                                    {{ $statusBadge['label'] }}
                                 </span>
                             </td>
                             <td class="py-4 px-space-md text-right">
@@ -250,7 +223,7 @@
                                     <a href="{{ route('kamar.edit', $kamar) }}" class="p-1.5 rounded-md text-on-surface-variant hover:text-primary hover:bg-surface-container-low transition-colors" title="Edit Kamar">
                                         <span class="material-symbols-outlined text-[18px]">edit</span>
                                     </a>
-                                    <form method="POST" action="{{ route('kamar.destroy', $kamar) }}" onsubmit="return confirm('Hapus kamar #{{ $kamar->nomor_kamar }}?');">
+                                    <form method="POST" action="{{ route('kamar.destroy', $kamar) }}" data-confirm-title="Hapus Data Kamar" data-confirm="Apakah Anda yakin ingin menghapus kamar #{{ $kamar->nomor_kamar }}?">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="p-1.5 rounded-md text-outline hover:text-error hover:bg-error-container/50 transition-colors cursor-pointer" title="Hapus Kamar">
@@ -262,7 +235,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="8" class="py-space-2xl text-center text-on-surface-variant">
+                            <td colspan="7" class="py-space-2xl text-center text-on-surface-variant">
                                 Belum ada data kamar yang cocok. Klik <strong>Tambah Kamar Baru</strong> untuk menambahkan unit kamar.
                             </td>
                         </tr>

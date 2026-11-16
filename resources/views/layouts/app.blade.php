@@ -31,6 +31,30 @@
         </main>
     </div>
 
+    {{-- Global Delete Confirmation Modal --}}
+    <div id="delete-confirm-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-space-md bg-primary/40 backdrop-blur-xs" role="dialog" aria-modal="true" aria-labelledby="delete-confirm-title">
+        <div class="bg-surface-container-lowest rounded-2xl shadow-2xl max-w-md w-full p-space-lg flex flex-col gap-space-md animate-[fadeIn_0.15s_ease-out]">
+            <div class="flex items-start gap-space-md">
+                <div class="w-11 h-11 rounded-xl bg-error-container text-error flex items-center justify-center shrink-0">
+                    <span class="material-symbols-outlined text-[24px]">delete_forever</span>
+                </div>
+                <div class="flex flex-col gap-1">
+                    <h3 id="delete-confirm-title" class="font-headline-sm text-headline-sm text-primary">Konfirmasi Penghapusan</h3>
+                    <p id="delete-confirm-message" class="font-body-md text-body-md text-on-surface-variant">Apakah Anda yakin ingin menghapus data ini?</p>
+                    <p class="font-caption-sm text-caption-sm text-error mt-1">Tindakan ini permanen dan data tidak dapat dikembalikan.</p>
+                </div>
+            </div>
+            <div class="flex items-center justify-end gap-space-sm pt-space-xs">
+                <button type="button" onclick="closeDeleteModal()" class="px-space-md py-2 rounded-lg bg-surface-container text-on-surface hover:bg-surface-container-high font-label-md text-label-md transition-colors cursor-pointer">
+                    Batal
+                </button>
+                <button type="button" id="delete-confirm-submit" class="px-space-lg py-2 rounded-lg bg-error text-on-error hover:bg-[#991b1b] font-label-md text-label-md shadow-sm transition-colors cursor-pointer">
+                    Ya, Hapus
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script>
         function toggleSidebar(open) {
             const sidebar = document.getElementById('app-sidebar');
@@ -45,6 +69,56 @@
                 backdrop.classList.add('hidden');
             }
         }
+
+        let pendingDeleteForm = null;
+
+        function openDeleteModal(form) {
+            pendingDeleteForm = form;
+            const modal = document.getElementById('delete-confirm-modal');
+            const titleEl = document.getElementById('delete-confirm-title');
+            const msgEl = document.getElementById('delete-confirm-message');
+            if (!modal || !titleEl || !msgEl) return;
+
+            titleEl.textContent = form.dataset.confirmTitle || 'Konfirmasi Penghapusan';
+            msgEl.textContent = form.dataset.confirm || 'Apakah Anda yakin ingin menghapus data ini?';
+
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeDeleteModal() {
+            const modal = document.getElementById('delete-confirm-modal');
+            if (!modal) return;
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            pendingDeleteForm = null;
+        }
+
+        document.addEventListener('submit', function (e) {
+            const form = e.target;
+            if (form instanceof HTMLFormElement && form.dataset.confirm && !form.dataset.confirmed) {
+                e.preventDefault();
+                openDeleteModal(form);
+            }
+        });
+
+        document.getElementById('delete-confirm-submit')?.addEventListener('click', function () {
+            if (!pendingDeleteForm) return;
+            pendingDeleteForm.dataset.confirmed = 'true';
+            pendingDeleteForm.submit();
+        });
+
+        document.getElementById('delete-confirm-modal')?.addEventListener('click', function (e) {
+            if (e.target === this) {
+                closeDeleteModal();
+            }
+        });
+
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') {
+                closeDeleteModal();
+            }
+        });
     </script>
     @stack('scripts')
 </body>
