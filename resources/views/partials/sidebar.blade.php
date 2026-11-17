@@ -103,6 +103,33 @@
                 @endif
             @endrole
 
+            {{-- Menu Client --}}
+            @role('Client')
+                @if (Route::has('pendaftaran.create'))
+                    <a href="{{ route('pendaftaran.create') }}"
+                    class="flex items-center gap-space-sm px-space-md py-space-sm rounded-xl transition-all {{ request()->routeIs('pendaftaran.*') ? $activeClass : $inactiveClass }}">
+                        <span class="material-symbols-outlined text-[20px]">
+                            assignment
+                        </span>
+                        <span class="font-body-md text-body-md">
+                            Pendaftaran Hunian
+                        </span>
+                    </a>
+                @endif
+            @endrole
+
+            @if (Route::has('pembayaran.index'))
+                <a href="{{ route('pembayaran.index') }}"
+                class="flex items-center gap-space-sm px-space-md py-space-sm rounded-xl transition-all {{ request()->routeIs('pembayaran.*') ? $activeClass : $inactiveClass }}">
+                    <span class="material-symbols-outlined text-[20px]">
+                        payments
+                    </span>
+                    <span class="font-body-md text-body-md">
+                        Pembayaran
+                    </span>
+                </a>
+            @endif
+
             @yield('sidebar-items')
         </nav>
     </div>
