@@ -5,21 +5,35 @@
     $inactiveClass = 'text-primary-fixed hover:bg-secondary/40 hover:text-surface-container-lowest';
 @endphp
 
-<aside id="app-sidebar" class="fixed left-0 top-0 h-full w-64 bg-primary-container z-50 flex flex-col justify-between shadow-[0_1px_8px_rgba(0,0,0,0.04)] -translate-x-full lg:translate-x-0 transition-transform duration-200">
+<aside id="app-sidebar"
+       class="fixed left-0 top-0 h-full w-64 bg-primary-container z-50 flex flex-col justify-between shadow-[0_1px_8px_rgba(0,0,0,0.04)] -translate-x-full lg:translate-x-0 transition-transform duration-200">
     <div class="flex flex-col overflow-y-auto">
         {{-- Brand Header --}}
         <div class="h-20 px-space-lg flex items-center justify-between bg-primary/20 shrink-0">
             <a href="{{ url('/') }}" class="flex items-center gap-space-sm">
                 <div class="w-10 h-10 rounded-xl bg-secondary flex items-center justify-center shrink-0">
-                    <span class="material-symbols-outlined text-on-secondary text-[24px]">apartment</span>
+                    <span class="material-symbols-outlined text-on-secondary text-[24px]">
+                        apartment
+                    </span>
                 </div>
+
                 <div class="flex flex-col">
-                    <span class="font-headline-sm text-headline-sm text-surface-container-lowest leading-none">Andalas</span>
-                    <span class="font-caption-sm text-caption-sm text-secondary-fixed-dim uppercase tracking-wider">Residence</span>
+                    <span class="font-headline-sm text-headline-sm text-surface-container-lowest leading-none">
+                        Andalas
+                    </span>
+                    <span class="font-caption-sm text-caption-sm text-secondary-fixed-dim uppercase tracking-wider">
+                        Residence
+                    </span>
                 </div>
             </a>
-            <button type="button" class="lg:hidden text-primary-fixed hover:text-on-primary p-1" onclick="toggleSidebar(false)" aria-label="Tutup Menu">
-                <span class="material-symbols-outlined text-[22px]">close</span>
+
+            <button type="button"
+                    class="lg:hidden text-primary-fixed hover:text-on-primary p-1"
+                    onclick="toggleSidebar(false)"
+                    aria-label="Tutup Menu">
+                <span class="material-symbols-outlined text-[22px]">
+                    close
+                </span>
             </button>
         </div>
 
@@ -32,30 +46,59 @@
 
         {{-- Navigation Links --}}
         <nav class="flex flex-col px-space-sm gap-space-xs">
+            {{-- Menu Pimpinan --}}
             @role('Pimpinan')
                 @if (Route::has('dashboard.okupansi'))
                     <a href="{{ route('dashboard.okupansi') }}"
                        class="flex items-center gap-space-sm px-space-md py-space-sm rounded-xl transition-all {{ request()->routeIs('dashboard.okupansi') ? $activeClass : $inactiveClass }}">
-                        <span class="material-symbols-outlined text-[20px]">space_dashboard</span>
-                        <span class="font-body-md text-body-md">Dashboard Okupansi</span>
+                        <span class="material-symbols-outlined text-[20px]">
+                            space_dashboard
+                        </span>
+                        <span class="font-body-md text-body-md">
+                            Dashboard Okupansi
+                        </span>
                     </a>
                 @endif
             @endrole
 
+            {{-- Menu Fasilitator --}}
             @role('Fasilitator')
                 @if (Route::has('gedung.index'))
                     <a href="{{ route('gedung.index') }}"
                        class="flex items-center gap-space-sm px-space-md py-space-sm rounded-xl transition-all {{ request()->routeIs('gedung.*') ? $activeClass : $inactiveClass }}">
-                        <span class="material-symbols-outlined text-[20px]">domain</span>
-                        <span class="font-body-md text-body-md">Manajemen Gedung</span>
+                        <span class="material-symbols-outlined text-[20px]">
+                            domain
+                        </span>
+                        <span class="font-body-md text-body-md">
+                            Manajemen Gedung
+                        </span>
                     </a>
                 @endif
 
                 @if (Route::has('kamar.index'))
                     <a href="{{ route('kamar.index') }}"
                        class="flex items-center gap-space-sm px-space-md py-space-sm rounded-xl transition-all {{ request()->routeIs('kamar.*') ? $activeClass : $inactiveClass }}">
-                        <span class="material-symbols-outlined text-[20px]">bed</span>
-                        <span class="font-body-md text-body-md">Manajemen Kamar</span>
+                        <span class="material-symbols-outlined text-[20px]">
+                            bed
+                        </span>
+                        <span class="font-body-md text-body-md">
+                            Manajemen Kamar
+                        </span>
+                    </a>
+                @endif
+            @endrole
+
+            {{-- Menu Admin Layanan --}}
+            @role('Admin Layanan')
+                @if (Route::has('periode.index'))
+                    <a href="{{ route('periode.index') }}"
+                       class="flex items-center gap-space-sm px-space-md py-space-sm rounded-xl transition-all {{ request()->routeIs('periode.*') ? $activeClass : $inactiveClass }}">
+                        <span class="material-symbols-outlined text-[20px]">
+                            date_range
+                        </span>
+                        <span class="font-body-md text-body-md">
+                            Periode Pendaftaran
+                        </span>
                     </a>
                 @endif
             @endrole
@@ -69,8 +112,12 @@
         <div class="p-space-md">
             <form action="{{ route('logout') }}" method="POST">
                 @csrf
-                <button type="submit" class="w-full flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg bg-primary/40 hover:bg-error text-primary-fixed hover:text-on-error font-caption-sm-medium text-caption-sm-medium transition-colors cursor-pointer">
-                    <span class="material-symbols-outlined text-[16px]">logout</span>
+
+                <button type="submit"
+                        class="w-full flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg bg-primary/40 hover:bg-error text-primary-fixed hover:text-on-error font-caption-sm-medium text-caption-sm-medium transition-colors cursor-pointer">
+                    <span class="material-symbols-outlined text-[16px]">
+                        logout
+                    </span>
                     <span>Keluar Sistem</span>
                 </button>
             </form>

@@ -9,3 +9,4 @@ Route::get('/', function () {
 require __DIR__.'/modules/auth.php';
 require __DIR__.'/modules/dashboard.php';
 require __DIR__.'/modules/gedung.php';
+require __DIR__.'/modules/periode.php';
