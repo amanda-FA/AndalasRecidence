@@ -19,6 +19,7 @@ Route::middleware('guest')->group(function () {
 
 // Hanya untuk pengguna yang sudah login
 Route::middleware('auth')->group(function () {
+    Route::get('/portal', [AuthController::class, 'home'])->name('portal');
     Route::post('/logout', [AuthController::class, 'logout'])
         ->name('logout');
 });

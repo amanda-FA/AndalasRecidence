@@ -19,6 +19,7 @@ class Gedung extends Model
         'jenis_penghuni',
         'jumlah_lantai',
         'keterangan',
+        'foto',
     ];
 
     protected function casts(): array
@@ -35,7 +36,12 @@ class Gedung extends Model
 
     public function fasilitas(): HasMany
     {
-        return $this->hasMany(Fasilitas::class, 'id_gedung', 'id_gedung');
+        return $this->hasMany(Fasilitas::class, 'id_gedung', 'id_gedung')->where('aktif', true);
+    }
+
+    public function getFotoUrlAttribute(): ?string
+    {
+        return $this->foto ? asset('storage/'.$this->foto) : null;
     }
 
     // Accessors for UI compatibility

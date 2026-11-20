@@ -37,6 +37,16 @@ class Client extends Model
         return $this->belongsTo(JenisClient::class, 'id_jenis_client', 'id_jenis_client');
     }
 
+    public function requiresAdminPlacement(): bool
+    {
+        return $this->jenisClient?->requiresAdminPlacement() ?? false;
+    }
+
+    public function canChooseRoom(): bool
+    {
+        return $this->jenisClient?->canChooseRoom() ?? false;
+    }
+
     public function pengguna(): BelongsTo
     {
         return $this->belongsTo(Pengguna::class, 'id_pengguna', 'id_pengguna');

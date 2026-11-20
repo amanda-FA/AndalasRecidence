@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
@@ -22,6 +23,7 @@ class PenempatanKamar extends Model
         'tanggal_masuk',
         'tanggal_keluar',
         'status_penempatan',
+        'nomor_bed', 'rencana_keluar', 'jadwal_kunci_mulai', 'jadwal_kunci_selesai', 'lokasi_kunci', 'penanggung_jawab', 'kontak_penanggung_jawab',
     ];
 
     protected function casts(): array
@@ -29,7 +31,22 @@ class PenempatanKamar extends Model
         return [
             'tanggal_masuk' => 'date',
             'tanggal_keluar' => 'date',
+            'nomor_bed' => 'integer', 'rencana_keluar' => 'date',
+            'jadwal_kunci_mulai' => 'datetime', 'jadwal_kunci_selesai' => 'datetime',
         ];
+    }
+
+    public function scopeForUser(Builder $query, int $userId): Builder
+    {
+        return $query->whereHas('pendaftaranHunian.client', fn (Builder $client) => $client->where('id_pengguna', $userId));
+    }
+
+    public function scopeCurrent(Builder $query): Builder
+    {
+        return $query->where('status_penempatan', 'aktif')->whereNull('tanggal_keluar')
+            ->where(fn ($q) => $q->whereNull('rencana_keluar')->orWhereDate('rencana_keluar', '>=', today('Asia/Jakarta')->toDateString()))
+            ->whereDate('tanggal_masuk', '<=', now('Asia/Jakarta')->toDateString())
+            ->orderByDesc('tanggal_masuk')->orderByDesc('id_penempatan');
     }
 
     public function pendaftaranHunian(): BelongsTo

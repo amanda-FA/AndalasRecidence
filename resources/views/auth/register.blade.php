@@ -17,8 +17,8 @@
                 <div class="pb-space-md mb-space-md bg-surface-container-low/50 -mx-space-md -mt-space-md p-space-md md:-mx-space-xl md:-mt-space-xl md:p-space-lg rounded-t-2xl">
                     <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
                         <span class="font-label-md text-label-md text-secondary tracking-wide uppercase">Formulir Pendaftaran Residen</span>
-                        <span class="font-caption-sm-medium text-caption-sm text-[#2E9E5B] bg-[#2E9E5B]/10 px-2.5 py-0.5 rounded-full flex items-center gap-1">
-                            <span class="w-1.5 h-1.5 rounded-full bg-[#2E9E5B]"></span> Jalur Mahasiswa / Umum Aktif
+                        <span class="font-caption-sm-medium text-caption-sm text-success bg-success/10 px-2.5 py-0.5 rounded-full flex items-center gap-1">
+                            <span class="w-1.5 h-1.5 rounded-full bg-success"></span> Jalur Mahasiswa / Umum Aktif
                         </span>
                     </div>
                     <h1 class="font-headline-md text-headline-md text-primary">Buat Akun Residen Baru</h1>
@@ -53,49 +53,28 @@
                             <span class="font-caption-sm text-caption-sm text-on-surface-variant">Pilih status kepesertaan</span>
                         </div>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-space-sm">
-                            <label class="category-card relative flex flex-col p-space-sm rounded-xl border {{ $selectedCategory === 'reguler' ? 'border-secondary bg-surface-container-low shadow-sm' : 'border-outline-variant bg-surface-container-lowest' }} hover:border-secondary cursor-pointer transition-all">
-                                <div class="flex items-center justify-between mb-1">
-                                    <div class="flex items-center gap-2">
-                                        <span class="material-symbols-outlined text-secondary text-[20px]">school</span>
-                                        <span class="font-title-md text-[14px] text-primary font-semibold">Mahasiswa Reguler</span>
+                            @foreach (\App\Models\JenisClient::CATEGORIES as $code => $name)
+                                @php
+                                    $adminPlacement = in_array($code, \App\Models\JenisClient::ADMIN_PLACEMENT_CATEGORIES, true);
+                                    $categoryIcon = match ($code) {
+                                        'kipk' => 'workspace_premium',
+                                        'international_private', 'international_funded' => 'language',
+                                        'guest' => 'apartment',
+                                        'summer_course' => 'travel_explore',
+                                        default => 'school',
+                                    };
+                                @endphp
+                                <label class="category-card relative flex flex-col gap-2 p-space-sm rounded-xl border {{ $selectedCategory === $code ? 'border-secondary bg-surface-container-low shadow-sm' : 'border-outline-variant bg-surface-container-lowest' }} hover:border-secondary cursor-pointer transition-all last:sm:col-span-2">
+                                    <div class="flex items-center justify-between gap-2">
+                                        <div class="flex items-center gap-2 min-w-0">
+                                            <span class="material-symbols-outlined text-secondary text-[20px] shrink-0" aria-hidden="true">{{ $categoryIcon }}</span>
+                                            <span class="font-title-md text-[14px] text-primary font-semibold">{{ $name }}</span>
+                                        </div>
+                                        <input @checked($selectedCategory === $code) class="h-4 w-4 shrink-0 text-secondary focus:ring-secondary" name="applicant_category" type="radio" value="{{ $code }}" required>
                                     </div>
-                                    <input {{ $selectedCategory === 'reguler' ? 'checked' : '' }} class="h-4 w-4 text-secondary focus:ring-secondary" name="applicant_category" type="radio" value="reguler">
-                                </div>
-                                <p class="font-caption-sm text-caption-sm text-on-surface-variant">Jalur SNBP, SNBT, &amp; Seleksi Mandiri</p>
-                            </label>
-
-                            <label class="category-card relative flex flex-col p-space-sm rounded-xl border {{ $selectedCategory === 'kipk' ? 'border-secondary bg-surface-container-low shadow-sm' : 'border-outline-variant bg-surface-container-lowest' }} hover:border-secondary cursor-pointer transition-all">
-                                <div class="flex items-center justify-between mb-1">
-                                    <div class="flex items-center gap-2">
-                                        <span class="material-symbols-outlined text-outline text-[20px]">workspace_premium</span>
-                                        <span class="font-title-md text-[14px] text-primary font-semibold">Mahasiswa KIP-K</span>
-                                    </div>
-                                    <input {{ $selectedCategory === 'kipk' ? 'checked' : '' }} class="h-4 w-4 text-secondary focus:ring-secondary" name="applicant_category" type="radio" value="kipk">
-                                </div>
-                                <p class="font-caption-sm text-caption-sm text-on-surface-variant">Beasiswa KIP-Kuliah &amp; Afirmasi Dikti</p>
-                            </label>
-
-                            <label class="category-card relative flex flex-col p-space-sm rounded-xl border {{ $selectedCategory === 'summer_course' ? 'border-secondary bg-surface-container-low shadow-sm' : 'border-outline-variant bg-surface-container-lowest' }} hover:border-secondary cursor-pointer transition-all">
-                                <div class="flex items-center justify-between mb-1">
-                                    <div class="flex items-center gap-2">
-                                        <span class="material-symbols-outlined text-outline text-[20px]">travel_explore</span>
-                                        <span class="font-title-md text-[14px] text-primary font-semibold">Summer Course</span>
-                                    </div>
-                                    <input {{ $selectedCategory === 'summer_course' ? 'checked' : '' }} class="h-4 w-4 text-secondary focus:ring-secondary" name="applicant_category" type="radio" value="summer_course">
-                                </div>
-                                <p class="font-caption-sm text-caption-sm text-on-surface-variant">Program Internasional &amp; Pertukaran</p>
-                            </label>
-
-                            <label class="category-card relative flex flex-col p-space-sm rounded-xl border {{ $selectedCategory === 'guest' ? 'border-secondary bg-surface-container-low shadow-sm' : 'border-outline-variant bg-surface-container-lowest' }} hover:border-secondary cursor-pointer transition-all">
-                                <div class="flex items-center justify-between mb-1">
-                                    <div class="flex items-center gap-2">
-                                        <span class="material-symbols-outlined text-outline text-[20px]">apartment</span>
-                                        <span class="font-title-md text-[14px] text-primary font-semibold">Non-Mahasiswa / Tamu</span>
-                                    </div>
-                                    <input {{ $selectedCategory === 'guest' ? 'checked' : '' }} class="h-4 w-4 text-secondary focus:ring-secondary" name="applicant_category" type="radio" value="guest">
-                                </div>
-                                <p class="font-caption-sm text-caption-sm text-on-surface-variant">Peneliti, Dosen Tamu &amp; Wisma Kampus</p>
-                            </label>
+                                    <p class="font-caption-sm text-caption-sm text-on-surface-variant">{{ $adminPlacement ? 'Ditempatkan Admin Layanan' : 'Dapat memilih gedung dan kamar' }}</p>
+                                </label>
+                            @endforeach
                         </div>
                     </div>
 
@@ -213,7 +192,7 @@
                                        placeholder="Ulangi kata sandi"
                                        required
                                        type="password">
-                                <span class="material-symbols-outlined absolute right-3 text-[#2E9E5B] text-[20px] hidden" id="match-indicator-icon">check_circle</span>
+                                <span class="material-symbols-outlined absolute right-3 text-success text-[20px] hidden" id="match-indicator-icon">check_circle</span>
                             </div>
                         </div>
                     </div>
@@ -338,11 +317,11 @@
             text.textContent = 'Cukup';
             text.className = 'font-caption-sm-medium text-[#C97D1A]';
         } else if (score === 3) {
-            b1.className = 'h-full w-1/3 rounded-full transition-all duration-300 bg-[#2E9E5B]';
-            b2.className = 'h-full w-1/3 rounded-full transition-all duration-300 bg-[#2E9E5B]';
-            b3.className = 'h-full w-1/3 rounded-full transition-all duration-300 bg-[#2E9E5B]';
+            b1.className = 'h-full w-1/3 rounded-full transition-all duration-300 bg-success';
+            b2.className = 'h-full w-1/3 rounded-full transition-all duration-300 bg-success';
+            b3.className = 'h-full w-1/3 rounded-full transition-all duration-300 bg-success';
             text.textContent = 'Sangat Kuat';
-            text.className = 'font-caption-sm-medium text-[#2E9E5B]';
+            text.className = 'font-caption-sm-medium text-success';
         }
         checkPasswordMatch();
     }
@@ -352,13 +331,13 @@
         const icon = elem.querySelector('.material-symbols-outlined');
         if (isValid) {
             elem.classList.remove('text-on-surface-variant');
-            elem.classList.add('text-[#2E9E5B]');
+            elem.classList.add('text-success');
             if (icon) {
                 icon.textContent = 'check_circle';
-                icon.className = 'material-symbols-outlined text-[14px] text-[#2E9E5B]';
+                icon.className = 'material-symbols-outlined text-[14px] text-success';
             }
         } else {
-            elem.classList.remove('text-[#2E9E5B]');
+            elem.classList.remove('text-success');
             elem.classList.add('text-on-surface-variant');
             if (icon) {
                 icon.textContent = 'circle';

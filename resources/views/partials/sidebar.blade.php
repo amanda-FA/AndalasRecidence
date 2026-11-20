@@ -1,7 +1,7 @@
 @php
     $user = auth()->user();
     $roleLabel = $user ? ($user->getRoleNames()->first() ?? 'Pengguna') : 'Tamu';
-    $activeClass = 'bg-secondary text-on-secondary shadow-[0_2px_8px_rgba(18,32,86,0.12)] font-body-md-medium';
+    $activeClass = 'bg-secondary text-on-secondary shadow-brand-active font-body-md-medium';
     $inactiveClass = 'text-primary-fixed hover:bg-secondary/40 hover:text-surface-container-lowest';
 @endphp
 
@@ -11,11 +11,7 @@
         {{-- Brand Header --}}
         <div class="h-20 px-space-lg flex items-center justify-between bg-primary/20 shrink-0">
             <a href="{{ url('/') }}" class="flex items-center gap-space-sm">
-                <div class="w-10 h-10 rounded-xl bg-secondary flex items-center justify-center shrink-0">
-                    <span class="material-symbols-outlined text-on-secondary text-[24px]">
-                        apartment
-                    </span>
-                </div>
+                <img src="{{ asset('images/logo_andalasresidence.png') }}" alt="Logo Andalas Residence" width="48" height="48" class="w-12 h-12 rounded-xl bg-primary-container object-contain shrink-0">
 
                 <div class="flex flex-col">
                     <span class="font-headline-sm text-headline-sm text-surface-container-lowest leading-none">
@@ -101,6 +97,18 @@
                         </span>
                     </a>
                 @endif
+
+                @if (Route::has('verifikasi-pendaftaran.index'))
+                    <a href="{{ route('verifikasi-pendaftaran.index') }}"
+                       class="flex items-center gap-space-sm px-space-md py-space-sm rounded-xl transition-all {{ request()->routeIs('verifikasi-pendaftaran.*') ? $activeClass : $inactiveClass }}">
+                        <span class="material-symbols-outlined text-[20px]">
+                            fact_check
+                        </span>
+                        <span class="font-body-md text-body-md">
+                            Verifikasi Pendaftaran
+                        </span>
+                    </a>
+                @endif
             @endrole
 
             {{-- Menu Client --}}
@@ -114,6 +122,26 @@
                         <span class="font-body-md text-body-md">
                             Pendaftaran Hunian
                         </span>
+                    </a>
+                @endif
+
+                @if (Route::has('penempatan.index'))
+                    <a href="{{ route('penempatan.index') }}"
+                       class="flex items-center gap-space-sm px-space-md py-space-sm rounded-xl transition-all {{ request()->routeIs('penempatan.*') ? $activeClass : $inactiveClass }}">
+                        <span class="material-symbols-outlined text-[20px]">
+                            meeting_room
+                        </span>
+                        <span class="font-body-md text-body-md">
+                            Penempatan Kamar
+                        </span>
+                    </a>
+                @endif
+
+                @if (Route::has('kerusakan.index'))
+                    <a href="{{ route('kerusakan.index') }}"
+                       class="flex items-center gap-space-sm px-space-md py-space-sm rounded-xl transition-all {{ request()->routeIs('kerusakan.*') ? $activeClass : $inactiveClass }}">
+                        <span class="material-symbols-outlined text-[20px]">build_circle</span>
+                        <span class="font-body-md text-body-md">Lapor Kerusakan</span>
                     </a>
                 @endif
             @endrole

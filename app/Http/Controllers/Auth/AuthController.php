@@ -12,9 +12,21 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
+use Illuminate\Validation\Rule;
 
 class AuthController extends Controller
 {
+    public function home(Request $request)
+    {
+        if (! $request->user()) {
+            return redirect()->route('login');
+        }
+
+        $path = $this->redirectPathForUser($request->user());
+
+        return redirect($path);
+    }
+
     // Menampilkan halaman login
     public function showLogin()
     {
@@ -64,6 +76,14 @@ class AuthController extends Controller
             return route('gedung.index');
         }
 
+        if ($user->hasRole('Client')) {
+            return route('pendaftaran.create');
+        }
+
+        if ($user->hasRole('Admin Layanan')) {
+            return route('periode.index');
+        }
+
         return '/';
     }
 
@@ -78,7 +98,7 @@ class AuthController extends Controller
     {
         $data = $request->validate([
             'name' => ['required', 'string', 'max:150'],
-            'applicant_category' => ['nullable', 'string'],
+            'applicant_category' => ['nullable', Rule::in(array_keys(JenisClient::CATEGORIES))],
             'identity_number' => ['nullable', 'string', 'max:50'],
             'email' => ['required', 'email', 'max:150', 'unique:pengguna,email'],
             'phone' => ['nullable', 'string', 'max:20'],
@@ -106,12 +126,14 @@ class AuthController extends Controller
             'status_aktif' => 1,
         ]);
 
-        $jenisClient = JenisClient::firstOrCreate(['jenis' => 'Mahasiswa Reguler']);
+        $category = $data['applicant_category'] ?? 'reguler';
+        $jenisClient = JenisClient::firstOrCreate(['jenis' => JenisClient::CATEGORIES[$category]]);
 
         Client::create([
             'id_jenis_client' => $jenisClient->id_jenis_client,
             'id_pengguna' => $user->id_pengguna,
             'nomor_identitas' => $data['identity_number'] ?? null,
+            'status_KIPK' => $category === 'kipk',
             'pekerjaan' => $data['applicant_category'] ?? 'Mahasiswa',
         ]);
 

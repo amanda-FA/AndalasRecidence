@@ -40,7 +40,7 @@
                 <a href="{{ route('gedung.index') }}" class="px-space-lg py-2.5 rounded-lg bg-surface-container text-on-surface hover:bg-surface-container-high transition-all font-label-md text-label-md">
                     Batal
                 </a>
-                <button class="px-space-xl py-2.5 rounded-lg bg-secondary text-on-primary hover:bg-[#4650C7] shadow-sm hover:shadow transition-all font-label-md text-label-md cursor-pointer" type="submit">
+                <button class="px-space-xl py-2.5 rounded-lg bg-secondary text-on-primary hover:bg-on-secondary-fixed-variant shadow-sm hover:shadow transition-all font-label-md text-label-md cursor-pointer" type="submit">
                     Simpan &amp; Daftarkan Gedung Baru
                 </button>
             </div>

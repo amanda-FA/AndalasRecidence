@@ -6,7 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Models\Gedung;
 use App\Models\Kamar;
 use App\Models\TipeKamar;
+use App\Services\FacilitySelectionService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Database\QueryException;
 
 class KamarController extends Controller
 {
@@ -68,25 +71,14 @@ class KamarController extends Controller
         $tipeKamars = TipeKamar::orderBy('nama_tipe')->get();
         $selectedGedungId = $request->query('gedung_id');
 
-        return view('kamar.create', compact('gedungs', 'tipeKamars', 'selectedGedungId'));
+        return view('kamar.create', compact('gedungs', 'tipeKamars', 'selectedGedungId') + app(FacilitySelectionService::class)->formData('kamar'));
     }
 
     public function store(Request $request)
     {
         $data = $this->validatedData($request);
 
-        $defaultTipe = TipeKamar::firstOrCreate(
-            ['nama_tipe' => $data['tipe_kamar']],
-            ['kapasitas' => $data['kapasitas_bed'] ?? 4, 'tarif' => $data['tarif'] ?? 0]
-        );
-
-        Kamar::create([
-            'id_gedung' => $data['gedung_id'],
-            'id_tipeKamar' => $defaultTipe->id_tipeKamar,
-            'nomor_kamar' => $data['nomor_kamar'],
-            'lantai' => $data['lantai'],
-            'status_kamar' => $data['status'] ?? 'tersedia',
-        ]);
+        $this->saveKamar($request, $data);
 
         return redirect()
             ->route('kamar.index', ['gedung_id' => $data['gedung_id']])
@@ -98,25 +90,14 @@ class KamarController extends Controller
         $gedungs = Gedung::orderBy('nama_gedung')->get();
         $tipeKamars = TipeKamar::orderBy('nama_tipe')->get();
 
-        return view('kamar.edit', compact('kamar', 'gedungs', 'tipeKamars'));
+        return view('kamar.edit', compact('kamar', 'gedungs', 'tipeKamars') + app(FacilitySelectionService::class)->formData('kamar', $kamar));
     }
 
     public function update(Request $request, Kamar $kamar)
     {
         $data = $this->validatedData($request);
 
-        $defaultTipe = TipeKamar::firstOrCreate(
-            ['nama_tipe' => $data['tipe_kamar']],
-            ['kapasitas' => $data['kapasitas_bed'] ?? 4, 'tarif' => $data['tarif'] ?? 0]
-        );
-
-        $kamar->update([
-            'id_gedung' => $data['gedung_id'],
-            'id_tipeKamar' => $defaultTipe->id_tipeKamar,
-            'nomor_kamar' => $data['nomor_kamar'],
-            'lantai' => $data['lantai'],
-            'status_kamar' => $data['status'] ?? 'tersedia',
-        ]);
+        $this->saveKamar($request, $data, $kamar);
 
         return redirect()
             ->route('kamar.index', ['gedung_id' => $data['gedung_id']])
@@ -126,7 +107,17 @@ class KamarController extends Controller
     public function destroy(Kamar $kamar)
     {
         $gedungId = $kamar->id_gedung;
-        $kamar->delete();
+        try {
+            $deleted = DB::transaction(function () use ($kamar) {
+                $owner = Kamar::whereKey($kamar->id_kamar)->lockForUpdate()->firstOrFail();
+                if ($owner->penempatanKamars()->exists() || ! app(FacilitySelectionService::class)->deleteUnusedInventory($owner)) return false;
+                return $owner->delete();
+            });
+        } catch (QueryException $exception) {
+            if ((string) $exception->getCode() !== '23000') throw $exception;
+            $deleted = false;
+        }
+        if (! $deleted) return redirect()->route('kamar.index', ['gedung_id' => $gedungId])->with('error', 'Kamar atau fasilitasnya masih digunakan pada penempatan, laporan kerusakan, atau pengecekan.');
 
         return redirect()
             ->route('kamar.index', ['gedung_id' => $gedungId])
@@ -143,8 +134,23 @@ class KamarController extends Controller
             'kapasitas_bed' => ['nullable', 'integer', 'min:1', 'max:20'],
             'tarif' => ['nullable', 'numeric', 'min:0'],
             'status' => ['required', 'string', 'max:30'],
-        ]);
+        ] + FacilitySelectionService::rules('kamar'));
 
         return $validated;
+    }
+
+    private function saveKamar(Request $request, array $data, ?Kamar $kamar = null): void
+    {
+        DB::transaction(function () use ($request, $data, $kamar) {
+            $type = TipeKamar::firstOrCreate(['nama_tipe' => $data['tipe_kamar']], ['kapasitas' => $data['kapasitas_bed'] ?? 4, 'tarif' => $data['tarif'] ?? 0]);
+            $owner = $kamar ? Kamar::whereKey($kamar->id_kamar)->lockForUpdate()->firstOrFail() : new Kamar();
+            $owner->fill([
+                'id_gedung' => $data['gedung_id'], 'id_tipeKamar' => $type->id_tipeKamar,
+                'nomor_kamar' => $data['nomor_kamar'], 'lantai' => $data['lantai'], 'status_kamar' => $data['status'],
+            ])->save();
+            if ($request->has('fasilitas_present') || $request->has('fasilitas')) {
+                app(FacilitySelectionService::class)->sync($owner, $data['fasilitas'] ?? []);
+            }
+        });
     }
 }

@@ -72,7 +72,7 @@
                         <span>Cetak / PDF (.PDF)</span>
                     </a>
                     <a class="flex items-center gap-2 px-4 py-2.5 font-label-md text-label-md text-on-surface hover:bg-surface-container-low transition-colors" href="#" onclick="alert('Fitur ekspor Excel akan tersedia setelah integrasi database.'); return false;">
-                        <span class="material-symbols-outlined text-[#2E9E5B] text-[20px]">table_view</span>
+                        <span class="material-symbols-outlined text-success text-[20px]">table_view</span>
                         <span>Dataset Spreadsheet (.Excel)</span>
                     </a>
                 </div>
@@ -133,17 +133,17 @@
         <div class="flex flex-col justify-between p-space-lg rounded-2xl bg-surface-container-lowest shadow-sm hover:shadow-md transition-all">
             <div class="flex items-center justify-between mb-space-sm">
                 <span class="font-caption-sm-medium text-caption-sm-medium uppercase tracking-wider text-on-surface-variant">Okupansi Terisi</span>
-                <div class="w-9 h-9 rounded-xl bg-[#2E9E5B]/15 flex items-center justify-center text-[#2E9E5B]">
+                <div class="w-9 h-9 rounded-xl bg-success/15 flex items-center justify-center text-success">
                     <span class="material-symbols-outlined text-[20px]">how_to_reg</span>
                 </div>
             </div>
             <div>
                 <div class="flex items-baseline gap-2">
                     <span class="font-headline-lg text-headline-lg text-on-surface tracking-tight">{{ number_format($kpi['total_terisi'], 0, ',', '.') }}</span>
-                    <span class="font-title-md text-title-md text-[#2E9E5B]">Bed</span>
+                    <span class="font-title-md text-title-md text-success">Bed</span>
                 </div>
                 <div class="flex items-center gap-1.5 mt-1">
-                    <span class="inline-flex items-center px-2 py-0.5 rounded-full bg-[#2E9E5B]/10 text-[#2E9E5B] font-label-md text-label-md">
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-full bg-success/10 text-success font-label-md text-label-md">
                         <span class="material-symbols-outlined text-[16px] mr-0.5">trending_up</span> {{ $kpi['persentase_okupansi'] }}%
                     </span>
                     <span class="font-caption-sm text-caption-sm text-on-surface-variant">Tingkat Okupansi</span>
@@ -151,7 +151,7 @@
             </div>
             <div class="mt-space-md pt-space-xs flex items-center justify-between text-on-surface-variant font-caption-sm text-caption-sm">
                 <span>Keterisian Aktif</span>
-                <span class="font-label-md text-label-md text-[#2E9E5B]">+4.2% vs Sem. Lalu</span>
+                <span class="font-label-md text-label-md text-success">+4.2% vs Sem. Lalu</span>
             </div>
         </div>
 
@@ -235,7 +235,7 @@
                 </div>
                 <div class="flex flex-wrap items-center gap-space-sm self-start sm:self-auto">
                     <span class="flex items-center gap-1 font-caption-sm text-caption-sm text-on-surface-variant">
-                        <span class="w-3 h-3 rounded bg-[#2E9E5B]"></span> &gt;90% Optimal
+                        <span class="w-3 h-3 rounded bg-success"></span> &gt;90% Optimal
                     </span>
                     <span class="flex items-center gap-1 font-caption-sm text-caption-sm text-on-surface-variant">
                         <span class="w-3 h-3 rounded bg-secondary"></span> 80-89% Ideal
@@ -250,10 +250,10 @@
                 @foreach ($gedungList as $gedung)
                     @php
                         $barColor = $gedung['persentase'] >= 90
-                            ? 'bg-[#2E9E5B]'
+                            ? 'bg-success'
                             : ($gedung['persentase'] >= 80 ? 'bg-secondary' : 'bg-secondary-fixed-dim');
                         $textColor = $gedung['persentase'] >= 90
-                            ? 'text-[#2E9E5B]'
+                            ? 'text-success'
                             : ($gedung['persentase'] >= 80 ? 'text-secondary' : 'text-on-secondary-fixed-variant');
                     @endphp
                     <div class="flex flex-col gap-1">
@@ -354,10 +354,10 @@
                     @foreach ($gedungList as $gedung)
                         @php
                             $barColor = $gedung['persentase'] >= 90
-                                ? 'bg-[#2E9E5B]'
+                                ? 'bg-success'
                                 : ($gedung['persentase'] >= 80 ? 'bg-secondary' : 'bg-secondary-fixed-dim');
                             $textColor = $gedung['persentase'] >= 90
-                                ? 'text-[#2E9E5B]'
+                                ? 'text-success'
                                 : ($gedung['persentase'] >= 80 ? 'text-secondary' : 'text-on-surface-variant');
                         @endphp
                         <tr class="hover:bg-surface-container-low/60 transition-colors">

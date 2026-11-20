@@ -3,6 +3,9 @@
 namespace App\Http\Controllers\Pendaftaran;
 
 use App\Http\Controllers\Controller;
+use App\Models\JenisBerkas;
+use App\Models\JenisClient;
+use App\Models\Kamar;
 use App\Models\PendaftaranHunian;
 use App\Models\PeriodePendaftaran;
 use App\Models\TipeKamar;
@@ -18,11 +21,7 @@ class PendaftaranHunianController extends Controller
 {
     private function bolehMemilihTipe($client): bool
     {
-        return !$client->status_KIPK
-            && in_array($client->jenisClient?->jenis, [
-                'Mahasiswa Reguler',
-                'Tamu / Umum',
-            ], true);
+        return $client->canChooseRoom();
     }
 
     private function gedungDiizinkan($client): array
@@ -44,13 +43,11 @@ class PendaftaranHunianController extends Controller
             'Gedung Asrama Pupera Putera (H)',
         ];
 
-        if ($client->jenisClient?->jenis === 'Tamu / Umum') {
+        if ($client->jenisClient?->jenis === JenisClient::CATEGORIES['guest']) {
             $gedung[] = 'Gedung Asrama Nakes';
             $gedung[] = 'Gedung Asrama ASN';
         }
 
-        // Nakes belum dimasukkan untuk Reguler karena
-        // profil belum membedakan maba dan non-maba.
         return $gedung;
     }
 
@@ -150,12 +147,28 @@ class PendaftaranHunianController extends Controller
             );
         }
 
+        $roomChoices = $bolehMemilihTipe ? Kamar::with(['gedung', 'tipeKamar'])
+            ->where('status_kamar', 'tersedia')
+            ->whereHas('gedung', fn ($q) => $q->whereIn('nama_gedung', $gedungDiizinkan))
+            ->withCount(['penempatanKamars as occupied' => fn ($q) => $q->current()])
+            ->orderBy('nomor_kamar')->get()->filter(fn ($room) => $room->occupied < ($room->getRelation('tipeKamar')?->kapasitas ?? 0))
+            ->map(fn ($room) => [
+                'id' => $room->id_kamar, 'building_id' => $room->id_gedung, 'building' => $room->gedung->nama_gedung,
+                'type_id' => $room->id_tipeKamar, 'type' => $room->getRelation('tipeKamar')->nama_tipe,
+                'number' => $room->nomor_kamar, 'gender' => $room->gedung->jenis_penghuni,
+                'available' => $room->getRelation('tipeKamar')->kapasitas - $room->occupied,
+            ])->values() : collect();
+
+        $jenisBerkas = JenisBerkas::orderBy('id_jenis_berkas')->get(['id_jenis_berkas', 'nama_berkas']);
+
         return view('pendaftaran.create', compact(
             'client',
             'periodes',
             'tipeKamars',
             'bolehMemilihTipe',
-            'genderTipe'
+            'genderTipe',
+            'jenisBerkas',
+            'roomChoices'
         ));
     }
 
@@ -189,6 +202,8 @@ class PendaftaranHunianController extends Controller
                 'integer',
                 Rule::exists('tipe_kamar', 'id_tipeKamar'),
             ],
+            'id_kamar' => [Rule::requiredIf($bolehMemilihTipe), Rule::prohibitedIf(!$bolehMemilihTipe), 'nullable', 'integer', 'exists:kamar,id_kamar'],
+            'id_gedung' => [Rule::requiredIf($bolehMemilihTipe), Rule::prohibitedIf(!$bolehMemilihTipe), 'nullable', 'integer', 'exists:gedung,id_gedung'],
             'nomor_identitas' => ['required', 'string', 'max:50'],
             'pekerjaan' => ['nullable', 'string', 'max:100'],
             'jenis_kelamin' => [
@@ -197,6 +212,8 @@ class PendaftaranHunianController extends Controller
             ],
             'alamat_asal' => ['required', 'string', 'max:2000'],
             'berkas' => ['required', 'array', 'min:1', 'max:5'],
+            'id_jenis_berkas' => ['required', 'array', 'min:1', 'max:5'],
+            'id_jenis_berkas.*' => ['required', 'integer', Rule::exists('jenis_berkas', 'id_jenis_berkas')],
             'berkas.*' => [
                 'required',
                 'file',
@@ -206,16 +223,32 @@ class PendaftaranHunianController extends Controller
             ],
             'persetujuan' => ['accepted'],
         ], [
-            'id_tipeKamar.required' => 'Pilih preferensi tipe kamar.',
+            'id_kamar.required' => 'Pilih kamar yang akan didaftarkan.',
+            'id_gedung.required' => 'Pilih gedung hunian.',
+            'id_tipeKamar.required' => 'Pilih tipe kamar.',
             'id_tipeKamar.prohibited' =>
                 'Tipe kamar kategori ini ditentukan Admin Layanan.',
             'berkas.required' =>
                 'Lampirkan minimal satu berkas persyaratan.',
             'berkas.max' => 'Maksimal lima berkas per pengajuan.',
             'berkas.*.max' => 'Ukuran setiap berkas maksimal 10 MB.',
+            'id_jenis_berkas.required' => 'Pilih jenis untuk setiap berkas yang dilampirkan.',
+            'id_jenis_berkas.*.required' => 'Pilih jenis berkas.',
+            'id_jenis_berkas.*.exists' => 'Jenis berkas yang dipilih tidak tersedia.',
             'persetujuan.accepted' =>
                 'Setujui pernyataan sebelum mengirim.',
         ]);
+
+        if (array_keys($request->file('berkas', [])) !== array_keys($data['id_jenis_berkas'])) {
+            throw ValidationException::withMessages([
+                'id_jenis_berkas' => 'Setiap lampiran harus memiliki satu pilihan jenis berkas.',
+            ]);
+        }
+
+        $requiredTypes = JenisBerkas::pluck('id_jenis_berkas');
+        if ($requiredTypes->isEmpty() || $requiredTypes->diff(collect($data['id_jenis_berkas'])->map(fn ($id) => (int) $id))->isNotEmpty()) {
+            throw ValidationException::withMessages(['berkas' => 'Lengkapi semua berkas: FC Kartu Keluarga, FC KTP, dan Hasil Tes Kesehatan.']);
+        }
 
         $paths = [];
 
@@ -275,19 +308,16 @@ class PendaftaranHunianController extends Controller
                     ]);
                 }
 
+                $selectedRoom = null;
                 if ($bolehMemilihTipe) {
-                    $tipeValid = $this->queryTipe(
-                        $profil,
-                        $data['jenis_kelamin']
-                    )
-                        ->whereKey($data['id_tipeKamar'])
-                        ->exists();
-
-                    if (!$tipeValid) {
-                        throw ValidationException::withMessages([
-                            'id_tipeKamar' =>
-                                'Tipe kamar tidak sesuai dengan kategori atau jenis kelamin pendaftar.',
-                        ]);
+                    $selectedRoom = Kamar::with(['gedung', 'tipeKamar'])->whereKey($data['id_kamar'])->lockForUpdate()->firstOrFail();
+                    $allowedGender = $data['jenis_kelamin'] === 'laki-laki' ? ['putra','campuran','tamu'] : ['putri','campuran','tamu'];
+                    if ($selectedRoom->id_gedung != $data['id_gedung'] || $selectedRoom->id_tipeKamar != $data['id_tipeKamar']
+                        || !in_array($selectedRoom->gedung->nama_gedung, $this->gedungDiizinkan($profil), true)
+                        || !in_array($selectedRoom->gedung->jenis_penghuni, $allowedGender, true)
+                        || $selectedRoom->status_kamar !== 'tersedia'
+                        || $selectedRoom->penempatanKamars()->current()->count() >= ($selectedRoom->getRelation('tipeKamar')?->kapasitas ?? 0)) {
+                        throw ValidationException::withMessages(['id_kamar' => 'Pilihan gedung, tipe, atau kamar tidak sesuai atau kamar sudah penuh.']);
                     }
                 }
 
@@ -304,14 +334,15 @@ class PendaftaranHunianController extends Controller
                     'id_tipeKamar' => $bolehMemilihTipe
                         ? $data['id_tipeKamar']
                         : null,
+                    'id_kamar' => $selectedRoom?->id_kamar,
                     'id_admin' => null,
-                    'tanggal_daftar' => today(),
+                    'tanggal_daftar' => now(),
                     'status_pendaftaran' => 'menunggu_verifikasi',
                     'tanggal_verifikasi' => null,
                     'catatan_verifikasi' => null,
                 ]);
 
-                foreach ($request->file('berkas', []) as $file) {
+                foreach ($request->file('berkas', []) as $index => $file) {
                     $path = $fileStorage->store(
                         $file,
                         'pendaftaran',
@@ -321,6 +352,7 @@ class PendaftaranHunianController extends Controller
                     $paths[] = $path;
 
                     $pendaftaran->berkasPendaftarans()->create([
+                        'id_jenis_berkas' => $data['id_jenis_berkas'][$index],
                         'path_file' => $path,
                         'tanggal_upload' => today(),
                     ]);

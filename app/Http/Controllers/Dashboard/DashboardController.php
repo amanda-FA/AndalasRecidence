@@ -37,7 +37,7 @@ class DashboardController extends Controller
                 $statusStyle = 'bg-[#ba1a1a]/10 text-error';
             } elseif ($persentase >= 80) {
                 $status = 'Optimal';
-                $statusStyle = 'bg-[#2E9E5B]/10 text-[#2E9E5B]';
+                $statusStyle = 'bg-success/10 text-success';
             } else {
                 $status = 'Tersedia Kuota';
                 $statusStyle = 'bg-secondary-fixed text-on-secondary-fixed-variant';

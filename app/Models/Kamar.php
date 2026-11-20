@@ -42,7 +42,7 @@ class Kamar extends Model
 
     public function fasilitas(): HasMany
     {
-        return $this->hasMany(Fasilitas::class, 'id_kamar', 'id_kamar');
+        return $this->hasMany(Fasilitas::class, 'id_kamar', 'id_kamar')->where('aktif', true);
     }
 
     public function penempatanKamars(): HasMany
@@ -73,7 +73,7 @@ class Kamar extends Model
 
     public function getBedTerisiAttribute(): int
     {
-        return $this->penempatanKamars()->where('status_penempatan', 'aktif')->count();
+        return $this->penempatanKamars()->current()->count();
     }
 
     public function getBedTersediaAttribute(): int

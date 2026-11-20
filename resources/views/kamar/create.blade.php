@@ -41,7 +41,7 @@
                 <a href="{{ route('kamar.index') }}" class="px-space-md py-2.5 rounded-lg bg-surface-container text-on-surface hover:bg-surface-container-high transition-colors font-label-md text-label-md">
                     Batal
                 </a>
-                <button class="px-space-lg py-2.5 rounded-lg bg-secondary text-on-secondary hover:bg-secondary-container transition-all font-label-md text-label-md shadow-sm cursor-pointer" type="submit">
+                <button class="px-space-lg py-2.5 rounded-lg bg-secondary text-on-secondary hover:bg-secondary-container hover:text-on-secondary-container transition-all font-label-md text-label-md shadow-sm cursor-pointer" type="submit">
                     Simpan &amp; Daftarkan Kamar Baru
                 </button>
             </div>

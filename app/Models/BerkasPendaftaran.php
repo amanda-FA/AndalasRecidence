@@ -16,6 +16,7 @@ class BerkasPendaftaran extends Model
 
     protected $fillable = [
         'id_pendaftaran',
+        'id_jenis_berkas',
         'path_file',
         'tanggal_upload',
     ];
@@ -30,5 +31,10 @@ class BerkasPendaftaran extends Model
     public function pendaftaranHunian(): BelongsTo
     {
         return $this->belongsTo(PendaftaranHunian::class, 'id_pendaftaran', 'id_pendaftaran');
+    }
+
+    public function jenisBerkas(): BelongsTo
+    {
+        return $this->belongsTo(JenisBerkas::class, 'id_jenis_berkas', 'id_jenis_berkas');
     }
 }

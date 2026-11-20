@@ -1,17 +1,6 @@
 @php
     $kamar = $kamar ?? null;
     $selectedGedung = old('gedung_id', $kamar?->gedung_id ?? ($selectedGedungId ?? ''));
-    $fasilitasOptions = [
-        ['label' => 'AC Pendingin Ruangan', 'desc' => 'Daikin Inverter / Standar', 'icon' => 'mode_fan'],
-        ['label' => 'Kamar Mandi Dalam', 'desc' => 'Private En-suite Shower', 'icon' => 'bathtub'],
-        ['label' => 'Pemanas Air Listrik', 'desc' => 'Water Heater', 'icon' => 'water_heater'],
-        ['label' => 'Meja & Kursi Belajar', 'desc' => 'Ergonomis + Lampu Meja', 'icon' => 'desk'],
-        ['label' => 'Lemari Pakaian 2 Pintu', 'desc' => 'Loker individual berkunci', 'icon' => 'inventory'],
-        ['label' => 'Kasur Springbed Single', 'desc' => 'Ukuran 100x200 + Bantal', 'icon' => 'single_bed'],
-        ['label' => 'WiFi Eduroam High-Speed', 'desc' => 'Coverage Access Point', 'icon' => 'wifi'],
-        ['label' => 'Balkon Pribadi', 'desc' => 'Akses ventilasi teras luar', 'icon' => 'deck'],
-    ];
-    $selectedFasilitas = old('fasilitas', $kamar ? $kamar->fasilitas->pluck('nama_fasilitas')->all() : []);
 @endphp
 
 <div class="flex flex-col gap-space-lg">
@@ -127,25 +116,7 @@
         </div>
     </div>
 
-    {{-- Bagian 3: Kelengkapan Fasilitas Kamar --}}
-    <div class="bg-surface-container-lowest rounded-2xl p-space-lg md:p-space-xl shadow-sm flex flex-col gap-space-lg">
-        <div class="pb-space-sm border-b border-surface-container">
-            <h2 class="font-headline-sm text-headline-sm text-primary">Kelengkapan Fasilitas Kamar</h2>
-            <p class="font-caption-sm text-caption-sm text-on-surface-variant">Pilih inventaris dan sarana yang terpasang di kamar ini.</p>
-        </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-space-md">
-            @foreach ($fasilitasOptions as $item)
-                <label class="flex items-start gap-3 p-3.5 rounded-xl bg-surface-container-low hover:bg-surface-container transition-all cursor-pointer">
-                    <input name="fasilitas[]" value="{{ $item['label'] }}" {{ in_array($item['label'], $selectedFasilitas) ? 'checked' : '' }} class="mt-0.5 w-4 h-4 rounded text-secondary accent-secondary cursor-pointer" type="checkbox">
-                    <div class="flex flex-col">
-                        <span class="font-body-md-medium text-body-md-medium text-primary">{{ $item['label'] }}</span>
-                        <span class="font-caption-sm text-caption-sm text-outline">{{ $item['desc'] }}</span>
-                    </div>
-                </label>
-            @endforeach
-        </div>
-    </div>
+    @include('partials.facility-selector', ['facilityTitle' => 'Kelengkapan Fasilitas Kamar', 'facilityDescription' => 'Pilih fasilitas yang terpasang di kamar ini.'])
 
     {{-- Bagian 4: Catatan Teknis --}}
     <div class="bg-surface-container-lowest rounded-2xl p-space-lg md:p-space-xl shadow-sm flex flex-col gap-space-lg">

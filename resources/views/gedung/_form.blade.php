@@ -1,15 +1,5 @@
 @php
     $gedung = $gedung ?? null;
-    $fasilitasList = [
-        ['label' => 'Dapur / Pantry', 'icon' => 'soup_kitchen'],
-        ['label' => 'Musholla Terpadu', 'icon' => 'mosque'],
-        ['label' => 'Ruang Belajar / Cowork', 'icon' => 'local_library'],
-        ['label' => 'Parkir Berkanopi', 'icon' => 'garage_home'],
-        ['label' => 'CCTV 24 Jam Aktif', 'icon' => 'videocam'],
-        ['label' => 'WiFi Eduroam / IdREN', 'icon' => 'wifi'],
-        ['label' => 'Sistem Hydrant & Tanggap Darurat', 'icon' => 'fire_extinguisher'],
-    ];
-    $selectedFasilitas = old('fasilitas', $gedung?->fasilitas ?? []);
 @endphp
 
 <div class="flex flex-col gap-space-lg">
@@ -32,10 +22,10 @@
 
             <div class="flex flex-col gap-1.5">
                 <label class="font-label-md text-label-md text-primary" for="kode">
-                    Kode Gedung Unik <span class="text-error">*</span>
+                    Kode Gedung Unik
                 </label>
                 <input class="w-full px-space-md py-3 rounded-lg bg-surface-container-low text-on-surface font-body-md-medium text-body-md-medium focus:bg-surface-container-lowest outline-none focus:ring-2 focus:ring-secondary/30 uppercase tracking-wider transition-all placeholder:text-outline"
-                       id="kode" name="kode" value="{{ old('kode', $gedung?->kode) }}" placeholder="Contoh: GD-UNAND-E" required type="text">
+                       id="kode" name="kode" value="{{ old('kode', $gedung?->kode) }}" placeholder="Contoh: GD-UNAND-E" type="text">
             </div>
 
             <div class="flex flex-col gap-1.5">
@@ -141,33 +131,24 @@
         </div>
     </section>
 
-    {{-- Bagian 3: Fasilitas Bersama --}}
-    <section class="bg-surface-container-lowest rounded-xl p-space-xl shadow-sm flex flex-col gap-space-lg">
-        <div class="pb-space-sm border-b border-surface-container">
-            <h2 class="font-title-md text-title-md text-primary">Fasilitas Bersama &amp; Proteksi</h2>
-            <p class="font-caption-sm text-caption-sm text-on-surface-variant">Centang semua amenitas gedung yang siap difungsikan.</p>
-        </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-            @foreach ($fasilitasList as $item)
-                <label class="flex items-center gap-3 p-3 rounded-lg bg-surface-container-low hover:bg-surface-container transition-all cursor-pointer select-none">
-                    <input name="fasilitas[]" value="{{ $item['label'] }}" {{ in_array($item['label'], $selectedFasilitas) ? 'checked' : '' }} class="w-4 h-4 rounded text-secondary accent-secondary cursor-pointer" type="checkbox">
-                    <span class="font-body-md-medium text-body-md-medium text-primary">{{ $item['label'] }}</span>
-                </label>
-            @endforeach
-        </div>
-    </section>
+    @include('partials.facility-selector', ['facilityTitle' => 'Fasilitas Bersama & Proteksi', 'facilityDescription' => 'Pilih fasilitas bersama yang tersedia di gedung ini.'])
 
     {{-- Bagian 4: Foto & Deskripsi --}}
     <section class="bg-surface-container-lowest rounded-xl p-space-xl shadow-sm flex flex-col gap-space-lg">
         <div class="pb-space-sm border-b border-surface-container">
             <h2 class="font-title-md text-title-md text-primary">Foto Tampak Depan &amp; Deskripsi Gedung</h2>
-            <p class="font-caption-sm text-caption-sm text-on-surface-variant">Opsional: unggah foto tampak depan (JPG/PNG maks. 5MB) dan catatan gedung.</p>
+            <p class="font-caption-sm text-caption-sm text-on-surface-variant">Opsional: unggah foto tampak depan (JPG, PNG, atau WebP maks. 2 MB) dan catatan gedung.</p>
         </div>
 
         <div class="flex flex-col gap-1.5">
             <label class="font-label-md text-label-md text-primary" for="foto">Foto Tampak Depan Gedung</label>
-            <input class="w-full p-2.5 rounded-lg bg-surface-container-low text-on-surface font-body-md text-body-md file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-secondary file:text-on-secondary file:font-label-md file:cursor-pointer" id="foto" name="foto" type="file" accept="image/*">
+            <input class="w-full p-2.5 rounded-lg bg-surface-container-low text-on-surface font-body-md text-body-md file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-secondary file:text-on-secondary file:font-label-md file:cursor-pointer" id="foto" name="foto" type="file" accept="image/jpeg,image/png,image/webp" data-building-photo-input aria-describedby="foto-help{{ $errors->has('foto') ? ' foto-error' : '' }}" @error('foto') aria-invalid="true" @enderror>
+            <p id="foto-help" class="text-caption-sm text-on-surface-variant">{{ $gedung?->foto ? 'Gambar saat ini tetap digunakan jika kamu tidak memilih gambar baru.' : 'Foto akan tampil pada daftar gedung dan halaman hunian.' }}</p>
+            @error('foto')<p id="foto-error" class="text-caption-sm text-error" role="alert">{{ $message }}</p>@enderror
+            <figure data-building-photo-preview-wrap @if (! $gedung?->foto_url) hidden @endif class="mt-3 max-w-xl overflow-hidden rounded-xl border border-outline-variant/30 bg-surface-container-low">
+                <img data-building-photo-preview @if ($gedung?->foto_url) src="{{ $gedung->foto_url }}" @endif alt="Pratinjau foto gedung" class="w-full h-56 object-contain" data-current-photo="{{ $gedung?->foto_url ?? '' }}">
+                <figcaption class="px-4 py-2 text-caption-sm text-on-surface-variant">Pratinjau foto gedung</figcaption>
+            </figure>
         </div>
 
         <div class="flex flex-col gap-1.5">

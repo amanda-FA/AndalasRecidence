@@ -26,7 +26,8 @@
     $genderTerpilih = old('jenis_kelamin', $genderProfil);
 
     $bisaMengirim = $periodes->isNotEmpty()
-        && (!$bolehMemilihTipe || $tipeKamars->isNotEmpty());
+        && (!$bolehMemilihTipe || $roomChoices->isNotEmpty())
+        && $jenisBerkas->isNotEmpty();
 @endphp
 
 <div class="w-full max-w-[1280px] mx-auto">
@@ -295,46 +296,12 @@
                     </div>
 
                     @if ($bolehMemilihTipe)
-                        <div>
-                            <label for="id_tipeKamar"
-                                   class="block font-label-md text-label-md mb-space-xs">
-                                Preferensi Tipe Kamar
-                                <span class="text-error">*</span>
-                            </label>
-
-                            <select id="id_tipeKamar"
-                                    name="id_tipeKamar"
-                                    required
-                                    aria-describedby="petunjuk-tipe"
-                                    class="{{ $inputClass }}">
-                                <option value="">Pilih tipe kamar</option>
-
-                                @foreach ($tipeKamars as $tipe)
-                                    <option
-                                        value="{{ $tipe->id_tipeKamar }}"
-                                        data-gender="{{ implode(',', $genderTipe[$tipe->id_tipeKamar] ?? []) }}"
-                                        @selected((string) old('id_tipeKamar') === (string) $tipe->id_tipeKamar)
-                                    >
-                                        {{ $tipe->nama_tipe }}
-
-                                        @if (!str_contains(strtolower($tipe->nama_tipe), 'keluarga'))
-                                            — kapasitas {{ $tipe->kapasitas }} orang
-                                        @endif
-                                    </option>
-                                @endforeach
-                            </select>
-
-                            <p id="petunjuk-tipe"
-                               class="font-caption-sm text-caption-sm text-on-surface-variant mt-space-sm"
-                               aria-live="polite">
-                                Pilihan mengikuti kategori dan jenis kelamin pendaftar.
-                            </p>
-
-                            <p class="font-caption-sm text-caption-sm text-on-surface-variant mt-space-xs">
-                                Preferensi ini belum menetapkan kamar.
-                                Penempatan akhir dilakukan oleh Admin Layanan.
-                            </p>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div><label for="id_gedung" class="block font-label-md text-label-md mb-2">Gedung Hunian <span class="text-error">*</span></label><select id="id_gedung" name="id_gedung" required class="{{ $inputClass }}"><option value="">Pilih gedung</option>@foreach ($roomChoices->unique('building_id') as $room)<option value="{{ $room['building_id'] }}" @selected((string)old('id_gedung') === (string)$room['building_id'])>{{ $room['building'] }}</option>@endforeach</select></div>
+                            <div><label for="id_tipeKamar" class="block font-label-md text-label-md mb-2">Tipe Kamar <span class="text-error">*</span></label><select id="id_tipeKamar" name="id_tipeKamar" required class="{{ $inputClass }}"><option value="">Pilih tipe kamar</option>@foreach ($tipeKamars as $type)<option value="{{ $type->id_tipeKamar }}" @selected((string)old('id_tipeKamar') === (string)$type->id_tipeKamar)>{{ $type->nama_tipe }}</option>@endforeach</select></div>
+                            <div><label for="id_kamar" class="block font-label-md text-label-md mb-2">Nomor Kamar <span class="text-error">*</span></label><select id="id_kamar" name="id_kamar" required class="{{ $inputClass }}"><option value="">Pilih kamar</option>@foreach ($roomChoices as $room)<option value="{{ $room['id'] }}" @selected((string)old('id_kamar') === (string)$room['id'])>{{ $room['building'] }} / {{ $room['number'] }}</option>@endforeach</select></div>
                         </div>
+                        <p id="petunjuk-tipe" class="text-caption-sm text-on-surface-variant mt-3">Pilihan kamar mengikuti gedung, tipe, jenis kelamin, dan kapasitas yang tersedia.</p>
                     @else
                         <div class="flex items-start gap-space-sm rounded-xl bg-surface-container-low p-space-md">
                             <span class="material-symbols-outlined text-secondary">
@@ -343,13 +310,13 @@
 
                             <div>
                                 <p class="font-label-md text-label-md">
-                                    Tipe kamar ditentukan Admin Layanan
+                                    Gedung dan kamar ditentukan Admin Layanan
                                 </p>
 
                                 <p class="font-caption-sm text-caption-sm text-on-surface-variant mt-1">
                                     Kategori {{ $client->jenisClient?->jenis }}
                                     dapat mengajukan pendaftaran tanpa
-                                    memilih tipe kamar.
+                                    memilih gedung dan kamar.
                                 </p>
                             </div>
                         </div>
@@ -388,34 +355,21 @@
 
                 <div class="p-space-lg">
                     <p class="text-on-surface-variant mb-space-md">
-                        Pilih 1–5 lampiran sesuai persyaratan yang
-                        disampaikan pengelola. Berkas akan diperiksa
-                        setelah pengajuan dikirim.
+                        Lengkapi unggahan FC Kartu Keluarga, FC KTP, dan Hasil Tes Kesehatan. Berkas akan diperiksa setelah pengajuan dikirim.
                     </p>
 
-                    <label for="berkas"
-                           class="block font-label-md text-label-md mb-space-sm">
-                        Pilih atau Ganti Lampiran
-                        <span class="text-error">*</span>
-                    </label>
-
-                    <input id="berkas"
-                           name="berkas[]"
-                           type="file"
-                           accept=".pdf,.jpg,.jpeg,.png"
-                           multiple
-                           required
-                           class="block w-full rounded-xl bg-surface-container-low p-space-md">
-
-                    <p class="font-caption-sm text-caption-sm text-on-surface-variant mt-space-sm">
-                        Pilih beberapa file sekaligus.
-                        Pemilihan baru menggantikan daftar sebelumnya.
-                    </p>
-
-                    <ul id="daftar-berkas"
-                        class="flex flex-col gap-space-sm mt-space-lg"
-                        aria-live="polite"></ul>
-
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                        @foreach ($jenisBerkas as $jenis)
+                        <div class="rounded-xl border border-outline-variant/40 bg-surface-container-low p-4">
+                            <label for="berkas-{{ $jenis->id_jenis_berkas }}" class="block font-semibold text-primary mb-3">{{ $jenis->nama_berkas }} <span class="text-error">*</span></label>
+                            <input type="hidden" name="id_jenis_berkas[{{ $jenis->id_jenis_berkas }}]" value="{{ $jenis->id_jenis_berkas }}">
+                            <input id="berkas-{{ $jenis->id_jenis_berkas }}" name="berkas[{{ $jenis->id_jenis_berkas }}]" type="file" accept=".pdf,.jpg,.jpeg,.png" required data-registration-document class="block w-full text-caption-sm file:bg-secondary file:text-on-secondary file:border-0 file:rounded-lg file:px-3 file:py-2 file:mr-2">
+                            <p class="text-caption-sm text-on-surface-variant mt-3">PDF, JPG, JPEG, PNG. Maksimal 10 MB.</p>
+                            @error('berkas.'.$jenis->id_jenis_berkas)<p class="text-caption-sm text-error mt-2">{{ $message }}</p>@enderror
+                        </div>
+                        @endforeach
+                    </div>
+                    @if ($jenisBerkas->isEmpty())<p class="text-error mt-3">Jenis berkas belum tersedia. Hubungi Admin Layanan.</p>@endif
                     <p class="font-caption-sm text-caption-sm text-on-surface-variant mt-space-md">
                         Jika pengajuan ditolak karena kesalahan input,
                         pilih kembali berkas sebelum mengirim ulang.
@@ -485,7 +439,7 @@
 
                         <div>
                             <dt class="font-caption-sm text-caption-sm text-on-surface-variant">
-                                Preferensi Tipe Kamar
+                                Pilihan Kamar
                             </dt>
                             <dd id="ringkasan-tipe" class="mt-1">
                                 {{ $bolehMemilihTipe ? 'Belum dipilih' : 'Ditentukan Admin Layanan' }}
@@ -546,14 +500,17 @@
     (() => {
         const periode = document.getElementById('id_periode');
         const tipe = document.getElementById('id_tipeKamar');
+        const gedung = document.getElementById('id_gedung');
+        const kamar = document.getElementById('id_kamar');
+        const roomChoices = @json($roomChoices);
         const petunjukTipe = document.getElementById('petunjuk-tipe');
         const genderInputs = document.querySelectorAll(
             'input[name="jenis_kelamin"]'
         );
 
-        const inputBerkas = document.getElementById('berkas');
-        const daftarBerkas = document.getElementById('daftar-berkas');
+        const inputsBerkas = [...document.querySelectorAll('[data-registration-document]')];
         const jumlahBerkas = document.getElementById('jumlah-berkas');
+        const jenisBerkas = @json($jenisBerkas);
 
         const ringkasanPeriode = document.getElementById('ringkasan-periode');
         const ringkasanTipe = document.getElementById('ringkasan-tipe');
@@ -575,133 +532,50 @@
             ringkasanPeriode.textContent = teksPilihan(periode);
 
             if (tipe) {
-                ringkasanTipe.textContent = teksPilihan(tipe);
+                ringkasanTipe.textContent = kamar?.value ? `${teksPilihan(gedung)} / ${teksPilihan(kamar)}` : 'Belum dipilih';
+                tombolKirim.disabled = !bisaMengirimDasar || !kamar?.value;
             }
         }
 
+        function setOptions(select, items, placeholder, selected) {
+            select.replaceChildren(new Option(placeholder, ''));
+            items.forEach(item => select.add(new Option(item.label, String(item.value))));
+            select.value = items.some(item => String(item.value) === String(selected)) ? String(selected) : '';
+            select.disabled = items.length === 0;
+        }
+
         function saringTipe() {
-            if (!tipe) {
-                tombolKirim.disabled = !bisaMengirimDasar;
-                perbaruiRingkasan();
-                return;
-            }
-
-            const gender = document.querySelector(
-                'input[name="jenis_kelamin"]:checked'
-            )?.value ?? '';
-
-            let pilihanValid = false;
-            let jumlahPilihan = 0;
-
-            for (const option of tipe.options) {
-                if (!option.value) continue;
-
-                const genderDiizinkan = (
-                    option.dataset.gender ?? ''
-                ).split(',');
-
-                const boleh = gender !== ''
-                    && genderDiizinkan.includes(gender);
-
-                option.hidden = !boleh;
-                option.disabled = !boleh;
-
-                if (boleh) {
-                    jumlahPilihan++;
-                }
-
-                if (option.selected && boleh) {
-                    pilihanValid = true;
-                }
-            }
-
-            if (!pilihanValid) {
-                tipe.value = '';
-            }
-
-            if (!gender) {
-                tipe.options[0].textContent =
-                    'Pilih jenis kelamin terlebih dahulu';
-
-                petunjukTipe.textContent =
-                    'Lengkapi jenis kelamin pada Bagian A untuk melihat pilihan tipe kamar.';
-            } else if (jumlahPilihan === 0) {
-                tipe.options[0].textContent =
-                    'Belum ada tipe kamar yang sesuai';
-
-                petunjukTipe.textContent =
-                    'Belum tersedia pilihan tipe untuk kategori dan jenis kelamin ini. Hubungi Admin Layanan.';
-            } else {
-                tipe.options[0].textContent = 'Pilih tipe kamar';
-
-                petunjukTipe.textContent =
-                    'Pilihan mengikuti kategori dan peruntukan gedung yang sesuai jenis kelamin pendaftar.';
-            }
-
-            tombolKirim.disabled =
-                !bisaMengirimDasar || jumlahPilihan === 0;
-
+            if (!tipe) { tombolKirim.disabled = !bisaMengirimDasar; perbaruiRingkasan(); return; }
+            const gender = document.querySelector('input[name="jenis_kelamin"]:checked')?.value;
+            const allowed = gender === 'laki-laki' ? ['putra','campuran','tamu'] : gender === 'perempuan' ? ['putri','campuran','tamu'] : [];
+            const options = roomChoices.filter(room => allowed.includes(room.gender));
+            const keepBuilding = gedung.value, keepType = tipe.value, keepRoom = kamar.value;
+            const buildings = [...new Map(options.map(room => [room.building_id, {value:room.building_id,label:room.building}])).values()];
+            setOptions(gedung, buildings, gender ? 'Pilih gedung' : 'Pilih jenis kelamin dahulu', keepBuilding);
+            const inBuilding = options.filter(room => String(room.building_id) === gedung.value);
+            const types = [...new Map(inBuilding.map(room => [room.type_id, {value:room.type_id,label:room.type}])).values()];
+            setOptions(tipe, types, 'Pilih tipe kamar', keepType);
+            const rooms = inBuilding.filter(room => String(room.type_id) === tipe.value).map(room => ({value:room.id,label:`Kamar ${room.number} (${room.available} tempat tersedia)`}));
+            setOptions(kamar, rooms, 'Pilih nomor kamar', keepRoom);
+            petunjukTipe.textContent = options.length ? 'Pilihan kamar disimpan dalam pendaftaran untuk diperiksa Admin Layanan.' : 'Belum ada kamar yang tersedia untuk kategori dan jenis kelamin ini.';
             perbaruiRingkasan();
         }
 
         periode.addEventListener('change', perbaruiRingkasan);
-        tipe?.addEventListener('change', perbaruiRingkasan);
+        gedung?.addEventListener('change', saringTipe);
+        tipe?.addEventListener('change', saringTipe);
+        kamar?.addEventListener('change', perbaruiRingkasan);
 
         genderInputs.forEach(input => {
             input.addEventListener('change', saringTipe);
         });
 
-        inputBerkas.addEventListener('change', () => {
-            const files = Array.from(inputBerkas.files);
-
-            daftarBerkas.replaceChildren();
-            jumlahBerkas.textContent = `${files.length} dipilih`;
-            ringkasanBerkas.textContent = `${files.length} berkas`;
-
-            for (const file of files) {
-                const item = document.createElement('li');
-                item.className =
-                    'flex items-start gap-3 rounded-xl bg-surface-container-low p-4';
-
-                const icon = document.createElement('span');
-                icon.className =
-                    'material-symbols-outlined text-secondary';
-                icon.setAttribute('aria-hidden', 'true');
-                icon.textContent = 'description';
-
-                const detail = document.createElement('div');
-                detail.className = 'min-w-0 flex-1';
-
-                const nama = document.createElement('p');
-                nama.className =
-                    'font-label-md text-label-md break-all';
-                nama.textContent = file.name;
-
-                const ukuran = document.createElement('p');
-                ukuran.className =
-                    'font-caption-sm text-caption-sm text-on-surface-variant mt-1';
-                ukuran.textContent =
-                    `${(file.size / 1024 / 1024).toFixed(2)} MB · Dipilih untuk dikirim`;
-
-                detail.append(nama, ukuran);
-                item.append(icon, detail);
-                daftarBerkas.appendChild(item);
-            }
-
-            if (files.length > 5) {
-                inputBerkas.setCustomValidity(
-                    'Pilih maksimal lima berkas.'
-                );
-            } else if (
-                files.some(file => file.size > 10 * 1024 * 1024)
-            ) {
-                inputBerkas.setCustomValidity(
-                    'Ukuran setiap berkas maksimal 10 MB.'
-                );
-            } else {
-                inputBerkas.setCustomValidity('');
-            }
-        });
+        inputsBerkas.forEach(input => input.addEventListener('change', () => {
+            const count = inputsBerkas.filter(item => item.files.length).length;
+            jumlahBerkas.textContent = `${count} dipilih`;
+            ringkasanBerkas.textContent = `${count} berkas`;
+            input.setCustomValidity(input.files[0]?.size > 10 * 1024 * 1024 ? 'Ukuran berkas maksimal 10 MB.' : '');
+        }));
 
         saringTipe();
     })();

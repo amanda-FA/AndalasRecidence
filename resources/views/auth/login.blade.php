@@ -7,12 +7,7 @@
     <div class="flex flex-col gap-space-lg">
         {{-- Header & Identity Section --}}
         <header class="flex flex-col items-center text-center gap-space-xs">
-            <div class="relative flex items-center justify-center w-16 h-16 rounded-xl bg-primary-container text-on-primary shadow-sm mb-space-xs">
-                <span class="material-symbols-outlined text-[32px]">apartment</span>
-                <span class="absolute -bottom-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-secondary text-[10px] text-on-secondary">
-                    <span class="material-symbols-outlined text-[10px]">school</span>
-                </span>
-            </div>
+            <img src="{{ asset('images/logo_andalasresidence.png') }}" alt="Logo Andalas Residence" width="64" height="64" class="w-16 h-16 rounded-xl bg-primary-container object-contain shadow-sm mb-space-xs">
             <div class="flex flex-col">
                 <span class="font-label-md text-caption-sm text-secondary uppercase tracking-widest">Universitas Andalas</span>
                 <h1 class="font-headline-sm text-headline-sm text-primary tracking-tight">Andalas Residence</h1>
@@ -30,7 +25,7 @@
         </div> -->
 
         @if (session('status'))
-            <div class="p-space-sm rounded-lg bg-[#2E9E5B]/10 text-[#1F7A43] border border-[#2E9E5B]/30 font-caption-sm text-caption-sm flex items-center gap-2" role="status">
+            <div class="p-space-sm rounded-lg bg-success/10 text-on-success-container border border-success/30 font-caption-sm text-caption-sm flex items-center gap-2" role="status">
                 <span class="material-symbols-outlined text-[18px]">check_circle</span>
                 <span>{{ session('status') }}</span>
             </div>

@@ -19,18 +19,30 @@ class PendaftaranHunian extends Model
         'id_client',
         'id_periode',
         'id_tipeKamar',
+        'id_kamar',
         'id_admin',
         'tanggal_daftar',
         'status_pendaftaran',
         'tanggal_verifikasi',
         'catatan_verifikasi',
+        'tanggal_masuk',
+        'rencana_keluar',
+        'jadwal_kunci_mulai',
+        'jadwal_kunci_selesai',
+        'lokasi_kunci',
+        'penanggung_jawab',
+        'kontak_penanggung_jawab',
     ];
 
     protected function casts(): array
     {
         return [
-            'tanggal_daftar' => 'date',
-            'tanggal_verifikasi' => 'date',
+            'tanggal_daftar' => 'datetime',
+            'tanggal_verifikasi' => 'datetime',
+            'tanggal_masuk' => 'date',
+            'rencana_keluar' => 'date',
+            'jadwal_kunci_mulai' => 'datetime',
+            'jadwal_kunci_selesai' => 'datetime',
         ];
     }
 
@@ -47,6 +59,11 @@ class PendaftaranHunian extends Model
     public function tipeKamar(): BelongsTo
     {
         return $this->belongsTo(TipeKamar::class, 'id_tipeKamar', 'id_tipeKamar');
+    }
+
+    public function kamar(): BelongsTo
+    {
+        return $this->belongsTo(Kamar::class, 'id_kamar', 'id_kamar');
     }
 
     public function admin(): BelongsTo

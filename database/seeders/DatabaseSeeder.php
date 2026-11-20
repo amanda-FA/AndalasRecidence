@@ -16,7 +16,9 @@ class DatabaseSeeder extends Seeder
         $this->call([
             RoleSeeder::class,
             JenisClientSeeder::class,
+            JenisBerkasSeeder::class,
             DataAsramaSeeder::class,
+            PilihanFasilitasSeeder::class,
         ]);
 
         $accounts = [
@@ -64,7 +66,7 @@ class DatabaseSeeder extends Seeder
             ],
         ];
 
-        $jenisReguler = JenisClient::where('jenis', 'Mahasiswa Reguler')->first();
+        $jenisReguler = JenisClient::where('jenis', JenisClient::CATEGORIES['reguler'])->first();
 
         foreach ($accounts as $acc) {
             $role = Role::where('nama_role', $acc['role'])->first();

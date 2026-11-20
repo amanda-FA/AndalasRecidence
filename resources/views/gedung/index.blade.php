@@ -17,7 +17,7 @@
                 <span class="material-symbols-outlined text-[18px]">bed</span>
                 <span>Kelola Kamar</span>
             </a>
-            <a href="{{ route('gedung.create') }}" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-secondary text-on-secondary font-label-md text-label-md shadow-[0_4px_14px_rgba(71,80,199,0.3)] hover:bg-on-secondary-fixed-variant transition-all transform active:translate-y-0.5">
+            <a href="{{ route('gedung.create') }}" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-secondary text-on-secondary font-label-md text-label-md shadow-brand-action-lg hover:bg-on-secondary-fixed-variant transition-all transform active:translate-y-0.5">
                 <span class="material-symbols-outlined text-[20px]">add</span>
                 <span>Tambah Gedung Baru</span>
             </a>
@@ -38,8 +38,8 @@
                     <span class="font-headline-lg text-headline-lg text-primary tracking-tight">{{ $metrics['total_gedung'] }}</span>
                     <span class="font-title-md text-title-md text-on-surface-variant font-medium">Unit</span>
                 </div>
-                <div class="mt-2 flex items-center gap-1.5 text-caption-sm-medium text-[#2E9E5B]">
-                    <span class="w-2 h-2 rounded-full bg-[#2E9E5B]"></span>
+                <div class="mt-2 flex items-center gap-1.5 text-caption-sm-medium text-success">
+                    <span class="w-2 h-2 rounded-full bg-success"></span>
                     <span>{{ $metrics['gedung_aktif'] }} Aktif Beroperasi Penuh</span>
                 </div>
             </div>
@@ -165,7 +165,7 @@
                         default => 'public',
                     };
                     $statusBg = match($gedung->status) {
-                        'aktif' => 'bg-[#2E9E5B]/90',
+                        'aktif' => 'bg-success/90',
                         'persiapan' => 'bg-[#C97D1A]/90',
                         default => 'bg-outline/90',
                     };
@@ -175,7 +175,7 @@
                 <div class="bg-surface-container-lowest rounded-xl shadow-sm hover:shadow-md transition-all overflow-hidden flex flex-col group">
                     <div class="relative h-48 w-full overflow-hidden bg-primary-container">
                         @if ($gedung->foto)
-                            <img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="{{ asset('storage/' . $gedung->foto) }}" alt="{{ $gedung->nama }}">
+                            <img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="{{ $gedung->foto_url }}" alt="Foto {{ $gedung->nama }}" loading="lazy">
                         @else
                             <div class="w-full h-full bg-gradient-to-br from-primary-container via-primary to-secondary/80 flex items-center justify-center">
                                 <span class="material-symbols-outlined text-[64px] text-on-primary/20">apartment</span>

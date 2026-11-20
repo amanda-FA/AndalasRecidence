@@ -1,5 +1,5 @@
 @if (session('success'))
-    <div class="mb-space-lg p-space-md rounded-xl bg-[#2E9E5B]/10 text-[#1F7A43] flex items-center gap-space-sm" role="alert">
+    <div class="mb-space-lg p-space-md rounded-xl bg-success/10 text-on-success-container flex items-center gap-space-sm" role="alert">
         <span class="material-symbols-outlined text-[20px]">check_circle</span>
         <span class="font-body-md-medium text-body-md-medium">{{ session('success') }}</span>
     </div>

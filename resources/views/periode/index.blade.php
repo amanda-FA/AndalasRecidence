@@ -25,7 +25,7 @@
     }
 
     #periode-dialog::backdrop {
-        background: rgba(18, 32, 86, 0.5);
+        background: color-mix(in srgb, var(--color-primary) 50%, transparent);
         backdrop-filter: blur(4px);
     }
 </style>
@@ -76,43 +76,39 @@
                     'label' => 'Total Periode',
                     'nilai' => $ringkasan['total'],
                     'ikon' => 'calendar_month',
-                    'keterangan' => 'Seluruh periode yang tersimpan',
+                    'warna' => 'text-primary',
+                    'latar_ikon' => 'bg-surface-container-low text-secondary',
                 ],
                 [
                     'label' => 'Pendaftaran Dibuka',
                     'nilai' => $ringkasan['aktif'],
                     'ikon' => 'event_available',
-                    'keterangan' => 'Status dibuka dan dalam rentang tanggal',
+                    'warna' => 'text-success',
+                    'latar_ikon' => 'bg-success-container text-success',
                 ],
                 [
                     'label' => 'Total Pendaftar',
                     'nilai' => $ringkasan['pendaftar'],
                     'ikon' => 'group',
-                    'keterangan' => 'Akumulasi pendaftaran seluruh periode',
+                    'warna' => 'text-secondary',
+                    'latar_ikon' => 'bg-surface-container-low text-secondary',
                 ],
             ];
         @endphp
 
         @foreach ($cards as $card)
-            <div class="rounded-2xl bg-surface-container-lowest p-space-lg shadow-sm">
-                <div class="flex items-center justify-between gap-space-sm">
-                    <span class="font-caption-sm-medium text-caption-sm-medium uppercase tracking-wider text-on-surface-variant">
+            <div class="rounded-2xl bg-surface-container-lowest border border-outline-variant/10 p-4 sm:p-5 shadow-sm flex items-center justify-between gap-3 min-w-0">
+                <div class="min-w-0">
+                    <p class="text-[11px] leading-[17px] font-medium uppercase tracking-wider text-on-surface-variant min-h-[34px]">
                         {{ $card['label'] }}
-                    </span>
-                    <span class="w-11 h-11 rounded-xl bg-surface-container-low text-secondary flex items-center justify-center shrink-0">
-                        <span class="material-symbols-outlined">
-                            {{ $card['ikon'] }}
-                        </span>
-                    </span>
+                    </p>
+                    <p class="text-[30px] leading-9 font-semibold mt-2 {{ $card['warna'] }}">
+                        {{ number_format($card['nilai'], 0, ',', '.') }}
+                    </p>
                 </div>
-
-                <div class="font-headline-xl text-headline-xl text-primary mt-space-sm">
-                    {{ number_format($card['nilai'], 0, ',', '.') }}
-                </div>
-
-                <p class="font-caption-sm text-caption-sm text-on-surface-variant mt-space-sm">
-                    {{ $card['keterangan'] }}
-                </p>
+                <span class="w-11 h-11 rounded-xl flex items-center justify-center shrink-0 {{ $card['latar_ikon'] }}">
+                    <span class="material-symbols-outlined text-[24px]" aria-hidden="true">{{ $card['ikon'] }}</span>
+                </span>
             </div>
         @endforeach
     </section>

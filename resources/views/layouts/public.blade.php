@@ -16,7 +16,7 @@
 </head>
 <body class="bg-background font-body-md text-on-surface antialiased min-h-screen flex flex-col justify-between">
     {{-- Public Top Header --}}
-    <header class="fixed top-0 left-0 right-0 z-50 bg-surface/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(18,32,86,0.06)]">
+    <header class="fixed top-0 left-0 right-0 z-50 bg-surface/90 backdrop-blur-xl shadow-brand-header">
         <div class="h-20 max-w-[1280px] mx-auto px-margin-mobile md:px-margin flex items-center justify-between gap-space-md">
             <a href="{{ url('/') }}" class="flex items-center gap-space-sm">
                 <div class="w-10 h-10 rounded-xl bg-primary-container flex items-center justify-center text-on-primary shadow-sm">
@@ -41,19 +41,19 @@
             <div class="flex items-center gap-space-sm">
                 @auth
                     @if (Route::has('dashboard.okupansi'))
-                        <a class="inline-flex items-center px-space-md py-space-xs bg-secondary text-on-secondary font-label-md text-label-md rounded-lg shadow-[0_2px_8px_rgba(18,32,86,0.08)] hover:bg-on-secondary-fixed-variant transition-colors" href="{{ route('dashboard.okupansi') }}">
+                        <a class="inline-flex items-center px-space-md py-space-xs bg-secondary text-on-secondary font-label-md text-label-md rounded-lg shadow-brand-public hover:bg-on-secondary-fixed-variant transition-colors" href="{{ route('portal') }}">
                             Dashboard
                         </a>
                     @endif
                 @else
                     @if (Route::has('login'))
-                        <a class="{{ View::hasSection('minimal') ? 'inline-flex bg-secondary text-on-secondary hover:bg-on-secondary-fixed-variant shadow-[0_2px_8px_rgba(18,32,86,0.08)] px-5 py-2.5' : 'hidden sm:inline-flex text-secondary hover:text-on-secondary hover:bg-secondary px-space-md py-2' }} items-center font-label-md text-label-md rounded-lg transition-colors" href="{{ route('login') }}">
+                        <a class="{{ View::hasSection('minimal') ? 'inline-flex bg-secondary text-on-secondary hover:bg-on-secondary-fixed-variant shadow-brand-public px-5 py-2.5' : 'hidden sm:inline-flex text-secondary hover:text-on-secondary hover:bg-secondary px-space-md py-2' }} items-center font-label-md text-label-md rounded-lg transition-colors" href="{{ route('login') }}">
                             Masuk / Login
                         </a>
                     @endif
                     @unless (View::hasSection('minimal'))
                         @if (Route::has('register'))
-                            <a class="inline-flex items-center px-space-md py-space-xs bg-secondary text-on-secondary font-label-md text-label-md rounded-lg shadow-[0_2px_8px_rgba(18,32,86,0.08)] hover:bg-on-secondary-fixed-variant transition-colors" href="{{ route('register') }}">
+                            <a class="inline-flex items-center px-space-md py-space-xs bg-secondary text-on-secondary font-label-md text-label-md rounded-lg shadow-brand-public hover:bg-on-secondary-fixed-variant transition-colors" href="{{ route('register') }}">
                                 Daftar Akun
                             </a>
                         @endif
@@ -70,7 +70,7 @@
 
     @unless (View::hasSection('minimal'))
     {{-- Public Footer --}}
-    <footer class="w-full bg-surface-container-low shadow-[0_-1px_6px_rgba(18,32,86,0.03)] mt-space-2xl">
+    <footer class="w-full bg-surface-container-low shadow-brand-footer mt-space-2xl">
         <div class="max-w-[1280px] mx-auto px-margin-mobile md:px-margin py-space-2xl">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-space-xl">
                 <div class="md:col-span-1">
