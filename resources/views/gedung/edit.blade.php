@@ -3,7 +3,7 @@
 @section('title', 'Edit Gedung - Andalas Residence')
 
 @section('content')
-<div class="flex flex-col gap-space-xl max-w-[1200px] mx-auto w-full">
+<div class="building-form-page flex flex-col gap-space-xl mx-auto w-full">
     <div class="flex flex-col md:flex-row md:items-end justify-between gap-space-md">
         <div class="flex flex-col gap-space-xs">
             <nav aria-label="Breadcrumb" class="flex items-center gap-2 text-on-surface-variant font-caption-sm text-caption-sm">

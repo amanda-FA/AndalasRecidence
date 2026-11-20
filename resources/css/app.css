@@ -6,6 +6,14 @@
 @source '../**/*.js';
 @source '../../app/Http/Controllers/**/*.php';
 
+.building-form-page {
+    max-width: 1200px;
+}
+
+.building-status-option:has(input:checked) {
+    background-color: var(--color-secondary-fixed);
+}
+
 @theme {
     /* Colors - Stitch Design System */
     --color-inverse-on-surface: #f0efff;

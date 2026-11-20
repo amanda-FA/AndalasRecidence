@@ -3,7 +3,7 @@
 @section('title', 'Tambah Gedung Baru - Andalas Residence')
 
 @section('content')
-<div class="flex flex-col gap-space-xl max-w-[1200px] mx-auto w-full">
+<div class="building-form-page flex flex-col gap-space-xl mx-auto w-full">
     {{-- Top Navigation & Header --}}
     <div class="flex flex-col md:flex-row md:items-end justify-between gap-space-md">
         <div class="flex flex-col gap-space-xs">

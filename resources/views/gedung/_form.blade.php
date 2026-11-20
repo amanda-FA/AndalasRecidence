@@ -50,21 +50,21 @@
                 </label>
                 @php $statusVal = old('status', $gedung?->status ?? 'aktif'); @endphp
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-space-sm">
-                    <label class="flex items-center gap-space-sm p-space-sm rounded-lg bg-surface-container-low hover:bg-surface-container transition-all cursor-pointer has-[:checked]:bg-secondary-fixed">
+                    <label class="building-status-option flex items-center gap-space-sm p-space-sm rounded-lg bg-surface-container-low hover:bg-surface-container transition-all cursor-pointer">
                         <input {{ $statusVal === 'aktif' ? 'checked' : '' }} class="accent-secondary w-4 h-4 cursor-pointer" name="status" type="radio" value="aktif">
                         <div class="flex flex-col">
                             <span class="font-body-md-medium text-body-md-medium text-primary">Aktif Operasional</span>
                             <span class="font-caption-sm text-caption-sm text-on-surface-variant">Dapat dihuni segera</span>
                         </div>
                     </label>
-                    <label class="flex items-center gap-space-sm p-space-sm rounded-lg bg-surface-container-low hover:bg-surface-container transition-all cursor-pointer has-[:checked]:bg-secondary-fixed">
+                    <label class="building-status-option flex items-center gap-space-sm p-space-sm rounded-lg bg-surface-container-low hover:bg-surface-container transition-all cursor-pointer">
                         <input {{ $statusVal === 'persiapan' ? 'checked' : '' }} class="accent-secondary w-4 h-4 cursor-pointer" name="status" type="radio" value="persiapan">
                         <div class="flex flex-col">
                             <span class="font-body-md-medium text-body-md-medium text-primary">Persiapan / Renovasi</span>
                             <span class="font-caption-sm text-caption-sm text-on-surface-variant">Maintenance fisik</span>
                         </div>
                     </label>
-                    <label class="flex items-center gap-space-sm p-space-sm rounded-lg bg-surface-container-low hover:bg-surface-container transition-all cursor-pointer has-[:checked]:bg-secondary-fixed">
+                    <label class="building-status-option flex items-center gap-space-sm p-space-sm rounded-lg bg-surface-container-low hover:bg-surface-container transition-all cursor-pointer">
                         <input {{ $statusVal === 'draf' ? 'checked' : '' }} class="accent-secondary w-4 h-4 cursor-pointer" name="status" type="radio" value="draf">
                         <div class="flex flex-col">
                             <span class="font-body-md-medium text-body-md-medium text-primary">Draf Tersimpan</span>
