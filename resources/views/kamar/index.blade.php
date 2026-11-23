@@ -81,9 +81,12 @@
             <input type="hidden" name="gedung_id" value="{{ $selectedGedung->id_gedung }}">
         @endif
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-space-sm items-center">
-            <div class="lg:col-span-3 relative">
-                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-[18px]">search</span>
-                <input name="q" value="{{ request('q') }}" class="w-full pl-9 pr-3 py-2 bg-surface-container-low rounded-lg font-body-md text-body-md text-on-surface placeholder:text-outline outline-none focus:bg-surface-container-lowest focus:ring-2 focus:ring-secondary/20 transition-all" placeholder="Cari nomor kamar (contoh: 204)..." type="text">
+            <div class="lg:col-span-3 relative flex items-center">
+                <span class="material-symbols-outlined absolute left-3 text-outline text-[18px] pointer-events-none">search</span>
+                <input id="kamar-search-input" name="q" value="{{ request('q') }}" class="w-full pl-9 pr-20 py-2 bg-surface-container-low rounded-lg font-body-md text-body-md text-on-surface placeholder:text-outline outline-none focus:bg-surface-container-lowest focus:ring-2 focus:ring-secondary/20 transition-all" placeholder="Cari nomor kamar atau tipe (contoh: 204)..." type="text">
+                <button type="submit" class="absolute right-1.5 px-3 py-1 rounded-md bg-secondary text-on-secondary font-caption-sm-medium text-caption-sm-medium hover:bg-on-secondary-fixed-variant transition-colors cursor-pointer">
+                    Cari
+                </button>
             </div>
 
             <div>
@@ -243,3 +246,26 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+    (function () {
+        const input = document.getElementById('kamar-search-input');
+        if (!input || !input.form) return;
+
+        let timer = null;
+        if (input.value.length > 0 && new URLSearchParams(window.location.search).has('q')) {
+            input.focus();
+            const len = input.value.length;
+            input.setSelectionRange(len, len);
+        }
+
+        input.addEventListener('input', function () {
+            clearTimeout(timer);
+            timer = setTimeout(() => {
+                input.form.submit();
+            }, 450);
+        });
+    })();
+</script>
+@endpush

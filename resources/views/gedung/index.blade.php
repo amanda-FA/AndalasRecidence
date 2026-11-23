@@ -64,7 +64,7 @@
     <form method="GET" action="{{ route('gedung.index') }}" class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col md:flex-row items-stretch md:items-center justify-between gap-space-md">
         <div class="relative flex-1 max-w-md">
             <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-[20px]">search</span>
-            <input name="q" value="{{ request('q') }}" class="w-full pl-10 pr-space-md py-2.5 bg-surface-container-low rounded-lg font-body-md text-body-md text-on-surface placeholder:text-outline outline-none focus:bg-surface-container-lowest focus:ring-2 focus:ring-secondary/20 transition-all" placeholder="Cari nama gedung, kode, atau lokasi..." type="text">
+            <input id="gedung-search-input" name="q" value="{{ request('q') }}" class="w-full pl-10 pr-space-md py-2.5 bg-surface-container-low rounded-lg font-body-md text-body-md text-on-surface placeholder:text-outline outline-none focus:bg-surface-container-lowest focus:ring-2 focus:ring-secondary/20 transition-all" placeholder="Cari nama gedung atau keterangan..." type="text">
         </div>
         <div class="flex items-center gap-space-sm flex-wrap">
             <div class="relative">
@@ -221,3 +221,26 @@
     @endif
 </div>
 @endsection
+
+@push('scripts')
+<script>
+    (function () {
+        const input = document.getElementById('gedung-search-input');
+        if (!input || !input.form) return;
+
+        let timer = null;
+        if (input.value.length > 0 && new URLSearchParams(window.location.search).has('q')) {
+            input.focus();
+            const len = input.value.length;
+            input.setSelectionRange(len, len);
+        }
+
+        input.addEventListener('input', function () {
+            clearTimeout(timer);
+            timer = setTimeout(() => {
+                input.form.submit();
+            }, 450);
+        });
+    })();
+</script>
+@endpush
