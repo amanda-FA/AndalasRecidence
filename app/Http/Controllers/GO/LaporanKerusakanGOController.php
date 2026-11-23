@@ -56,6 +56,51 @@ class LaporanKerusakanGOController extends Controller
         return view('go.laporan-kerusakan', compact('stats', 'tikets'));
     }
 
+    public function create(Request $request)
+    {
+        $idPengajuan = $request->query('pengajuan_id', 1);
+        $komponen = $request->query('komponen', 'ac_split');
+
+        $checkout = \App\Models\PengajuanCheckout::with([
+            'penempatanKamar.kamar.gedung',
+            'penempatanKamar.pendaftaranHunian.client.pengguna',
+            'pengecekan',
+        ])->find($idPengajuan) ?? \App\Models\PengajuanCheckout::with([
+            'penempatanKamar.kamar.gedung',
+            'penempatanKamar.pendaftaranHunian.client.pengguna',
+            'pengecekan',
+        ])->first();
+
+        $penempatan = $checkout?->penempatanKamar;
+        $kamar = $penempatan?->kamar;
+        $gedung = $kamar?->gedung;
+        $client = $penempatan?->pendaftaranHunian?->client;
+        $pengguna = $client?->pengguna;
+        $nomorAudit = '#CHK-' . now()->format('Y') . '-' . str_pad($checkout?->id_pengajuan ?? 1, 4, '0', STR_PAD_LEFT);
+
+        // Cari fasilitas terkait kamar jika ada
+        $fasilitas = \App\Models\Fasilitas::where(function ($q) use ($kamar, $gedung) {
+            if ($kamar) $q->where('id_kamar', $kamar->id_kamar);
+            if ($gedung) $q->orWhere('id_gedung', $gedung->id_gedung);
+        })->get();
+
+        if ($fasilitas->isEmpty()) {
+            $fasilitas = \App\Models\Fasilitas::limit(10)->get();
+        }
+
+        return view('go.form-laporan-kerusakan', compact(
+            'checkout',
+            'penempatan',
+            'kamar',
+            'gedung',
+            'client',
+            'pengguna',
+            'nomorAudit',
+            'komponen',
+            'fasilitas'
+        ));
+    }
+
     public function store(Request $request)
     {
         $request->validate([

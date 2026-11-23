@@ -17,6 +17,7 @@ Route::middleware(['auth', 'role:GO|General Officer'])->prefix('go')->name('go.'
     Route::post('/pengecekan-kamar/{id}/draft', [PengecekanKamarGOController::class, 'draft'])->name('pengecekan-kamar.draft');
 
     Route::get('/laporan-kerusakan', [LaporanKerusakanGOController::class, 'index'])->name('laporan-kerusakan.index');
+    Route::get('/laporan-kerusakan/create', [LaporanKerusakanGOController::class, 'create'])->name('laporan-kerusakan.create');
     Route::post('/laporan-kerusakan', [LaporanKerusakanGOController::class, 'store'])->name('laporan-kerusakan.store');
 
     Route::get('/riwayat-pengecekan', [RiwayatPengecekanController::class, 'index'])->name('riwayat-pengecekan.index');
