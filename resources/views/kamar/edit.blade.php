@@ -31,20 +31,13 @@
 
         @include('kamar._form', ['kamar' => $kamar])
 
-        <div class="bg-surface-container-lowest rounded-2xl p-space-md md:p-space-lg shadow-sm flex flex-col sm:flex-row items-center justify-between gap-space-md">
-            <div class="flex items-center gap-2 text-outline font-caption-sm-medium text-caption-sm-medium">
-                <span class="material-symbols-outlined text-secondary text-[18px]">sync</span>
-                <span>Perubahan langsung memperbarui status okupansi.</span>
-            </div>
-            <div class="flex items-center gap-space-sm w-full sm:w-auto justify-end">
-                <a href="{{ route('kamar.index', ['gedung_id' => $kamar->gedung_id]) }}" class="px-space-md py-2.5 rounded-lg bg-surface-container text-on-surface hover:bg-surface-container-high transition-colors font-label-md text-label-md">
-                    Batal
-                </a>
-                <button class="px-space-lg py-2.5 rounded-lg bg-secondary text-on-secondary hover:bg-secondary-container hover:text-on-secondary-container transition-all font-label-md text-label-md shadow-sm flex items-center gap-2 cursor-pointer" type="submit">
-                    <span class="material-symbols-outlined text-[18px]">save</span>
-                    <span>Simpan Perubahan</span>
-                </button>
-            </div>
+        <div class="flex flex-wrap items-center justify-end gap-space-sm">
+            <a href="{{ route('kamar.index', ['gedung_id' => $kamar->gedung_id]) }}" class="px-space-md py-2.5 rounded-lg bg-surface-container text-on-surface hover:bg-surface-container-high transition-colors font-label-md text-label-md">
+                Batal
+            </a>
+            <button class="px-space-lg py-2.5 rounded-lg bg-secondary text-on-secondary hover:bg-secondary-container hover:text-on-secondary-container transition-all font-label-md text-label-md shadow-sm cursor-pointer" type="submit">
+                Simpan Perubahan
+            </button>
         </div>
     </form>
 </div>

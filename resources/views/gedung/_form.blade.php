@@ -138,24 +138,24 @@
             ->map(fn ($id) => (int) $id)
             ->all();
     @endphp
-    <section class="bg-surface-container-lowest rounded-xl p-space-xl shadow-sm flex flex-col gap-space-lg">
-        <div class="pb-space-sm border-b border-surface-container">
-            <h2 class="font-title-md text-title-md text-primary">Penghuni Yang Eligible</h2>
-            <p class="font-caption-sm text-caption-sm text-on-surface-variant">Centang kategori penghuni/client yang diperbolehkan menempati gedung ini.</p>
+    <section class="bg-surface-container-lowest rounded-2xl p-space-lg md:p-space-xl shadow-sm flex flex-col gap-space-md">
+        <div class="pb-space-md border-b border-surface-container">
+            <h2 class="font-headline-sm text-headline-sm text-primary">Penghuni Yang Eligible</h2>
+            <p class="text-caption-sm text-on-surface-variant mt-1">Centang kategori penghuni/client yang diperbolehkan menempati gedung ini.</p>
         </div>
 
         <input type="hidden" name="eligible_clients_present" value="1">
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-space-sm">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             @foreach ($jenisClients as $jc)
-                <label class="flex items-center gap-space-sm p-space-sm rounded-lg bg-surface-container-low hover:bg-surface-container transition-all cursor-pointer has-[:checked]:bg-secondary-fixed">
+                <label class="flex items-center gap-3 p-4 rounded-xl bg-surface-container-low hover:bg-surface-container transition-colors cursor-pointer select-none">
                     <input
                         type="checkbox"
                         name="eligible_jenis_clients[]"
                         value="{{ $jc->id_jenis_client }}"
-                        {{ in_array((int) $jc->id_jenis_client, $selectedEligibleClients, true) ? 'checked' : '' }}
-                        class="accent-secondary w-4 h-4 rounded cursor-pointer shrink-0"
+                        @checked(in_array((int) $jc->id_jenis_client, $selectedEligibleClients, true))
+                        class="w-5 h-5 shrink-0 rounded accent-secondary cursor-pointer"
                     >
-                    <span class="font-body-md-medium text-body-md-medium text-primary">{{ $jc->jenis }}</span>
+                    <span class="text-body-md font-medium text-primary break-words">{{ $jc->jenis }}</span>
                 </label>
             @endforeach
         </div>

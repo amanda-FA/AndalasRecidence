@@ -15,11 +15,8 @@
             <div class="bg-surface-container-lowest rounded-2xl shadow-xl p-space-md md:p-space-xl relative">
                 {{-- Card Header --}}
                 <div class="pb-space-md mb-space-md bg-surface-container-low/50 -mx-space-md -mt-space-md p-space-md md:-mx-space-xl md:-mt-space-xl md:p-space-lg rounded-t-2xl">
-                    <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+                    <div class="mb-2">
                         <span class="font-label-md text-label-md text-secondary tracking-wide uppercase">Formulir Pendaftaran Residen</span>
-                        <span class="font-caption-sm-medium text-caption-sm text-success bg-success/10 px-2.5 py-0.5 rounded-full flex items-center gap-1">
-                            <span class="w-1.5 h-1.5 rounded-full bg-success"></span> Jalur Mahasiswa / Umum Aktif
-                        </span>
                     </div>
                     <h1 class="font-headline-md text-headline-md text-primary">Buat Akun Residen Baru</h1>
                     <p class="font-body-md text-body-md text-on-surface-variant mt-1">
@@ -56,20 +53,10 @@
                             @foreach (\App\Models\JenisClient::CATEGORIES as $code => $name)
                                 @php
                                     $adminPlacement = in_array($code, \App\Models\JenisClient::ADMIN_PLACEMENT_CATEGORIES, true);
-                                    $categoryIcon = match ($code) {
-                                        'kipk' => 'workspace_premium',
-                                        'international_private', 'international_funded' => 'language',
-                                        'guest' => 'apartment',
-                                        'summer_course' => 'travel_explore',
-                                        default => 'school',
-                                    };
                                 @endphp
                                 <label class="category-card relative flex flex-col gap-2 p-space-sm rounded-xl border {{ $selectedCategory === $code ? 'border-secondary bg-surface-container-low shadow-sm' : 'border-outline-variant bg-surface-container-lowest' }} hover:border-secondary cursor-pointer transition-all last:sm:col-span-2">
                                     <div class="flex items-center justify-between gap-2">
-                                        <div class="flex items-center gap-2 min-w-0">
-                                            <span class="material-symbols-outlined text-secondary text-[20px] shrink-0" aria-hidden="true">{{ $categoryIcon }}</span>
-                                            <span class="font-title-md text-[14px] text-primary font-semibold">{{ $name }}</span>
-                                        </div>
+                                        <span class="font-title-md text-[14px] text-primary font-semibold">{{ $name }}</span>
                                         <input @checked($selectedCategory === $code) class="h-4 w-4 shrink-0 text-secondary focus:ring-secondary" name="applicant_category" type="radio" value="{{ $code }}" required>
                                     </div>
                                     <p class="font-caption-sm text-caption-sm text-on-surface-variant">{{ $adminPlacement ? 'Ditempatkan Admin Layanan' : 'Dapat memilih gedung dan kamar' }}</p>
@@ -83,16 +70,13 @@
                         <label class="block font-label-md text-label-md text-primary" for="reg-name">
                             Nama Lengkap (Sesuai KTP / KTM) <span class="text-error">*</span>
                         </label>
-                        <div class="relative flex items-center">
-                            <span class="material-symbols-outlined absolute left-3.5 text-outline text-[20px] pointer-events-none">person</span>
-                            <input class="w-full bg-surface-container-lowest border border-outline-variant/50 text-primary placeholder:text-outline/70 font-body-md text-body-md rounded-lg py-3 pl-11 pr-4 shadow-sm focus:outline-none focus:ring-2 focus:ring-secondary transition-all"
-                                   id="reg-name"
-                                   name="name"
-                                   value="{{ old('name') }}"
-                                   placeholder="Contoh: Muhammad Fadhil Pratama"
-                                   required
-                                   type="text">
-                        </div>
+                        <input class="w-full bg-surface-container-lowest border border-outline-variant/50 text-primary placeholder:text-outline/70 font-body-md text-body-md rounded-lg py-3 px-4 shadow-sm focus:outline-none focus:ring-2 focus:ring-secondary transition-all"
+                               id="reg-name"
+                               name="name"
+                               value="{{ old('name') }}"
+                               placeholder="Contoh: Muhammad Fadhil Pratama"
+                               required
+                               type="text">
                     </div>
 
                     {{-- NIM / KTP --}}
@@ -108,16 +92,13 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="relative flex items-center">
-                            <span class="material-symbols-outlined absolute left-3.5 text-outline text-[20px] pointer-events-none">badge</span>
-                            <input class="w-full bg-surface-container-lowest border border-outline-variant/50 text-primary placeholder:text-outline/70 font-body-md text-body-md rounded-lg py-3 pl-11 pr-4 shadow-sm focus:outline-none focus:ring-2 focus:ring-secondary transition-all font-mono"
-                                   id="reg-identifier"
-                                   name="identity_number"
-                                   value="{{ old('identity_number') }}"
-                                   placeholder="Contoh: 2411521008 atau 16 digit NIK KTP"
-                                   required
-                                   type="text">
-                        </div>
+                        <input class="w-full bg-surface-container-lowest border border-outline-variant/50 text-primary placeholder:text-outline/70 font-body-md text-body-md rounded-lg py-3 px-4 shadow-sm focus:outline-none focus:ring-2 focus:ring-secondary transition-all font-mono"
+                               id="reg-identifier"
+                               name="identity_number"
+                               value="{{ old('identity_number') }}"
+                               placeholder="Contoh: 2411521008 atau 16 digit NIK KTP"
+                               required
+                               type="text">
                     </div>
 
                     {{-- Email --}}
@@ -128,16 +109,13 @@
                             </label>
                             <span class="font-caption-sm text-caption-sm text-on-surface-variant">Disarankan format @unand.ac.id</span>
                         </div>
-                        <div class="relative flex items-center">
-                            <span class="material-symbols-outlined absolute left-3.5 text-outline text-[20px] pointer-events-none">mail</span>
-                            <input class="w-full bg-surface-container-lowest border border-outline-variant/50 text-primary placeholder:text-outline/70 font-body-md text-body-md rounded-lg py-3 pl-11 pr-4 shadow-sm focus:outline-none focus:ring-2 focus:ring-secondary transition-all"
-                                   id="reg-email"
-                                   name="email"
-                                   value="{{ old('email') }}"
-                                   placeholder="fadhil.pratama@unand.ac.id"
-                                   required
-                                   type="email">
-                        </div>
+                        <input class="w-full bg-surface-container-lowest border border-outline-variant/50 text-primary placeholder:text-outline/70 font-body-md text-body-md rounded-lg py-3 px-4 shadow-sm focus:outline-none focus:ring-2 focus:ring-secondary transition-all"
+                               id="reg-email"
+                               name="email"
+                               value="{{ old('email') }}"
+                               placeholder="fadhil.pratama@unand.ac.id"
+                               required
+                               type="email">
                     </div>
 
                     {{-- Nomor WhatsApp --}}
@@ -145,16 +123,13 @@
                         <label class="block font-label-md text-label-md text-primary" for="reg-phone">
                             Nomor WhatsApp / Telepon Seluler <span class="text-error">*</span>
                         </label>
-                        <div class="relative flex items-center">
-                            <span class="material-symbols-outlined absolute left-3.5 text-outline text-[20px] pointer-events-none">call</span>
-                            <input class="w-full bg-surface-container-lowest border border-outline-variant/50 text-primary placeholder:text-outline/70 font-body-md text-body-md rounded-lg py-3 pl-11 pr-4 shadow-sm focus:outline-none focus:ring-2 focus:ring-secondary transition-all font-mono"
-                                   id="reg-phone"
-                                   name="phone"
-                                   value="{{ old('phone') }}"
-                                   placeholder="Contoh: 0812-7788-9901"
-                                   required
-                                   type="tel">
-                        </div>
+                        <input class="w-full bg-surface-container-lowest border border-outline-variant/50 text-primary placeholder:text-outline/70 font-body-md text-body-md rounded-lg py-3 px-4 shadow-sm focus:outline-none focus:ring-2 focus:ring-secondary transition-all font-mono"
+                               id="reg-phone"
+                               name="phone"
+                               value="{{ old('phone') }}"
+                               placeholder="Contoh: 0812-7788-9901"
+                               required
+                               type="tel">
                         <p class="font-caption-sm text-caption-sm text-on-surface-variant">Kode verifikasi &amp; nomor kamar akan diteruskan ke nomor WhatsApp ini.</p>
                     </div>
 
@@ -165,8 +140,7 @@
                                 Kata Sandi <span class="text-error">*</span>
                             </label>
                             <div class="relative flex items-center">
-                                <span class="material-symbols-outlined absolute left-3.5 text-outline text-[20px] pointer-events-none">lock</span>
-                                <input class="w-full bg-surface-container-lowest border border-outline-variant/50 text-primary placeholder:text-outline/70 font-body-md text-body-md rounded-lg py-3 pl-11 pr-10 shadow-sm focus:outline-none focus:ring-2 focus:ring-secondary transition-all"
+                                <input class="w-full bg-surface-container-lowest border border-outline-variant/50 text-primary placeholder:text-outline/70 font-body-md text-body-md rounded-lg py-3 pl-4 pr-10 shadow-sm focus:outline-none focus:ring-2 focus:ring-secondary transition-all"
                                        id="reg-password"
                                        name="password"
                                        oninput="updatePasswordStrength(this.value)"
@@ -184,8 +158,7 @@
                                 Konfirmasi Kata Sandi <span class="text-error">*</span>
                             </label>
                             <div class="relative flex items-center">
-                                <span class="material-symbols-outlined absolute left-3.5 text-outline text-[20px] pointer-events-none">lock_reset</span>
-                                <input class="w-full bg-surface-container-lowest border border-outline-variant/50 text-primary placeholder:text-outline/70 font-body-md text-body-md rounded-lg py-3 pl-11 pr-10 shadow-sm focus:outline-none focus:ring-2 focus:ring-secondary transition-all"
+                                <input class="w-full bg-surface-container-lowest border border-outline-variant/50 text-primary placeholder:text-outline/70 font-body-md text-body-md rounded-lg py-3 pl-4 pr-10 shadow-sm focus:outline-none focus:ring-2 focus:ring-secondary transition-all"
                                        id="reg-confirm-password"
                                        name="password_confirmation"
                                        oninput="checkPasswordMatch()"
@@ -227,9 +200,8 @@
 
                     {{-- Submit --}}
                     <div class="pt-space-sm">
-                        <button class="w-full py-3.5 px-space-lg bg-primary hover:bg-primary-container text-on-primary font-label-md text-label-md rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center gap-space-sm active:translate-y-0.5 cursor-pointer" id="btn-register" type="submit">
+                        <button class="w-full py-3.5 px-space-lg bg-primary hover:bg-primary-container text-on-primary font-label-md text-label-md rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center active:translate-y-0.5 cursor-pointer" id="btn-register" type="submit">
                             <span>Buat Akun &amp; Lanjutkan Pendaftaran</span>
-                            <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
                         </button>
                     </div>
 

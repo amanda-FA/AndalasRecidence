@@ -4,19 +4,19 @@
 
 @section('navbar-left')
     <div class="flex items-center gap-space-lg">
-        <div class="flex items-center gap-space-sm px-space-md py-space-xs rounded-xl bg-surface-container-low text-on-surface">
+        <form method="GET" action="{{ route('dashboard.okupansi') }}" class="flex items-center gap-space-sm px-space-md py-space-xs rounded-xl bg-surface-container-low text-on-surface">
+            <input type="hidden" name="klaster" value="{{ $klasterFilter }}">
             <span class="material-symbols-outlined text-secondary text-[20px]">calendar_month</span>
             <label class="sr-only" for="semester-select">Periode Akademik</label>
-            <select class="bg-transparent font-label-md text-label-md text-on-surface outline-none cursor-pointer pr-space-xs" id="semester-select">
-                <option>Semester Ganjil 2025/2026</option>
-                <option>Semester Genap 2024/2025</option>
-                <option>Semester Ganjil 2024/2025</option>
+            <select name="periode" onchange="this.form.submit()" class="bg-transparent font-label-md text-label-md text-on-surface outline-none cursor-pointer pr-space-xs" id="semester-select">
+                <option value="all" {{ ($periodeFilter ?? 'all') === 'all' ? 'selected' : '' }}>Semua Periode</option>
+                @foreach ($periodes as $periode)
+                    <option value="{{ $periode->id_periode }}" {{ (string) ($periodeFilter ?? 'all') === (string) $periode->id_periode ? 'selected' : '' }}>
+                        {{ $periode->nama_periode }} ({{ $periode->tahun_akademik }})
+                    </option>
+                @endforeach
             </select>
-        </div>
-        <div class="hidden xl:flex items-center gap-space-xs px-space-md py-space-xs rounded-full bg-surface-container text-secondary font-caption-sm-medium text-caption-sm-medium">
-            <span class="w-2 h-2 rounded-full bg-secondary animate-pulse"></span>
-            Sistem Terintegrasi Kampus
-        </div>
+        </form>
     </div>
 @endsection
 
@@ -43,13 +43,14 @@
             </div>
             <h1 class="font-headline-lg text-headline-lg text-on-surface tracking-tight">Dashboard Eksekutif &amp; Statistik Okupansi</h1>
             <p class="font-body-md text-body-md text-on-surface-variant max-w-2xl mt-1">
-                Ringkasan tingkat hunian real-time, evaluasi kapasitas bed residensial, dan proyeksi ketersediaan kuota Semester Ganjil 2025/2026 di seluruh {{ $kpi['total_gedung'] }} klaster asrama.
+                Ringkasan tingkat hunian real-time, evaluasi kapasitas bed residensial, dan proyeksi ketersediaan kuota {{ $selectedPeriode ? $selectedPeriode->nama_periode . ' (' . $selectedPeriode->tahun_akademik . ')' : 'Semua Periode' }} di seluruh {{ $kpi['total_gedung'] }} klaster asrama.
             </p>
         </div>
 
         {{-- Executive Quick Controls & Export Actions --}}
         <div class="flex flex-wrap items-center gap-space-sm">
             <form method="GET" action="{{ route('dashboard.okupansi') }}" class="flex items-center bg-surface-container-lowest shadow-sm rounded-xl px-space-md py-space-xs">
+                <input type="hidden" name="periode" value="{{ $periodeFilter ?? 'all' }}">
                 <span class="material-symbols-outlined text-secondary text-[20px] mr-2">filter_alt</span>
                 <label class="sr-only" for="filter-gedung-header">Filter Klaster Gedung</label>
                 <select name="klaster" onchange="this.form.submit()" class="bg-transparent font-label-md text-label-md text-on-surface outline-none cursor-pointer pr-space-xs" id="filter-gedung-header">
@@ -67,13 +68,13 @@
                     <span class="material-symbols-outlined text-[18px] ml-1">expand_more</span>
                 </button>
                 <div class="hidden absolute right-0 mt-2 w-56 rounded-xl bg-surface-container-lowest shadow-xl z-30 py-2" id="export-dropdown">
-                    <a class="flex items-center gap-2 px-4 py-2.5 font-label-md text-label-md text-on-surface hover:bg-surface-container-low transition-colors" href="#" onclick="window.print(); return false;">
+                    <a class="flex items-center gap-2 px-4 py-2.5 font-label-md text-label-md text-on-surface hover:bg-surface-container-low transition-colors" href="{{ route('dashboard.okupansi.pdf', ['klaster' => $klasterFilter, 'periode' => $periodeFilter]) }}" target="_blank" rel="noopener">
                         <span class="material-symbols-outlined text-error text-[20px]">picture_as_pdf</span>
                         <span>Cetak / PDF (.PDF)</span>
                     </a>
-                    <a class="flex items-center gap-2 px-4 py-2.5 font-label-md text-label-md text-on-surface hover:bg-surface-container-low transition-colors" href="#" onclick="alert('Fitur ekspor Excel akan tersedia setelah integrasi database.'); return false;">
+                    <a class="flex items-center gap-2 px-4 py-2.5 font-label-md text-label-md text-on-surface hover:bg-surface-container-low transition-colors" href="{{ route('dashboard.okupansi.csv', ['klaster' => $klasterFilter, 'periode' => $periodeFilter]) }}">
                         <span class="material-symbols-outlined text-success text-[20px]">table_view</span>
-                        <span>Dataset Spreadsheet (.Excel)</span>
+                        <span>Dataset Spreadsheet (.CSV)</span>
                     </a>
                 </div>
             </div>

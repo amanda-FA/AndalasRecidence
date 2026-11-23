@@ -6,7 +6,7 @@
 @endphp
 
 <aside id="app-sidebar"
-       class="fixed left-0 top-0 h-full w-64 bg-primary-container z-50 flex flex-col justify-between shadow-[0_1px_8px_rgba(0,0,0,0.04)] -translate-x-full lg:translate-x-0 transition-transform duration-200">
+       class="fixed left-0 top-0 h-full w-64 bg-primary-container z-50 flex flex-col justify-between shadow-[0_1px_8px_rgba(0,0,0,0.04)] -translate-x-full lg:translate-x-0 transition-transform duration-200 print:hidden">
     <div class="flex flex-col overflow-y-auto">
         {{-- Brand Header --}}
         <div class="h-20 px-space-lg flex items-center justify-between bg-primary/20 shrink-0">

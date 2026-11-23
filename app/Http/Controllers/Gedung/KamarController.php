@@ -16,6 +16,7 @@ class KamarController extends Controller
     public function index(Request $request)
     {
         $gedungs = Gedung::orderBy('nama_gedung')->get();
+        $tipeKamars = TipeKamar::orderBy('nama_tipe')->get();
 
         $query = Kamar::with(['gedung', 'tipeKamar', 'fasilitas']);
 
@@ -32,7 +33,15 @@ class KamarController extends Controller
         }
 
         if ($status = $request->query('status')) {
-            $query->where('status_kamar', $status);
+            if ($status === 'perbaikan') {
+                $query->where('status_kamar', 'perbaikan');
+            } elseif ($status === 'penuh') {
+                $query->where('status_kamar', '!=', 'perbaikan')
+                    ->whereRaw('(select count(*) from penempatan_kamar where penempatan_kamar.id_kamar = kamar.id_kamar and penempatan_kamar.status_penempatan = ?) >= coalesce((select kapasitas from tipe_kamar where tipe_kamar.id_tipeKamar = kamar.id_tipeKamar), 0)', ['aktif']);
+            } elseif ($status === 'tersedia') {
+                $query->where('status_kamar', '!=', 'perbaikan')
+                    ->whereRaw('(select count(*) from penempatan_kamar where penempatan_kamar.id_kamar = kamar.id_kamar and penempatan_kamar.status_penempatan = ?) < coalesce((select kapasitas from tipe_kamar where tipe_kamar.id_tipeKamar = kamar.id_tipeKamar), 0)', ['aktif']);
+            }
         }
 
         if ($search = $request->query('q')) {
@@ -57,17 +66,18 @@ class KamarController extends Controller
             'kamar_terisi' => $kamarTerisi,
             'kamar_terisi_persen' => $totalKamar > 0 ? round(($kamarTerisi / $totalKamar) * 100) : 0,
             'bed_terisi' => $bedTerisi,
-            'kamar_tersedia' => $allKamars->where('status_kamar', 'tersedia')->count(),
+            'kamar_tersedia' => $allKamars->filter(fn (Kamar $k) => $k->status === 'tersedia')->count(),
             'bed_kosong' => max(0, $totalBed - $bedTerisi),
             'kamar_perbaikan' => $allKamars->where('status_kamar', 'perbaikan')->count(),
         ];
 
-        return view('kamar.index', compact('kamars', 'gedungs', 'stats'));
+        return view('kamar.index', compact('kamars', 'gedungs', 'tipeKamars', 'stats'));
     }
 
     public function create(Request $request)
     {
         $gedungs = Gedung::orderBy('nama_gedung')->get();
+        $tipeKamars = TipeKamar::orderBy('nama_tipe')->get();
         $tipeKamars = TipeKamar::orderBy('nama_tipe')->get();
         $selectedGedungId = $request->query('gedung_id');
 
@@ -88,6 +98,7 @@ class KamarController extends Controller
     public function edit(Kamar $kamar)
     {
         $gedungs = Gedung::orderBy('nama_gedung')->get();
+        $tipeKamars = TipeKamar::orderBy('nama_tipe')->get();
         $tipeKamars = TipeKamar::orderBy('nama_tipe')->get();
 
         return view('kamar.edit', compact('kamar', 'gedungs', 'tipeKamars') + app(FacilitySelectionService::class)->formData('kamar', $kamar));
@@ -142,11 +153,17 @@ class KamarController extends Controller
     private function saveKamar(Request $request, array $data, ?Kamar $kamar = null): void
     {
         DB::transaction(function () use ($request, $data, $kamar) {
-            $type = TipeKamar::firstOrCreate(['nama_tipe' => $data['tipe_kamar']], ['kapasitas' => $data['kapasitas_bed'] ?? 4, 'tarif' => $data['tarif'] ?? 0]);
+            $type = TipeKamar::firstOrCreate(
+                ['nama_tipe' => $data['tipe_kamar']],
+                ['kapasitas' => $data['kapasitas_bed'] ?? 4, 'tarif' => $data['tarif'] ?? 0]
+            );
             $owner = $kamar ? Kamar::whereKey($kamar->id_kamar)->lockForUpdate()->firstOrFail() : new Kamar();
             $owner->fill([
-                'id_gedung' => $data['gedung_id'], 'id_tipeKamar' => $type->id_tipeKamar,
-                'nomor_kamar' => $data['nomor_kamar'], 'lantai' => $data['lantai'], 'status_kamar' => $data['status'],
+                'id_gedung' => $data['gedung_id'],
+                'id_tipeKamar' => $type->id_tipeKamar,
+                'nomor_kamar' => $data['nomor_kamar'],
+                'lantai' => $data['lantai'],
+                'status_kamar' => $data['status'],
             ])->save();
             if ($request->has('fasilitas_present') || $request->has('fasilitas')) {
                 app(FacilitySelectionService::class)->sync($owner, $data['fasilitas'] ?? []);

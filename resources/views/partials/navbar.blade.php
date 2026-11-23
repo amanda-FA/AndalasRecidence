@@ -3,7 +3,7 @@
     $roleLabel = $user ? ($user->getRoleNames()->first() ?? 'Pengguna') : 'Tamu';
 @endphp
 
-<header class="fixed top-0 left-0 lg:left-64 right-0 h-20 bg-surface-container-lowest/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-30 px-space-md lg:px-space-xl flex items-center justify-between">
+<header class="fixed top-0 left-0 lg:left-64 right-0 h-20 bg-surface-container-lowest/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-30 px-space-md lg:px-space-xl flex items-center justify-between print:hidden">
     <div class="flex items-center gap-space-md">
         {{-- Mobile Menu Toggle --}}
         <button type="button" onclick="toggleSidebar(true)" class="lg:hidden w-10 h-10 rounded-xl bg-surface-container-low hover:bg-surface-container text-on-surface flex items-center justify-center" aria-label="Buka Menu">

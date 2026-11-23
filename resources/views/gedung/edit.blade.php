@@ -31,20 +31,13 @@
 
         @include('gedung._form', ['gedung' => $gedung])
 
-        <div class="bg-surface-container-lowest p-space-lg rounded-xl shadow-sm flex flex-col sm:flex-row items-center justify-between gap-space-md">
-            <div class="flex items-center gap-space-sm text-on-surface-variant font-caption-sm text-caption-sm">
-                <span class="material-symbols-outlined text-[18px] text-secondary">sync</span>
-                <span>Perubahan data akan langsung memperbarui perhitungan Dashboard Okupansi.</span>
-            </div>
-            <div class="flex flex-wrap items-center justify-end gap-space-sm w-full sm:w-auto">
-                <a href="{{ route('gedung.index') }}" class="px-space-lg py-2.5 rounded-lg bg-surface-container text-on-surface hover:bg-surface-container-high transition-all font-label-md text-label-md">
-                    Batal
-                </a>
-                <button class="px-space-xl py-2.5 rounded-lg bg-secondary text-on-primary hover:bg-on-secondary-fixed-variant shadow-sm hover:shadow transition-all font-label-md text-label-md flex items-center gap-space-xs cursor-pointer" type="submit">
-                    <span class="material-symbols-outlined text-[18px]">save</span>
-                    <span>Simpan Perubahan</span>
-                </button>
-            </div>
+        <div class="flex flex-wrap items-center justify-end gap-space-sm">
+            <a href="{{ route('gedung.index') }}" class="px-space-lg py-2.5 rounded-lg bg-surface-container text-on-surface hover:bg-surface-container-high transition-all font-label-md text-label-md">
+                Batal
+            </a>
+            <button class="px-space-xl py-2.5 rounded-lg bg-secondary text-on-primary hover:bg-on-secondary-fixed-variant shadow-sm hover:shadow transition-all font-label-md text-label-md cursor-pointer" type="submit">
+                Simpan Perubahan
+            </button>
         </div>
     </form>
 </div>

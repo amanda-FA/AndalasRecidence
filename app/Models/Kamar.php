@@ -63,7 +63,15 @@ class Kamar extends Model
 
     public function getStatusAttribute(): string
     {
-        return $this->status_kamar ?? 'tersedia';
+        if ($this->status_kamar === 'perbaikan') {
+            return 'perbaikan';
+        }
+
+        if ($this->kapasitas_bed > 0 && $this->bed_terisi >= $this->kapasitas_bed) {
+            return 'penuh';
+        }
+
+        return 'tersedia';
     }
 
     public function getKapasitasBedAttribute(): int

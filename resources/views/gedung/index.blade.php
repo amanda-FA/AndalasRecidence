@@ -26,75 +26,40 @@
 
     {{-- 4 Key Metrics Overview --}}
     <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-space-md">
-        <div class="bg-surface-container-lowest rounded-xl p-space-md shadow-sm flex flex-col justify-between relative overflow-hidden group hover:shadow-md transition-shadow">
-            <div class="flex items-center justify-between z-10">
-                <span class="font-caption-sm-medium text-caption-sm-medium text-on-surface-variant uppercase tracking-wider">Total Gedung</span>
-                <div class="w-9 h-9 rounded-lg bg-surface-container-low text-secondary flex items-center justify-center">
-                    <span class="material-symbols-outlined text-[20px]">apartment</span>
-                </div>
-            </div>
-            <div class="mt-space-md z-10">
-                <div class="flex items-baseline gap-2">
-                    <span class="font-headline-lg text-headline-lg text-primary tracking-tight">{{ $metrics['total_gedung'] }}</span>
-                    <span class="font-title-md text-title-md text-on-surface-variant font-medium">Unit</span>
-                </div>
-                <div class="mt-2 flex items-center gap-1.5 text-caption-sm-medium text-success">
-                    <span class="w-2 h-2 rounded-full bg-success"></span>
-                    <span>{{ $metrics['gedung_aktif'] }} Aktif Beroperasi Penuh</span>
-                </div>
+        <div class="bg-surface-container-lowest rounded-xl p-space-md shadow-sm flex flex-col justify-between">
+            <span class="font-caption-sm-medium text-caption-sm-medium text-on-surface-variant uppercase tracking-wider">Total Gedung</span>
+            <div class="mt-space-sm flex items-baseline gap-2">
+                <span class="font-headline-lg text-headline-lg text-primary tracking-tight">{{ $metrics['total_gedung'] }}</span>
+                <span class="font-title-md text-title-md text-on-surface-variant font-medium">Unit</span>
             </div>
         </div>
 
-        <div class="bg-surface-container-lowest rounded-xl p-space-md shadow-sm flex flex-col justify-between relative overflow-hidden group hover:shadow-md transition-shadow">
-            <div class="flex items-center justify-between z-10">
-                <span class="font-caption-sm-medium text-caption-sm-medium text-on-surface-variant uppercase tracking-wider">Total Lantai</span>
-                <div class="w-9 h-9 rounded-lg bg-surface-container-low text-secondary flex items-center justify-center">
-                    <span class="material-symbols-outlined text-[20px]">stairs</span>
-                </div>
-            </div>
-            <div class="mt-space-md z-10">
-                <div class="flex items-baseline gap-2">
-                    <span class="font-headline-lg text-headline-lg text-primary tracking-tight">{{ $metrics['total_lantai'] }}</span>
-                    <span class="font-title-md text-title-md text-on-surface-variant font-medium">Lantai</span>
-                </div>
-                <p class="mt-2 font-caption-sm text-caption-sm text-on-surface-variant">Total seluruh blok gedung</p>
+        <div class="bg-surface-container-lowest rounded-xl p-space-md shadow-sm flex flex-col justify-between">
+            <span class="font-caption-sm-medium text-caption-sm-medium text-on-surface-variant uppercase tracking-wider">Total Lantai</span>
+            <div class="mt-space-sm flex items-baseline gap-2">
+                <span class="font-headline-lg text-headline-lg text-primary tracking-tight">{{ $metrics['total_lantai'] }}</span>
+                <span class="font-title-md text-title-md text-on-surface-variant font-medium">Lantai</span>
             </div>
         </div>
 
-        <div class="bg-surface-container-lowest rounded-xl p-space-md shadow-sm flex flex-col justify-between relative overflow-hidden group hover:shadow-md transition-shadow">
-            <div class="flex items-center justify-between z-10">
-                <span class="font-caption-sm-medium text-caption-sm-medium text-on-surface-variant uppercase tracking-wider">Total Kamar</span>
-                <div class="w-9 h-9 rounded-lg bg-surface-container-low text-secondary flex items-center justify-center">
-                    <span class="material-symbols-outlined text-[20px]">meeting_room</span>
-                </div>
-            </div>
-            <div class="mt-space-md z-10">
-                <div class="flex items-baseline gap-2">
-                    <span class="font-headline-lg text-headline-lg text-primary tracking-tight">{{ $metrics['total_kamar'] }}</span>
-                    <span class="font-title-md text-title-md text-on-surface-variant font-medium">Unit Kamar</span>
-                </div>
-                <div class="mt-2 flex items-center gap-2">
-                    <span class="inline-block px-2 py-0.5 rounded-full bg-surface-container-low text-secondary font-caption-sm-medium text-caption-sm-medium">{{ $metrics['kamar_tersedia'] }} Tersedia</span>
-                </div>
+        <div class="bg-surface-container-lowest rounded-xl p-space-md shadow-sm flex flex-col justify-between">
+            <span class="font-caption-sm-medium text-caption-sm-medium text-on-surface-variant uppercase tracking-wider">Total Kamar</span>
+            <div class="mt-space-sm flex items-baseline gap-2">
+                <span class="font-headline-lg text-headline-lg text-primary tracking-tight">{{ $metrics['total_kamar'] }}</span>
+                <span class="font-title-md text-title-md text-on-surface-variant font-medium">Unit</span>
             </div>
         </div>
 
-        <div class="bg-surface-container-lowest rounded-xl p-space-md shadow-sm flex flex-col justify-between relative overflow-hidden group hover:shadow-md transition-shadow">
-            <div class="flex items-center justify-between z-10">
-                <span class="font-caption-sm-medium text-caption-sm-medium text-on-surface-variant uppercase tracking-wider">Rata-rata Okupansi</span>
-                <div class="w-9 h-9 rounded-lg bg-surface-container-low text-secondary flex items-center justify-center">
-                    <span class="material-symbols-outlined text-[20px]">groups</span>
-                </div>
-            </div>
-            <div class="mt-space-md z-10">
-                <div class="flex items-baseline gap-2">
+        <div class="bg-surface-container-lowest rounded-xl p-space-md shadow-sm flex flex-col justify-between">
+            <span class="font-caption-sm-medium text-caption-sm-medium text-on-surface-variant uppercase tracking-wider">Rata-rata Okupansi</span>
+            <div class="mt-space-sm">
+                <div class="flex items-baseline justify-between gap-2">
                     <span class="font-headline-lg text-headline-lg text-primary tracking-tight">{{ $metrics['okupansi_persen'] }}%</span>
-                    <span class="font-caption-sm-medium text-caption-sm-medium text-secondary">Terisi</span>
+                    <span class="font-caption-sm text-caption-sm text-on-surface-variant">{{ number_format($metrics['bed_terisi'], 0, ',', '.') }}/{{ number_format($metrics['total_bed'], 0, ',', '.') }} Bed</span>
                 </div>
-                <div class="w-full bg-surface-container h-2 rounded-full mt-2.5 overflow-hidden">
+                <div class="w-full bg-surface-container h-2 rounded-full mt-2 overflow-hidden">
                     <div class="bg-secondary h-full rounded-full" style="width: {{ min(100, $metrics['okupansi_persen']) }}%"></div>
                 </div>
-                <p class="mt-2 font-caption-sm text-caption-sm text-on-surface-variant">{{ number_format($metrics['bed_terisi'], 0, ',', '.') }} dari {{ number_format($metrics['total_bed'], 0, ',', '.') }} Bed Terisi</p>
             </div>
         </div>
     </div>
@@ -187,13 +152,6 @@
                             <span class="px-3 py-1 rounded-full bg-surface-container-lowest/90 backdrop-blur-md text-primary font-caption-sm-medium text-caption-sm-medium flex items-center gap-1 shadow-sm">
                                 <span class="material-symbols-outlined text-[14px]">{{ $peruntukanIcon }}</span>
                                 {{ $gedung->peruntukan_label }}
-                            </span>
-                            <span class="px-3 py-1 rounded-full bg-primary-container text-surface font-caption-sm-medium text-caption-sm-medium">{{ $gedung->kode }}</span>
-                        </div>
-
-                        <div class="absolute top-4 right-4">
-                            <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full {{ $statusBg }} text-surface-container-lowest backdrop-blur-md font-caption-sm-medium text-caption-sm-medium shadow-sm">
-                                {{ $gedung->status_label }}
                             </span>
                         </div>
 

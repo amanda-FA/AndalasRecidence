@@ -22,10 +22,10 @@
     @include('partials.sidebar')
 
     {{-- Main Wrapper --}}
-    <div class="lg:pl-64 min-h-screen flex flex-col">
+    <div class="lg:pl-64 print:pl-0 min-h-screen flex flex-col">
         @include('partials.navbar')
 
-        <main class="w-full flex-1 pt-24 pb-space-2xl px-space-md lg:px-space-xl bg-background">
+        <main class="w-full flex-1 pt-24 print:pt-4 pb-space-2xl px-space-md lg:px-space-xl bg-background">
             @include('partials.alerts')
             @yield('content')
         </main>

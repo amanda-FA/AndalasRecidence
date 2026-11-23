@@ -60,12 +60,20 @@
                 <label class="font-label-md text-label-md text-primary" for="tipe_kamar">
                     Konfigurasi Tipe Kamar <span class="text-error">*</span>
                 </label>
-                @php $tipeVal = old('tipe_kamar', $kamar?->tipe_kamar ?? 'Double Shared'); @endphp
+                @php
+                    $tipeKamars = $tipeKamars ?? collect();
+                    $tipeVal = old('tipe_kamar', $kamar?->tipe_kamar ?? ($tipeKamars->first()?->nama_tipe ?? 'Standar 4 Orang'));
+                @endphp
                 <div class="relative">
                     <select id="tipe_kamar" name="tipe_kamar" required class="w-full appearance-none bg-surface-container-low hover:bg-surface-container px-space-md py-3 rounded-lg font-body-md text-body-md text-primary outline-none focus:bg-surface-container-lowest transition-colors pr-10 cursor-pointer">
-                        @foreach (['Reguler', 'Single Deluxe', 'Double Shared', 'Triple Standard', 'Quad Standard', 'Wisma'] as $tipe)
-                            <option value="{{ $tipe }}" {{ $tipeVal === $tipe ? 'selected' : '' }}>{{ $tipe }}</option>
+                        @foreach ($tipeKamars as $tk)
+                            <option value="{{ $tk->nama_tipe }}" data-kapasitas="{{ $tk->kapasitas }}" data-tarif="{{ (int) $tk->tarif }}" {{ $tipeVal === $tk->nama_tipe ? 'selected' : '' }}>
+                                {{ $tk->nama_tipe }} ({{ $tk->kapasitas }} Bed - Rp {{ number_format($tk->tarif, 0, ',', '.') }})
+                            </option>
                         @endforeach
+                        @if ($tipeVal && ! $tipeKamars->contains('nama_tipe', $tipeVal))
+                            <option value="{{ $tipeVal }}" selected>{{ $tipeVal }}</option>
+                        @endif
                     </select>
                     <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-outline pointer-events-none text-[20px]">expand_more</span>
                 </div>
@@ -82,26 +90,25 @@
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-space-md">
             <div class="flex flex-col gap-1.5">
-                <label class="font-label-md text-label-md text-primary" for="kapasitas_bed">Kapasitas Bed <span class="text-error">*</span></label>
-                <input id="kapasitas_bed" name="kapasitas_bed" value="{{ old('kapasitas_bed', $kamar?->kapasitas_bed ?? 2) }}" min="1" max="20" required type="number" class="w-full bg-surface-container-low px-space-md py-3 rounded-lg font-body-md text-body-md text-primary outline-none">
+                <label class="font-label-md text-label-md text-primary" for="kapasitas_bed">Kapasitas Bed <span class="text-caption-sm text-outline font-normal">(Sesuai Tipe)</span></label>
+                <input id="kapasitas_bed" name="kapasitas_bed" value="{{ old('kapasitas_bed', $kamar?->kapasitas_bed ?? 2) }}" min="1" max="20" readonly type="number" class="w-full bg-surface-container-low/70 px-space-md py-3 rounded-lg font-body-md text-body-md text-on-surface-variant outline-none cursor-not-allowed">
             </div>
 
             <div class="flex flex-col gap-1.5">
-                <label class="font-label-md text-label-md text-primary" for="bed_terisi">Bed Terisi <span class="text-error">*</span></label>
-                <input id="bed_terisi" name="bed_terisi" value="{{ old('bed_terisi', $kamar?->bed_terisi ?? 0) }}" min="0" max="20" required type="number" class="w-full bg-surface-container-low px-space-md py-3 rounded-lg font-body-md text-body-md text-primary outline-none">
+                <label class="font-label-md text-label-md text-primary" for="bed_terisi">Bed Terisi <span class="text-caption-sm text-outline font-normal">(Otomatis)</span></label>
+                <input id="bed_terisi" name="bed_terisi" value="{{ old('bed_terisi', $kamar?->bed_terisi ?? 0) }}" min="0" max="20" readonly type="number" class="w-full bg-surface-container-low/70 px-space-md py-3 rounded-lg font-body-md text-body-md text-on-surface-variant outline-none cursor-not-allowed">
             </div>
 
             <div class="flex flex-col gap-1.5">
-                <label class="font-label-md text-label-md text-primary" for="tarif">Tarif / Bulan (Rp)</label>
-                <input id="tarif" name="tarif" value="{{ old('tarif', $kamar?->tarif ?? 1250000) }}" min="0" type="number" class="w-full bg-surface-container-low px-space-md py-3 rounded-lg font-body-md text-body-md text-primary outline-none">
+                <label class="font-label-md text-label-md text-primary" for="tarif">Tarif / Bulan (Rp) <span class="text-caption-sm text-outline font-normal">(Sesuai Tipe)</span></label>
+                <input id="tarif" name="tarif" value="{{ old('tarif', $kamar?->tarif ?? 1250000) }}" min="0" readonly type="number" class="w-full bg-surface-container-low/70 px-space-md py-3 rounded-lg font-body-md text-body-md text-on-surface-variant outline-none cursor-not-allowed">
             </div>
 
             <div class="flex flex-col gap-1.5">
                 <label class="font-label-md text-label-md text-primary" for="status">Status Kamar <span class="text-error">*</span></label>
-                @php $statusVal = old('status', $kamar?->status ?? 'tersedia'); @endphp
+                @php $statusVal = old('status', $kamar?->status_kamar === 'perbaikan' ? 'perbaikan' : 'tersedia'); @endphp
                 <select id="status" name="status" required class="w-full bg-surface-container-low px-space-md py-3 rounded-lg font-body-md text-body-md text-primary outline-none cursor-pointer">
-                    <option value="tersedia" {{ $statusVal === 'tersedia' ? 'selected' : '' }}>Tersedia</option>
-                    <option value="penuh" {{ $statusVal === 'penuh' ? 'selected' : '' }}>Penuh</option>
+                    <option value="tersedia" {{ $statusVal === 'tersedia' ? 'selected' : '' }}>Operasional (Otomatis Tersedia / Penuh)</option>
                     <option value="perbaikan" {{ $statusVal === 'perbaikan' ? 'selected' : '' }}>Dalam Perbaikan</option>
                 </select>
             </div>
@@ -131,3 +138,20 @@
         </div>
     </div>
 </div>
+
+@push('scripts')
+<script>
+    document.getElementById('tipe_kamar')?.addEventListener('change', function () {
+        const selected = this.options[this.selectedIndex];
+        if (!selected) return;
+        const kapasitasInput = document.getElementById('kapasitas_bed');
+        const tarifInput = document.getElementById('tarif');
+        if (kapasitasInput && selected.dataset.kapasitas) {
+            kapasitasInput.value = selected.dataset.kapasitas;
+        }
+        if (tarifInput && selected.dataset.tarif) {
+            tarifInput.value = selected.dataset.tarif;
+        }
+    });
+</script>
+@endpush

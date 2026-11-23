@@ -26,61 +26,49 @@
 
     {{-- 4 Stats Summary Cards --}}
     <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-space-md">
-        <div class="bg-surface-container-lowest p-space-lg rounded-xl shadow-brand-card flex flex-col justify-between">
-            <div class="mb-space-sm">
-                <span class="font-label-md text-label-md text-on-surface-variant">Total Kamar</span>
-            </div>
-            <div class="flex items-baseline gap-2">
-                <span class="font-headline-lg text-headline-lg text-primary font-bold">{{ $stats['total_kamar'] }}</span>
-                <span class="font-body-md text-body-md text-on-surface-variant">Unit Kamar</span>
-            </div>
-            <div class="mt-space-md pt-space-xs flex items-center justify-between text-caption-sm font-caption-sm text-on-surface-variant">
-                <span>Kapasitas: {{ number_format($stats['total_bed'], 0, ',', '.') }} Bed</span>
-                <span class="text-secondary font-medium">Terpetakan</span>
+        <div class="bg-surface-container-lowest p-space-md rounded-xl shadow-brand-card flex flex-col justify-between">
+            <span class="font-caption-sm-medium text-caption-sm-medium text-on-surface-variant uppercase tracking-wider">Total Kamar</span>
+            <div class="mt-space-sm flex items-baseline justify-between gap-2">
+                <div class="flex items-baseline gap-2">
+                    <span class="font-headline-lg text-headline-lg text-primary font-bold">{{ $stats['total_kamar'] }}</span>
+                    <span class="font-body-md text-body-md text-on-surface-variant">Unit</span>
+                </div>
+                <span class="font-caption-sm text-caption-sm text-on-surface-variant">{{ number_format($stats['total_bed'], 0, ',', '.') }} Bed</span>
             </div>
         </div>
 
-        <div class="bg-surface-container-lowest p-space-lg rounded-xl shadow-brand-card flex flex-col justify-between">
-            <div class="mb-space-sm">
-                <span class="font-label-md text-label-md text-on-surface-variant">Kamar Berpenghuni</span>
-            </div>
-            <div class="flex items-baseline gap-2">
-                <span class="font-headline-lg text-headline-lg text-primary font-bold">{{ $stats['kamar_terisi'] }}</span>
-                <span class="font-body-md text-body-md text-on-surface-variant">Unit ({{ $stats['kamar_terisi_persen'] }}%)</span>
-            </div>
-            <div class="mt-space-md pt-space-xs flex items-center gap-2">
-                <div class="w-full bg-surface-container-low h-1.5 rounded-full overflow-hidden">
+        <div class="bg-surface-container-lowest p-space-md rounded-xl shadow-brand-card flex flex-col justify-between">
+            <span class="font-caption-sm-medium text-caption-sm-medium text-on-surface-variant uppercase tracking-wider">Kamar Berpenghuni</span>
+            <div class="mt-space-sm">
+                <div class="flex items-baseline justify-between gap-2">
+                    <div class="flex items-baseline gap-2">
+                        <span class="font-headline-lg text-headline-lg text-primary font-bold">{{ $stats['kamar_terisi'] }}</span>
+                        <span class="font-body-md text-body-md text-on-surface-variant">Unit</span>
+                    </div>
+                    <span class="font-caption-sm text-caption-sm text-secondary font-medium">{{ $stats['kamar_terisi_persen'] }}%</span>
+                </div>
+                <div class="w-full bg-surface-container-low h-1.5 rounded-full mt-2 overflow-hidden">
                     <div class="bg-secondary h-full rounded-full" style="width: {{ min(100, $stats['kamar_terisi_persen']) }}%;"></div>
                 </div>
-                <span class="font-caption-sm-medium text-caption-sm-medium text-secondary whitespace-nowrap">{{ number_format($stats['bed_terisi'], 0, ',', '.') }} Penghuni</span>
             </div>
         </div>
 
-        <div class="bg-surface-container-lowest p-space-lg rounded-xl shadow-brand-card flex flex-col justify-between">
-            <div class="mb-space-sm">
-                <span class="font-label-md text-label-md text-on-surface-variant">Kamar Tersedia</span>
-            </div>
-            <div class="flex items-baseline gap-2">
-                <span class="font-headline-lg text-headline-lg text-primary font-bold">{{ $stats['kamar_tersedia'] }}</span>
-                <span class="font-body-md text-body-md text-on-surface-variant">Siap Reservasi</span>
-            </div>
-            <div class="mt-space-md pt-space-xs flex items-center justify-between font-caption-sm text-caption-sm text-on-surface-variant">
-                <span class="inline-flex items-center gap-1 text-success font-medium">
-                    <span class="w-2 h-2 rounded-full bg-success"></span> {{ number_format($stats['bed_kosong'], 0, ',', '.') }} Bed Kosong
-                </span>
+        <div class="bg-surface-container-lowest p-space-md rounded-xl shadow-brand-card flex flex-col justify-between">
+            <span class="font-caption-sm-medium text-caption-sm-medium text-on-surface-variant uppercase tracking-wider">Kamar Tersedia</span>
+            <div class="mt-space-sm flex items-baseline justify-between gap-2">
+                <div class="flex items-baseline gap-2">
+                    <span class="font-headline-lg text-headline-lg text-primary font-bold">{{ $stats['kamar_tersedia'] }}</span>
+                    <span class="font-body-md text-body-md text-on-surface-variant">Unit</span>
+                </div>
+                <span class="font-caption-sm text-caption-sm text-success font-medium">{{ number_format($stats['bed_kosong'], 0, ',', '.') }} Bed Kosong</span>
             </div>
         </div>
 
-        <div class="bg-surface-container-lowest p-space-lg rounded-xl shadow-brand-card flex flex-col justify-between">
-            <div class="mb-space-sm">
-                <span class="font-label-md text-label-md text-on-surface-variant">Dalam Perbaikan</span>
-            </div>
-            <div class="flex items-baseline gap-2">
+        <div class="bg-surface-container-lowest p-space-md rounded-xl shadow-brand-card flex flex-col justify-between">
+            <span class="font-caption-sm-medium text-caption-sm-medium text-on-surface-variant uppercase tracking-wider">Dalam Perbaikan</span>
+            <div class="mt-space-sm flex items-baseline gap-2">
                 <span class="font-headline-lg text-headline-lg text-primary font-bold">{{ $stats['kamar_perbaikan'] }}</span>
-                <span class="font-body-md text-body-md text-on-surface-variant">Unit Dinonaktifkan</span>
-            </div>
-            <div class="mt-space-md pt-space-xs flex items-center justify-between font-caption-sm text-caption-sm text-on-surface-variant">
-                <span class="text-[#C97D1A] font-medium">Status Maintenance</span>
+                <span class="font-body-md text-body-md text-on-surface-variant">Unit</span>
             </div>
         </div>
     </div>
@@ -114,8 +102,8 @@
             <div>
                 <select name="tipe_kamar" onchange="this.form.submit()" class="w-full px-3 py-2 bg-surface-container-low rounded-lg font-body-md text-body-md text-on-surface outline-none cursor-pointer">
                     <option value="">Semua Tipe</option>
-                    @foreach (['Reguler', 'Single Deluxe', 'Double Shared', 'Triple Standard', 'Quad Standard', 'Wisma'] as $tipe)
-                        <option value="{{ $tipe }}" {{ request('tipe_kamar') === $tipe ? 'selected' : '' }}>{{ $tipe }}</option>
+                    @foreach ($tipeKamars as $tk)
+                        <option value="{{ $tk->nama_tipe }}" {{ request('tipe_kamar') === $tk->nama_tipe ? 'selected' : '' }}>{{ $tk->nama_tipe }}</option>
                     @endforeach
                 </select>
             </div>
