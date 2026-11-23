@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Gedung;
 
 use App\Http\Controllers\Controller;
 use App\Models\Gedung;
+use App\Models\JenisClient;
 use App\Models\Kamar;
 use App\Services\FacilitySelectionService;
 use Illuminate\Http\Request;
@@ -54,7 +55,9 @@ class GedungController extends Controller
 
     public function create()
     {
-        return view('gedung.create', app(FacilitySelectionService::class)->formData('gedung'));
+        $jenisClients = JenisClient::orderBy('id_jenis_client')->get();
+
+        return view('gedung.create', compact('jenisClients') + app(FacilitySelectionService::class)->formData('gedung'));
     }
 
     public function store(Request $request)
@@ -68,7 +71,10 @@ class GedungController extends Controller
 
     public function edit(Gedung $gedung)
     {
-        return view('gedung.edit', compact('gedung') + app(FacilitySelectionService::class)->formData('gedung', $gedung));
+        $gedung->load('eligibleJenisClients');
+        $jenisClients = JenisClient::orderBy('id_jenis_client')->get();
+
+        return view('gedung.edit', compact('gedung', 'jenisClients') + app(FacilitySelectionService::class)->formData('gedung', $gedung));
     }
 
     public function update(Request $request, Gedung $gedung)
@@ -111,6 +117,8 @@ class GedungController extends Controller
             'jumlah_lantai' => ['required', 'integer', 'min:1', 'max:20'],
             'deskripsi' => ['nullable', 'string'],
             'foto' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+            'eligible_jenis_clients' => ['nullable', 'array'],
+            'eligible_jenis_clients.*' => ['integer', 'exists:jenis_client,id_jenis_client'],
         ] + FacilitySelectionService::rules('gedung'), [
             'foto.image' => 'File yang diunggah harus berupa gambar.',
             'foto.mimes' => 'Gunakan gambar berformat JPG, PNG, atau WebP.',
@@ -144,6 +152,9 @@ class GedungController extends Controller
                 }
                 if ($request->has('fasilitas_present') || $request->has('fasilitas')) {
                     app(FacilitySelectionService::class)->sync($owner, $data['fasilitas'] ?? []);
+                }
+                if ($request->has('eligible_clients_present') || $request->has('eligible_jenis_clients')) {
+                    $owner->eligibleJenisClients()->sync($data['eligible_jenis_clients'] ?? []);
                 }
             });
         } catch (Throwable $exception) {

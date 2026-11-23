@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Gedung extends Model
@@ -37,6 +38,20 @@ class Gedung extends Model
     public function fasilitas(): HasMany
     {
         return $this->hasMany(Fasilitas::class, 'id_gedung', 'id_gedung')->where('aktif', true);
+    }
+
+    public function eligibleJenisClients(): BelongsToMany
+    {
+        return $this->belongsToMany(JenisClient::class, 'gedung_jenis_client', 'id_gedung', 'id_jenis_client');
+    }
+
+    public function isEligibleFor(?JenisClient $jenisClient): bool
+    {
+        if (! $jenisClient) {
+            return false;
+        }
+
+        return $this->eligibleJenisClients->contains('id_jenis_client', $jenisClient->id_jenis_client);
     }
 
     public function getFotoUrlAttribute(): ?string

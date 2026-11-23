@@ -131,6 +131,39 @@
         </div>
     </section>
 
+    {{-- Bagian 3: Penghuni Yang Eligible --}}
+    @php
+        $jenisClients = $jenisClients ?? collect();
+        $selectedEligibleClients = collect(old('eligible_jenis_clients', $gedung?->eligibleJenisClients?->pluck('id_jenis_client')->all() ?? []))
+            ->map(fn ($id) => (int) $id)
+            ->all();
+    @endphp
+    <section class="bg-surface-container-lowest rounded-xl p-space-xl shadow-sm flex flex-col gap-space-lg">
+        <div class="pb-space-sm border-b border-surface-container">
+            <h2 class="font-title-md text-title-md text-primary">Penghuni Yang Eligible</h2>
+            <p class="font-caption-sm text-caption-sm text-on-surface-variant">Centang kategori penghuni/client yang diperbolehkan menempati gedung ini.</p>
+        </div>
+
+        <input type="hidden" name="eligible_clients_present" value="1">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-space-sm">
+            @foreach ($jenisClients as $jc)
+                <label class="flex items-center gap-space-sm p-space-sm rounded-lg bg-surface-container-low hover:bg-surface-container transition-all cursor-pointer has-[:checked]:bg-secondary-fixed">
+                    <input
+                        type="checkbox"
+                        name="eligible_jenis_clients[]"
+                        value="{{ $jc->id_jenis_client }}"
+                        {{ in_array((int) $jc->id_jenis_client, $selectedEligibleClients, true) ? 'checked' : '' }}
+                        class="accent-secondary w-4 h-4 rounded cursor-pointer shrink-0"
+                    >
+                    <span class="font-body-md-medium text-body-md-medium text-primary">{{ $jc->jenis }}</span>
+                </label>
+            @endforeach
+        </div>
+        @error('eligible_jenis_clients')
+            <p class="text-caption-sm text-error" role="alert">{{ $message }}</p>
+        @enderror
+    </section>
+
     @include('partials.facility-selector', ['facilityTitle' => 'Fasilitas Bersama & Proteksi', 'facilityDescription' => 'Pilih fasilitas bersama yang tersedia di gedung ini.'])
 
     {{-- Bagian 4: Foto & Deskripsi --}}

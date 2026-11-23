@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class JenisClient extends Model
@@ -43,5 +44,10 @@ class JenisClient extends Model
     public function clients(): HasMany
     {
         return $this->hasMany(Client::class, 'id_jenis_client', 'id_jenis_client');
+    }
+
+    public function eligibleGedungs(): BelongsToMany
+    {
+        return $this->belongsToMany(Gedung::class, 'gedung_jenis_client', 'id_jenis_client', 'id_gedung');
     }
 }

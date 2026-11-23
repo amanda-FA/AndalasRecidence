@@ -127,14 +127,15 @@ class AuthController extends Controller
         ]);
 
         $category = $data['applicant_category'] ?? 'reguler';
-        $jenisClient = JenisClient::firstOrCreate(['jenis' => JenisClient::CATEGORIES[$category]]);
+        $categoryLabel = JenisClient::CATEGORIES[$category];
+        $jenisClient = JenisClient::firstOrCreate(['jenis' => $categoryLabel]);
 
         Client::create([
             'id_jenis_client' => $jenisClient->id_jenis_client,
             'id_pengguna' => $user->id_pengguna,
             'nomor_identitas' => $data['identity_number'] ?? null,
             'status_KIPK' => $category === 'kipk',
-            'pekerjaan' => $data['applicant_category'] ?? 'Mahasiswa',
+            'pekerjaan' => $categoryLabel,
         ]);
 
         return redirect()->route('login')
