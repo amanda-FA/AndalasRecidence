@@ -144,6 +144,14 @@
                         <span class="font-body-md text-body-md">Lapor Kerusakan</span>
                     </a>
                 @endif
+
+                @if (Route::has('checkout.index'))
+                    <a href="{{ route('checkout.index') }}"
+                       class="flex items-center gap-space-sm px-space-md py-space-sm rounded-xl transition-all {{ request()->routeIs('checkout.*') || request()->routeIs('client.checkout*') ? $activeClass : $inactiveClass }}">
+                        <span class="material-symbols-outlined text-[20px]">assignment_return</span>
+                        <span class="font-body-md text-body-md">Check-out &amp; Bebas Asrama</span>
+                    </a>
+                @endif
             @endrole
 
             @if (Route::has('pembayaran.index'))

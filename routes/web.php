@@ -11,5 +11,6 @@ require __DIR__.'/modules/pendaftaran.php';
 require __DIR__.'/modules/penempatan.php';
 require __DIR__.'/modules/kerusakan.php';
 require __DIR__.'/modules/pembayaran.php';
+require __DIR__.'/modules/checkout.php';
 
 require __DIR__.'/modules/go.php';
