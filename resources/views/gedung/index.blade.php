@@ -13,10 +13,6 @@
             </p>
         </div>
         <div class="flex items-center gap-space-sm shrink-0 flex-wrap">
-            <a href="{{ route('kamar.index') }}" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-surface-container-lowest text-primary font-label-md text-label-md shadow-sm hover:bg-surface-container hover:text-secondary transition-all">
-                <span class="material-symbols-outlined text-[18px]">bed</span>
-                <span>Kelola Kamar</span>
-            </a>
             <a href="{{ route('gedung.create') }}" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-secondary text-on-secondary font-label-md text-label-md shadow-brand-action-lg hover:bg-on-secondary-fixed-variant transition-all transform active:translate-y-0.5">
                 <span class="material-symbols-outlined text-[20px]">add</span>
                 <span>Tambah Gedung Baru</span>

@@ -7,15 +7,17 @@
     {{-- Top Action & Title Bar --}}
     <div class="flex flex-col xl:flex-row xl:items-center justify-between gap-space-lg bg-surface-container-lowest p-space-lg rounded-xl shadow-brand-card">
         <div class="flex flex-col space-y-1 min-w-0">
-            <h1 class="font-headline-lg text-headline-lg text-primary tracking-tight">Manajemen Kamar</h1>
+            <h1 class="font-headline-lg text-headline-lg text-primary tracking-tight">
+                {{ $selectedGedung ? 'Kamar — ' . $selectedGedung->nama : 'Manajemen Kamar' }}
+            </h1>
             <p class="font-body-md text-body-md text-on-surface-variant max-w-2xl">
-                Kelola seluruh inventaris kamar, kapasitas bed, fasilitas unit, dan status ketersediaan secara real-time.
+                {{ $selectedGedung ? 'Daftar unit kamar, kapasitas bed, fasilitas, dan status ketersediaan pada ' . $selectedGedung->nama . '.' : 'Kelola seluruh inventaris kamar, kapasitas bed, fasilitas unit, dan status ketersediaan secara real-time.' }}
             </p>
         </div>
         <div class="flex items-center gap-space-sm shrink-0">
             <a href="{{ route('gedung.index') }}" class="inline-flex items-center gap-1.5 px-space-md py-2.5 rounded-lg bg-surface-container-low text-primary font-label-md text-label-md hover:bg-surface-container transition-all whitespace-nowrap">
-                <span class="material-symbols-outlined text-[18px]">domain</span>
-                <span>Manajemen Gedung</span>
+                <span class="material-symbols-outlined text-[18px]">arrow_back</span>
+                <span>Kembali ke Gedung</span>
             </a>
             <a href="{{ route('kamar.create', ['gedung_id' => request('gedung_id')]) }}" class="inline-flex items-center gap-2 px-space-md py-2.5 rounded-lg bg-secondary text-on-secondary font-label-md text-label-md hover:bg-on-secondary-fixed-variant active:translate-y-px transition-all shadow-brand-action whitespace-nowrap">
                 <span class="material-symbols-outlined text-[20px]">add_circle</span>
@@ -75,19 +77,13 @@
 
     {{-- Horizontal Filter Bar --}}
     <form method="GET" action="{{ route('kamar.index') }}" class="bg-surface-container-lowest p-space-md rounded-xl shadow-brand-card">
+        @if ($selectedGedung)
+            <input type="hidden" name="gedung_id" value="{{ $selectedGedung->id_gedung }}">
+        @endif
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-space-sm items-center">
-            <div class="lg:col-span-2 relative">
+            <div class="lg:col-span-3 relative">
                 <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-[18px]">search</span>
                 <input name="q" value="{{ request('q') }}" class="w-full pl-9 pr-3 py-2 bg-surface-container-low rounded-lg font-body-md text-body-md text-on-surface placeholder:text-outline outline-none focus:bg-surface-container-lowest focus:ring-2 focus:ring-secondary/20 transition-all" placeholder="Cari nomor kamar (contoh: 204)..." type="text">
-            </div>
-
-            <div>
-                <select name="gedung_id" onchange="this.form.submit()" class="w-full px-3 py-2 bg-surface-container-low rounded-lg font-body-md text-body-md text-on-surface outline-none cursor-pointer">
-                    <option value="">Semua Gedung</option>
-                    @foreach ($gedungs as $g)
-                        <option value="{{ $g->id }}" {{ (string) request('gedung_id') === (string) $g->id ? 'selected' : '' }}>{{ $g->nama }}</option>
-                    @endforeach
-                </select>
             </div>
 
             <div>
@@ -115,7 +111,7 @@
                     <option value="penuh" {{ request('status') === 'penuh' ? 'selected' : '' }}>Penuh</option>
                     <option value="perbaikan" {{ request('status') === 'perbaikan' ? 'selected' : '' }}>Dalam Perbaikan</option>
                 </select>
-                <a href="{{ route('kamar.index') }}" class="p-2 rounded-lg bg-surface-container-low text-on-surface-variant hover:text-error hover:bg-error-container transition-colors shrink-0" title="Reset Filter">
+                <a href="{{ route('kamar.index', $selectedGedung ? ['gedung_id' => $selectedGedung->id_gedung] : []) }}" class="p-2 rounded-lg bg-surface-container-low text-on-surface-variant hover:text-error hover:bg-error-container transition-colors shrink-0" title="Reset Filter">
                     <span class="material-symbols-outlined text-[20px]">restart_alt</span>
                 </a>
             </div>
@@ -126,7 +122,9 @@
     <div class="bg-surface-container-lowest rounded-xl shadow-brand-card overflow-hidden">
         <div class="px-space-lg py-space-md flex items-center justify-between">
             <div class="flex items-center gap-2">
-                <span class="font-title-md text-title-md text-primary font-semibold">Daftar Inventaris Unit Kamar</span>
+                <span class="font-title-md text-title-md text-primary font-semibold">
+                    {{ $selectedGedung ? 'Daftar Kamar — ' . $selectedGedung->nama : 'Daftar Inventaris Unit Kamar' }}
+                </span>
                 <span class="px-2 py-0.5 rounded-full bg-surface-container-low text-secondary font-caption-sm-medium text-caption-sm-medium">{{ $kamars->total() }} Total</span>
             </div>
         </div>

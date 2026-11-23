@@ -61,24 +61,12 @@
             @role('Fasilitator')
                 @if (Route::has('gedung.index'))
                     <a href="{{ route('gedung.index') }}"
-                       class="flex items-center gap-space-sm px-space-md py-space-sm rounded-xl transition-all {{ request()->routeIs('gedung.*') ? $activeClass : $inactiveClass }}">
+                       class="flex items-center gap-space-sm px-space-md py-space-sm rounded-xl transition-all {{ request()->routeIs('gedung.*', 'kamar.*') ? $activeClass : $inactiveClass }}">
                         <span class="material-symbols-outlined text-[20px]">
                             domain
                         </span>
                         <span class="font-body-md text-body-md">
                             Manajemen Gedung
-                        </span>
-                    </a>
-                @endif
-
-                @if (Route::has('kamar.index'))
-                    <a href="{{ route('kamar.index') }}"
-                       class="flex items-center gap-space-sm px-space-md py-space-sm rounded-xl transition-all {{ request()->routeIs('kamar.*') ? $activeClass : $inactiveClass }}">
-                        <span class="material-symbols-outlined text-[20px]">
-                            bed
-                        </span>
-                        <span class="font-body-md text-body-md">
-                            Manajemen Kamar
                         </span>
                     </a>
                 @endif

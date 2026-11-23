@@ -15,7 +15,7 @@ class KamarController extends Controller
 {
     public function index(Request $request)
     {
-        $gedungs = Gedung::orderBy('nama_gedung')->get();
+        $gedungs = Gedung::withCount('kamars')->orderBy('nama_gedung')->get();
         $tipeKamars = TipeKamar::orderBy('nama_tipe')->get();
 
         $query = Kamar::with(['gedung', 'tipeKamar', 'fasilitas']);
@@ -52,9 +52,16 @@ class KamarController extends Controller
             });
         }
 
+        $gedungId = $request->query('gedung_id');
+        $selectedGedung = $gedungId ? $gedungs->firstWhere('id_gedung', (int) $gedungId) : null;
+
         $kamars = $query->orderBy('id_gedung')->orderBy('lantai')->orderBy('nomor_kamar')->paginate(15)->withQueryString();
 
-        $allKamars = Kamar::with('tipeKamar')->get();
+        $allKamarsQuery = Kamar::with('tipeKamar');
+        if ($selectedGedung) {
+            $allKamarsQuery->where('id_gedung', $selectedGedung->id_gedung);
+        }
+        $allKamars = $allKamarsQuery->get();
         $totalBed = $allKamars->sum('kapasitas_bed');
         $bedTerisi = $allKamars->sum('bed_terisi');
         $totalKamar = $allKamars->count();
@@ -71,12 +78,12 @@ class KamarController extends Controller
             'kamar_perbaikan' => $allKamars->where('status_kamar', 'perbaikan')->count(),
         ];
 
-        return view('kamar.index', compact('kamars', 'gedungs', 'tipeKamars', 'stats'));
+        return view('kamar.index', compact('kamars', 'gedungs', 'tipeKamars', 'stats', 'selectedGedung'));
     }
 
     public function create(Request $request)
     {
-        $gedungs = Gedung::orderBy('nama_gedung')->get();
+        $gedungs = Gedung::withCount('kamars')->orderBy('nama_gedung')->get();
         $tipeKamars = TipeKamar::orderBy('nama_tipe')->get();
         $tipeKamars = TipeKamar::orderBy('nama_tipe')->get();
         $selectedGedungId = $request->query('gedung_id');
@@ -97,7 +104,7 @@ class KamarController extends Controller
 
     public function edit(Kamar $kamar)
     {
-        $gedungs = Gedung::orderBy('nama_gedung')->get();
+        $gedungs = Gedung::withCount('kamars')->orderBy('nama_gedung')->get();
         $tipeKamars = TipeKamar::orderBy('nama_tipe')->get();
         $tipeKamars = TipeKamar::orderBy('nama_tipe')->get();
 
