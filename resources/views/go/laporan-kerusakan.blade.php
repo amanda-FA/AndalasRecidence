@@ -16,10 +16,10 @@
             <h1 class="font-headline-lg text-primary" style="margin-bottom: var(--space-xs);">Laporan Kerusakan</h1>
             <p class="font-body-md text-on-surface-variant">Kelola seluruh tiket kerusakan fasilitas asrama.</p>
         </div>
-        <a href="{{ route('go.laporan-kerusakan.create') }}" class="bg-secondary text-on-secondary font-label-md" style="display: inline-flex; align-items: center; gap: var(--space-xs); padding: 10px 20px; border-radius: 999px; text-decoration: none; border: none; cursor: pointer;">
+        <button type="button" onclick="document.getElementById('modal-tambah-kerusakan').style.display='flex'" class="bg-secondary text-on-secondary font-label-md" style="display: inline-flex; align-items: center; gap: var(--space-xs); padding: 10px 20px; border-radius: 999px; text-decoration: none; border: none; cursor: pointer;">
             <span class="material-symbols-outlined" style="font-size: 20px;">add</span>
             Buat Laporan Kerusakan Baru
-        </a>
+        </button>
     </div>
 
     {{-- Stat Cards --}}
@@ -78,35 +78,32 @@
                 </thead>
                 <tbody>
                     @forelse ($tikets as $tiket)
+                        @php
+                            $noTiket = is_array($tiket) ? ($tiket['nomor_tiket'] ?? '-') : ($tiket->no_tiket ?? '-');
+                            $fasilitas = is_array($tiket) ? ($tiket['fasilitas'] ?? '-') : ($tiket->fasilitas ?? '-');
+                            $lokasi = is_array($tiket) ? (($tiket['gedung'] ?? '-') . ' · ' . ($tiket['kamar'] ?? '-')) : (($tiket->gedung->nama_gedung ?? '-') . ' · ' . ($tiket->kamar->nomor_kamar ?? '-'));
+                            $tgl = is_array($tiket) ? ($tiket['tanggal_lapor'] ?? '-') : (\Carbon\Carbon::parse($tiket->tanggal ?? now())->format('d M Y'));
+                            $teknisi = is_array($tiket) ? ($tiket['teknisi'] ?? 'Belum ditugaskan') : ($tiket->teknisi->nama_lengkap ?? 'Belum ditugaskan');
+                            $statusLabel = is_array($tiket) ? ($tiket['status_label'] ?? 'Menunggu Disposisi') : ($statusLabels[$tiket->status] ?? ucfirst($tiket->status ?? ''));
+                            $statusColor = is_array($tiket) ? ($tiket['status_color'] ?? '') : ($statusColors[$tiket->status] ?? '');
+                        @endphp
                         <tr style="border-bottom: 1px solid var(--outline-variant);">
                             <td class="font-body-md text-primary" style="padding: var(--space-sm) var(--space-md);">
-                                <span style="font-family: monospace;">{{ $tiket->no_tiket ?? '-' }}</span>
+                                <span style="font-family: monospace;">{{ $noTiket }}</span>
                             </td>
-                            <td class="font-body-md text-primary" style="padding: var(--space-sm) var(--space-md);">{{ $tiket->fasilitas ?? '-' }}</td>
+                            <td class="font-body-md text-primary" style="padding: var(--space-sm) var(--space-md);">{{ $fasilitas }}</td>
                             <td class="font-body-md text-on-surface-variant" style="padding: var(--space-sm) var(--space-md);">
-                                {{ $tiket->gedung->nama_gedung ?? '-' }} &middot; {{ $tiket->kamar->nomor_kamar ?? '-' }}
+                                {{ $lokasi }}
                             </td>
                             <td class="font-body-md text-on-surface-variant" style="padding: var(--space-sm) var(--space-md);">
-                                {{ \Carbon\Carbon::parse($tiket->tanggal)->format('d M Y') }}
+                                {{ $tgl }}
                             </td>
                             <td class="font-body-md text-primary" style="padding: var(--space-sm) var(--space-md);">
-                                {{ $tiket->teknisi->nama_lengkap ?? '—' }}
+                                {{ $teknisi }}
                             </td>
                             <td style="padding: var(--space-sm) var(--space-md);">
-                                @php
-                                    $statusColors = [
-                                        'menunggu_disposisi' => 'background: var(--warning-container); color: var(--on-warning-container);',
-                                        'dalam_perbaikan' => 'background: var(--info-container); color: var(--on-info-container);',
-                                        'selesai' => 'background: var(--success-container); color: var(--on-success-container);',
-                                    ];
-                                    $statusLabels = [
-                                        'menunggu_disposisi' => 'Menunggu Disposisi',
-                                        'dalam_perbaikan' => 'Dalam Perbaikan',
-                                        'selesai' => 'Selesai',
-                                    ];
-                                @endphp
-                                <span class="font-label-md" style="{{ $statusColors[$tiket->status] ?? '' }} padding: 4px 12px; border-radius: 999px;">
-                                    {{ $statusLabels[$tiket->status] ?? ucfirst($tiket->status) }}
+                                <span class="font-label-md {{ is_array($tiket) ? $statusColor : '' }}" style="{{ !is_array($tiket) ? $statusColor : '' }} padding: 4px 12px; border-radius: 999px;">
+                                    {{ $statusLabel }}
                                 </span>
                             </td>
                         </tr>

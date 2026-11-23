@@ -33,9 +33,9 @@
         <div style="flex: 1; min-width: 180px;">
             <label class="font-label-md text-on-surface-variant" style="display: block; margin-bottom: var(--space-xs);">Gedung</label>
             <select name="gedung" onchange="this.form.submit()" class="font-body-md text-primary" style="width: 100%; padding: 10px 14px; border-radius: 12px; border: 1px solid var(--outline-variant); background: var(--surface-container-lowest);">
-                <option value="">Semua Gedung</option>
-                @foreach ($gedungList as $gedung)
-                    <option value="{{ $gedung->id_gedung }}" {{ $gedungFilter == $gedung->id_gedung ? 'selected' : '' }}>{{ $gedung->nama_gedung }}</option>
+                <option value="all">Semua Gedung</option>
+                @foreach ($gedungList as $id => $nama)
+                    <option value="{{ $id }}" {{ $gedungFilter == $id ? 'selected' : '' }}>{{ $nama }}</option>
                 @endforeach
             </select>
         </div>
@@ -107,48 +107,58 @@
                 </thead>
                 <tbody>
                     @forelse ($antrean as $item)
+                        @php
+                            $namaMhs = is_array($item) ? ($item['nama'] ?? '-') : ($item->pengguna->nama_lengkap ?? '-');
+                            $namaGedung = is_array($item) ? ($item['gedung'] ?? '-') : ($item->gedung->nama_gedung ?? '-');
+                            $nomorKmr = is_array($item) ? ($item['kamar'] ?? '-') : ($item->kamar->nomor_kamar ?? '-');
+                            $tglCheckout = is_array($item) ? ($item['tanggal_checkout_formatted'] ?? '-') : (\Carbon\Carbon::parse($item->tanggal_checkout ?? now())->format('d M Y'));
+                            $statusVal = is_array($item) ? ($item['status'] ?? 'menunggu') : ($item->status ?? 'menunggu');
+                            $idPengajuan = is_array($item) ? ($item['id_pengajuan'] ?? 1) : ($item->id_pengajuan ?? 1);
+                        @endphp
                         <tr style="border-bottom: 1px solid var(--outline-variant);">
                             <td style="padding: var(--space-sm) var(--space-md);">
                                 <div style="display: flex; align-items: center; gap: var(--space-sm);">
                                     <div class="bg-primary-container" style="width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
-                                        <span class="font-label-md text-primary">{{ strtoupper(substr($item->pengguna->nama_lengkap ?? '-', 0, 1)) }}</span>
+                                        <span class="font-label-md text-primary">{{ strtoupper(substr($namaMhs, 0, 1)) }}</span>
                                     </div>
-                                    <span class="font-body-md text-primary">{{ $item->pengguna->nama_lengkap ?? '-' }}</span>
+                                    <span class="font-body-md text-primary">{{ $namaMhs }}</span>
                                 </div>
                             </td>
-                            <td class="font-body-md text-primary" style="padding: var(--space-sm) var(--space-md);">{{ $item->gedung->nama_gedung ?? '-' }}</td>
-                            <td class="font-body-md text-primary" style="padding: var(--space-sm) var(--space-md);">{{ $item->kamar->nomor_kamar ?? '-' }}</td>
+                            <td class="font-body-md text-primary" style="padding: var(--space-sm) var(--space-md);">{{ $namaGedung }}</td>
+                            <td class="font-body-md text-primary" style="padding: var(--space-sm) var(--space-md);">{{ $nomorKmr }}</td>
                             <td class="font-body-md text-on-surface-variant" style="padding: var(--space-sm) var(--space-md);">
-                                {{ \Carbon\Carbon::parse($item->tanggal_checkout)->format('d M Y') }}
+                                {{ $tglCheckout }}
                             </td>
                             <td style="padding: var(--space-sm) var(--space-md);">
                                 @php
                                     $statusColors = [
                                         'menunggu' => 'background: var(--warning-container); color: var(--on-warning-container);',
                                         'sedang_diperiksa' => 'background: var(--info-container); color: var(--on-info-container);',
+                                        'dalam_pengecekan' => 'background: var(--info-container); color: var(--on-info-container);',
                                         'selesai' => 'background: var(--success-container); color: var(--on-success-container);',
                                     ];
                                     $statusLabels = [
-                                        'menunggu' => 'Menunggu',
-                                        'sedang_diperiksa' => 'Sedang Diperiksa',
-                                        'selesai' => 'Selesai',
+                                        'menunggu' => 'Menunggu Pengecekan',
+                                        'sedang_diperiksa' => 'Dalam Pengecekan',
+                                        'dalam_pengecekan' => 'Dalam Pengecekan',
+                                        'selesai' => 'Selesai Pengecekan',
                                     ];
                                 @endphp
-                                <span class="font-label-md" style="{{ $statusColors[$item->status] ?? '' }} padding: 4px 12px; border-radius: 999px;">
-                                    {{ $statusLabels[$item->status] ?? ucfirst($item->status) }}
+                                <span class="font-label-md" style="{{ $statusColors[$statusVal] ?? 'background: var(--surface-container); color: var(--on-surface);' }} padding: 4px 12px; border-radius: 999px;">
+                                    {{ $statusLabels[$statusVal] ?? ucfirst($statusVal) }}
                                 </span>
                             </td>
                             <td style="padding: var(--space-sm) var(--space-md); text-align: center;">
-                                @if ($item->status === 'menunggu')
-                                    <form action="{{ route('go.pengecekan-kamar.mulai', $item->id_pengajuan) }}" method="POST" style="display: inline;">
+                                @if ($statusVal === 'menunggu')
+                                    <form action="{{ route('go.pengecekan-kamar.mulai', $idPengajuan) }}" method="POST" style="display: inline;">
                                         @csrf
                                         <button type="submit" class="bg-secondary text-on-secondary font-label-md" style="display: inline-flex; align-items: center; gap: var(--space-xs); padding: 8px 16px; border-radius: 999px; border: none; cursor: pointer;">
                                             <span class="material-symbols-outlined" style="font-size: 18px;">play_arrow</span>
                                             Mulai
                                         </button>
                                     </form>
-                                @elseif ($item->status === 'sedang_diperiksa')
-                                    <a href="{{ route('go.pengecekan-kamar.form', $item->id_pengajuan) }}" class="bg-primary-container text-primary font-label-md" style="display: inline-flex; align-items: center; gap: var(--space-xs); padding: 8px 16px; border-radius: 999px; text-decoration: none;">
+                                @elseif ($statusVal === 'sedang_diperiksa' || $statusVal === 'dalam_pengecekan')
+                                    <a href="{{ route('go.pengecekan-kamar.show', $idPengajuan) }}" class="bg-primary-container text-primary font-label-md" style="display: inline-flex; align-items: center; gap: var(--space-xs); padding: 8px 16px; border-radius: 999px; text-decoration: none;">
                                         <span class="material-symbols-outlined" style="font-size: 18px;">edit_note</span>
                                         Lanjutkan
                                     </a>

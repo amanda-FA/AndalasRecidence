@@ -106,50 +106,63 @@
                 </thead>
                 <tbody>
                     @forelse ($pengecekanTerbaru as $item)
+                        @php
+                            $namaPemohon = is_array($item) ? ($item['nama'] ?? '-') : ($item->pengguna->nama_lengkap ?? '-');
+                            $gedungKamar = is_array($item) ? (($item['gedung'] ?? '-') . ' / ' . ($item['kamar'] ?? '-')) : (($item->gedung->nama_gedung ?? '-') . ' / ' . ($item->kamar->nomor_kamar ?? '-'));
+                            $tglCheckout = is_array($item) ? ($item['tanggal_checkout'] ?? '-') : (\Carbon\Carbon::parse($item->tanggal_checkout ?? now())->format('d M Y'));
+                            $statusVal = is_array($item) ? ($item['status'] ?? 'menunggu') : ($item->status ?? 'menunggu');
+                            $idPengajuan = is_array($item) ? ($item['id_pengajuan'] ?? 1) : ($item->id_pengajuan ?? 1);
+                        @endphp
                         <tr style="border-bottom: 1px solid var(--outline-variant);">
                             <td style="padding: var(--space-sm) var(--space-md);">
                                 <div style="display: flex; align-items: center; gap: var(--space-sm);">
                                     <div class="bg-primary-container" style="width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
-                                        <span class="font-label-md text-primary">{{ strtoupper(substr($item->pengguna->nama_lengkap ?? '-', 0, 1)) }}</span>
+                                        <span class="font-label-md text-primary">{{ strtoupper(substr($namaPemohon, 0, 1)) }}</span>
                                     </div>
                                     <div>
-                                        <span class="font-body-md text-primary" style="display: block;">{{ $item->pengguna->nama_lengkap ?? '-' }}</span>
-                                        <span class="font-caption-sm text-on-surface-variant">{{ $item->pengguna->email ?? '' }}</span>
+                                        <span class="font-body-md text-primary" style="display: block;">{{ $namaPemohon }}</span>
                                     </div>
                                 </div>
                             </td>
                             <td class="font-body-md text-primary" style="padding: var(--space-sm) var(--space-md);">
-                                {{ $item->gedung->nama_gedung ?? '-' }} / {{ $item->kamar->nomor_kamar ?? '-' }}
+                                {{ $gedungKamar }}
                             </td>
                             <td class="font-body-md text-on-surface-variant" style="padding: var(--space-sm) var(--space-md);">
-                                {{ \Carbon\Carbon::parse($item->tanggal_checkout)->format('d M Y') }}
+                                {{ $tglCheckout }}
                             </td>
                             <td style="padding: var(--space-sm) var(--space-md);">
                                 @php
                                     $statusColors = [
                                         'menunggu' => 'background: var(--warning-container); color: var(--on-warning-container);',
                                         'sedang_diperiksa' => 'background: var(--info-container); color: var(--on-info-container);',
+                                        'dalam_pengecekan' => 'background: var(--info-container); color: var(--on-info-container);',
                                         'selesai' => 'background: var(--success-container); color: var(--on-success-container);',
                                     ];
                                     $statusLabels = [
-                                        'menunggu' => 'Menunggu',
+                                        'menunggu' => 'Menunggu Pengecekan',
                                         'sedang_diperiksa' => 'Sedang Diperiksa',
-                                        'selesai' => 'Selesai',
+                                        'dalam_pengecekan' => 'Sedang Diperiksa',
+                                        'selesai' => 'Selesai Pengecekan',
                                     ];
                                 @endphp
-                                <span class="font-label-md" style="{{ $statusColors[$item->status] ?? '' }} padding: 4px 12px; border-radius: 999px;">
-                                    {{ $statusLabels[$item->status] ?? ucfirst($item->status) }}
+                                <span class="font-label-md" style="{{ $statusColors[$statusVal] ?? 'background: var(--surface-container); color: var(--on-surface);' }} padding: 4px 12px; border-radius: 999px;">
+                                    {{ $statusLabels[$statusVal] ?? ucfirst($statusVal) }}
                                 </span>
                             </td>
                             <td style="padding: var(--space-sm) var(--space-md); text-align: center;">
-                                @if ($item->status === 'menunggu')
-                                    <form action="{{ route('go.pengecekan-kamar.mulai', $item->id_pengajuan) }}" method="POST" style="display: inline;">
+                                @if ($statusVal === 'menunggu')
+                                    <form action="{{ route('go.pengecekan-kamar.mulai', $idPengajuan) }}" method="POST" style="display: inline;">
                                         @csrf
                                         <button type="submit" class="bg-secondary text-on-secondary font-label-md" style="display: inline-flex; align-items: center; gap: var(--space-xs); padding: 8px 16px; border-radius: 999px; border: none; cursor: pointer;">
                                             <span class="material-symbols-outlined" style="font-size: 18px;">play_arrow</span>
                                             Mulai Periksa
                                         </button>
                                     </form>
+                                @elseif ($statusVal === 'dalam_pengecekan' || $statusVal === 'sedang_diperiksa')
+                                    <a href="{{ route('go.pengecekan-kamar.show', $idPengajuan) }}" class="bg-primary text-on-primary font-label-md" style="display: inline-flex; align-items: center; gap: var(--space-xs); padding: 8px 16px; border-radius: 999px; text-decoration: none;">
+                                        <span class="material-symbols-outlined" style="font-size: 18px;">edit_document</span>
+                                        Lanjutkan Form
+                                    </a>
                                 @else
                                     <span class="font-caption-sm text-on-surface-variant">—</span>
                                 @endif

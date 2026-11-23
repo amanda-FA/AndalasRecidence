@@ -144,7 +144,7 @@
         {{-- Footer --}}
         <div style="padding: var(--space-md) var(--space-lg); border-top: 1px solid var(--outline-variant); display: flex; justify-content: space-between; align-items: center;">
             <span class="font-caption-sm text-on-surface-variant">
-                Menampilkan {{ $riwayat->count() }} dari {{ $riwayat->total() ?? $riwayat->count() }} data pengecekan
+                Menampilkan {{ $riwayat->count() }} data pengecekan
             </span>
             @if (method_exists($riwayat, 'links'))
                 {{ $riwayat->links() }}
