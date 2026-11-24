@@ -24,31 +24,22 @@ class PendaftaranHunianController extends Controller
         return $client->canChooseRoom();
     }
 
+    private function kategoriValid($client): bool
+    {
+        return $client->jenisClient !== null
+            && in_array($client->jenisClient->jenis, JenisClient::CATEGORIES, true);
+    }
+
     private function gedungDiizinkan($client): array
     {
         if (!$this->bolehMemilihTipe($client)) {
             return [];
         }
 
-        // Gedung yang menerima maba non-KIPK
-        // sekaligus mahasiswa S1 non-maba.
-        $gedung = [
-            'Gedung Asrama RPX (A)',
-            'Gedung Asrama Rusunawa (B)',
-            'Gedung Asrama Pupera Putri (C)',
-            'Gedung Asrama Menpera (D)',
-            'Gedung Asrama RMS (E)',
-            'Gedung Asrama Oren (F)',
-            'Gedung Asrama Hijau (G)',
-            'Gedung Asrama Pupera Putera (H)',
-        ];
-
-        if ($client->jenisClient?->jenis === JenisClient::CATEGORIES['guest']) {
-            $gedung[] = 'Gedung Asrama Nakes';
-            $gedung[] = 'Gedung Asrama ASN';
-        }
-
-        return $gedung;
+        return $client->jenisClient->eligibleGedungs()
+            ->pluck('gedung.id_gedung')
+            ->map(fn ($id) => (int) $id)
+            ->all();
     }
 
     private function queryTipe(
@@ -68,7 +59,7 @@ class PendaftaranHunianController extends Controller
                 $gedungDiizinkan,
                 $jenisPenghuni
             ) {
-                $query->whereIn('nama_gedung', $gedungDiizinkan);
+                $query->whereIn('gedung.id_gedung', $gedungDiizinkan);
 
                 if ($jenisPenghuni !== null) {
                     $query->whereIn('jenis_penghuni', $jenisPenghuni);
@@ -89,11 +80,17 @@ class PendaftaranHunianController extends Controller
             'Profil client belum tersedia. Hubungi Admin Layanan.'
         );
 
+        abort_unless($this->kategoriValid($client), 403, 'Kategori Client belum valid. Hubungi Admin Layanan.');
+
         $hariIni = today()->toDateString();
+
+        $periodeTerdaftar = PendaftaranHunian::where('id_client', $client->id_client)
+            ->pluck('id_periode');
 
         $periodes = PeriodePendaftaran::where('status', 'dibuka')
             ->whereDate('tanggal_buka', '<=', $hariIni)
             ->whereDate('tanggal_tutup', '>=', $hariIni)
+            ->whereNotIn('id_periode', $periodeTerdaftar)
             ->orderByDesc('tanggal_buka')
             ->get();
 
@@ -120,7 +117,7 @@ class PendaftaranHunianController extends Controller
                 if (
                     !$gedung
                     || !in_array(
-                        $gedung->nama_gedung,
+                        (int) $gedung->id_gedung,
                         $gedungDiizinkan,
                         true
                     )
@@ -149,7 +146,7 @@ class PendaftaranHunianController extends Controller
 
         $roomChoices = $bolehMemilihTipe ? Kamar::with(['gedung', 'tipeKamar'])
             ->where('status_kamar', 'tersedia')
-            ->whereHas('gedung', fn ($q) => $q->whereIn('nama_gedung', $gedungDiizinkan))
+            ->whereHas('gedung', fn ($q) => $q->whereIn('gedung.id_gedung', $gedungDiizinkan))
             ->withCount(['penempatanKamars as occupied' => fn ($q) => $q->current()])
             ->orderBy('nomor_kamar')->get()->filter(fn ($room) => $room->occupied < ($room->getRelation('tipeKamar')?->kapasitas ?? 0))
             ->map(fn ($room) => [
@@ -187,6 +184,12 @@ class PendaftaranHunianController extends Controller
             'Profil client belum tersedia.'
         );
 
+        if (!$this->kategoriValid($client)) {
+            throw ValidationException::withMessages([
+                'kategori' => 'Kategori Client belum valid. Hubungi Admin Layanan.',
+            ]);
+        }
+
         $bolehMemilihTipe = $this->bolehMemilihTipe($client);
 
         $data = $request->validate([
@@ -213,7 +216,7 @@ class PendaftaranHunianController extends Controller
             'alamat_asal' => ['required', 'string', 'max:2000'],
             'berkas' => ['required', 'array', 'min:1', 'max:5'],
             'id_jenis_berkas' => ['required', 'array', 'min:1', 'max:5'],
-            'id_jenis_berkas.*' => ['required', 'integer', Rule::exists('jenis_berkas', 'id_jenis_berkas')],
+            'id_jenis_berkas.*' => ['required', 'integer', 'distinct', Rule::exists('jenis_berkas', 'id_jenis_berkas')],
             'berkas.*' => [
                 'required',
                 'file',
@@ -269,8 +272,9 @@ class PendaftaranHunianController extends Controller
                 $profil->load('jenisClient');
 
                 if (
-                    $this->bolehMemilihTipe($profil)
-                    !== $bolehMemilihTipe
+                    !$this->kategoriValid($profil)
+                    || $profil->id_jenis_client != $client->id_jenis_client
+                    || $this->bolehMemilihTipe($profil) !== $bolehMemilihTipe
                 ) {
                     throw ValidationException::withMessages([
                         'kategori' =>
@@ -312,8 +316,8 @@ class PendaftaranHunianController extends Controller
                 if ($bolehMemilihTipe) {
                     $selectedRoom = Kamar::with(['gedung', 'tipeKamar'])->whereKey($data['id_kamar'])->lockForUpdate()->firstOrFail();
                     $allowedGender = $data['jenis_kelamin'] === 'laki-laki' ? ['putra','campuran','tamu'] : ['putri','campuran','tamu'];
-                    if ($selectedRoom->id_gedung != $data['id_gedung'] || $selectedRoom->id_tipeKamar != $data['id_tipeKamar']
-                        || !in_array($selectedRoom->gedung->nama_gedung, $this->gedungDiizinkan($profil), true)
+                    if (!$selectedRoom->gedung || $selectedRoom->id_gedung != $data['id_gedung'] || $selectedRoom->id_tipeKamar != $data['id_tipeKamar']
+                        || !in_array((int) $selectedRoom->id_gedung, $this->gedungDiizinkan($profil), true)
                         || !in_array($selectedRoom->gedung->jenis_penghuni, $allowedGender, true)
                         || $selectedRoom->status_kamar !== 'tersedia'
                         || $selectedRoom->penempatanKamars()->current()->count() >= ($selectedRoom->getRelation('tipeKamar')?->kapasitas ?? 0)) {
@@ -323,7 +327,7 @@ class PendaftaranHunianController extends Controller
 
                 $profil->update([
                     'nomor_identitas' => $data['nomor_identitas'],
-                    'pekerjaan' => $data['pekerjaan'] ?? null,
+                    'pekerjaan' => $data['pekerjaan'] ?? $profil->pekerjaan,
                     'jenis_kelamin' => $data['jenis_kelamin'],
                     'alamat_asal' => $data['alamat_asal'],
                 ]);

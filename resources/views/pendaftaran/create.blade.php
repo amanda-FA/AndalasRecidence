@@ -53,6 +53,26 @@
         </p>
     </div>
 
+    {{-- Notifikasi keberhasilan pendaftaran --}}
+    @if (session('success'))
+        <div role="status" class="rounded-2xl border border-green-200 bg-green-50 p-6 mb-6">
+            <div class="flex items-start gap-4">
+                <div class="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center shrink-0">
+                    <span class="material-symbols-outlined text-green-600 text-[30px]">check_circle</span>
+                </div>
+                <div class="flex-1">
+                    <h2 class="text-lg font-bold text-green-800">Pendaftaran Berhasil Dikirim!</h2>
+                    <p class="text-sm text-green-700 mt-2">{{ session('success') }}</p>
+                    <span class="inline-flex items-center gap-2 rounded-full bg-amber-100 px-3 py-1 text-sm font-medium text-amber-800 mt-4">
+                        <span class="material-symbols-outlined text-[18px]">schedule</span>
+                        Menunggu Verifikasi
+                    </span>
+                    <p class="text-sm text-green-700 mt-4">Silakan menunggu hasil pemeriksaan berkas dan verifikasi dari Admin Layanan sebelum melanjutkan ke tahap berikutnya.</p>
+                </div>
+            </div>
+        </div>
+    @endif
+
     {{-- Kesalahan validasi --}}
     @if ($errors->any())
         <div role="alert"
@@ -72,7 +92,7 @@
     @if ($periodes->isEmpty())
         <div role="status"
              class="rounded-xl bg-surface-container p-space-lg mb-space-lg">
-            Belum ada periode yang sedang menerima pendaftaran.
+            Tidak ada periode pendaftaran yang dapat Anda pilih saat ini. Periode yang sudah Anda daftarkan tidak ditampilkan.
         </div>
     @endif
 
