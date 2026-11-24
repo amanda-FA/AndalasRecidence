@@ -134,7 +134,7 @@
                 @endif
             @endrole
 
-            @if (Route::has('pembayaran.index'))
+            @if (auth()->user()?->hasRole('Client') && Route::has('pembayaran.index'))
                 <a href="{{ route('pembayaran.index') }}"
                 class="flex items-center gap-space-sm px-space-md py-space-sm rounded-xl transition-all {{ request()->routeIs('pembayaran.*') ? $activeClass : $inactiveClass }}">
                     <span class="material-symbols-outlined text-[20px]">
