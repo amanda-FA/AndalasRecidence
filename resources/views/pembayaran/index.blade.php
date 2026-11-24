@@ -14,62 +14,212 @@
 @endsection
 
 @section('content')
-@php
-    // Data contoh untuk preview frontend.
-    $rincian = [
-        ['nama' => 'Sewa hunian', 'keterangan' => 'Contoh nominal sewa', 'nominal' => 700000],
-        ['nama' => 'Deposit fasilitas', 'keterangan' => 'Contoh komponen tagihan', 'nominal' => 50000],
-        ['nama' => 'Administrasi pembayaran', 'keterangan' => 'Contoh biaya administrasi', 'nominal' => 3000],
-    ];
 
-    $total = array_sum(array_column($rincian, 'nominal'));
+@php
+    $terverifikasi =
+        $pendaftaran?->status_pendaftaran === 'terverifikasi';
+
+    $total = $terverifikasi
+        ? $pembayaran?->jumlah
+        : null;
+
+    $statusBayar = $pembayaran?->status_pembayaran;
+
+    $pembiayaanKhusus = in_array($status, [
+        'pembiayaan_kipk',
+        'pembiayaan_pihak_ketiga',
+        'pembiayaan_penyelenggara',
+    ], true);
+
+    $namaKategori = match ($kategori) {
+        'reguler' => 'Maba Lokal NON KIP-K',
+        'kipk' => 'Maba Lokal KIP-K',
+        's1_non_maba' => 'Mahasiswa S1 Non Maba',
+        'international_private' => 'Internasional/S2/S3 pribadi',
+        'international_funded' => 'Internasional/S2/S3 ditanggung',
+        'guest' => 'Non Mahasiswa (UMUM)',
+        'summer_course' => 'Summer Course',
+        default => 'Belum diketahui',
+    };
+
+    $label = match (true) {
+        !$pendaftaran => 'Belum Mendaftar',
+        !$terverifikasi => ucfirst(str_replace('_', ' ', $status)),
+
+        $statusBayar === 'menunggu_kipk' =>
+            'Menunggu Pembiayaan KIP-K',
+
+        $status === 'pembiayaan_kipk' =>
+            'Pembiayaan KIP-K',
+
+        $status === 'pembiayaan_pihak_ketiga' =>
+            'Pembiayaan Pihak Ketiga',
+
+        $status === 'pembiayaan_penyelenggara' =>
+            'Pembiayaan Penyelenggara',
+
+        $status === 'pembayaran_belum_diaktifkan' =>
+            'Pembayaran Belum Diaktifkan',
+
+        $status === 'kategori_belum_dikenali' =>
+            'Kategori Belum Dikenali',
+
+        $statusBayar === 'simulasi_lunas' =>
+            'Lunas (Simulasi)',
+
+        $statusBayar === 'simulasi_gagal' =>
+            'Gagal (Simulasi)',
+
+        $statusBayar === 'menunggu' =>
+            'Menunggu Pembayaran',
+
+        $pembayaran !== null =>
+            ucfirst(str_replace('_', ' ', $statusBayar)),
+
+        $status === 'tarif_belum_tersedia' =>
+            'Tarif Belum Tersedia',
+
+        default => 'Tagihan Belum Diterbitkan',
+    };
+
+    $ikon = match (true) {
+        !$pendaftaran => 'assignment',
+        !$terverifikasi => 'pending_actions',
+        $pembiayaanKhusus => 'verified_user',
+        $status === 'pembayaran_belum_diaktifkan' => 'schedule',
+        $status === 'kategori_belum_dikenali' => 'help',
+        $statusBayar === 'simulasi_lunas' => 'check_circle',
+        $statusBayar === 'simulasi_gagal' => 'error',
+        $statusBayar === 'menunggu' => 'hourglass_top',
+        $status === 'tarif_belum_tersedia' => 'warning',
+        default => 'receipt_long',
+    };
+
+    $warnaBadge = match (true) {
+        !$terverifikasi => 'bg-slate-100 text-slate-700',
+        $pembiayaanKhusus => 'bg-blue-100 text-blue-800',
+        $status === 'pembayaran_belum_diaktifkan' =>
+            'bg-amber-100 text-amber-800',
+        $statusBayar === 'simulasi_lunas' =>
+            'bg-green-100 text-green-800',
+        $statusBayar === 'simulasi_gagal' =>
+            'bg-red-100 text-red-800',
+        $statusBayar === 'menunggu' =>
+            'bg-amber-100 text-amber-800',
+        default => 'bg-surface-container-lowest text-primary',
+    };
+
+    $deskripsi = match (true) {
+        !$pendaftaran =>
+            'Silakan melakukan pendaftaran hunian terlebih dahulu.',
+
+        !$terverifikasi =>
+            'Pembayaran tersedia setelah pendaftaran terverifikasi.',
+
+        $statusBayar === 'simulasi_lunas' =>
+            'Simulasi pembayaran berhasil. Tidak ada transaksi uang sungguhan.',
+
+        $statusBayar === 'simulasi_gagal' =>
+            'Simulasi pembayaran gagal. Silakan lakukan pengujian kembali.',
+
+        $statusBayar === 'menunggu' =>
+            'Tagihan telah diterbitkan dan menunggu simulasi pembayaran.',
+
+        $statusBayar === 'menunggu_kipk' =>
+            'Invoice Rp0 sementara. Pembiayaan KIP-K belum dinyatakan lunas.',
+
+        $pesan !== null => $pesan,
+
+        default =>
+            'Nominal pembayaran mengikuti tarif hunian yang berlaku.',
+    };
+
+    $namaMetode = match ($pembayaran?->metode_bayar) {
+        'simulasi_va' => 'Virtual Account (Simulasi)',
+        'simulasi_qris' => 'QRIS (Simulasi)',
+        'simulasi_loket' => 'Loket (Simulasi)',
+        'belum_dipilih' => 'Belum dipilih',
+        'kipk' => 'Pembiayaan KIP-K',
+        default => $pembayaran?->metode_bayar ?? 'Belum tersedia',
+    };
 @endphp
 
 <div class="w-full max-w-[1280px] mx-auto flex flex-col gap-space-lg">
-    {{-- Informasi simulasi --}}
-    <div class="flex flex-col md:flex-row md:items-center justify-between gap-space-md rounded-xl bg-surface-container p-space-md">
-        <div class="flex items-start gap-space-sm">
-            <span class="material-symbols-outlined text-secondary">
-                info
-            </span>
-            <div>
-                <p class="font-label-md text-label-md">
-                    Preview Frontend Pembayaran
-                </p>
-                <p class="font-caption-sm text-caption-sm text-on-surface-variant mt-1">
-                    Nominal dan kode di halaman ini adalah contoh.
-                    Belum terhubung ke layanan pembayaran.
-                </p>
-            </div>
+    @if (session('success'))
+        <div role="status" class="rounded-xl bg-green-50 text-green-800 p-4">{{ session('success') }}</div>
+    @endif
+    @if (session('warning'))
+        <div role="status" class="rounded-xl bg-amber-50 text-amber-800 p-4">{{ session('warning') }}</div>
+    @endif
+    @if ($errors->any())
+        <div role="alert" class="rounded-xl bg-red-50 text-red-800 p-4">
+            @foreach ($errors->all() as $error)
+                <p>{{ $error }}</p>
+            @endforeach
         </div>
+    @endif
 
-        <div class="shrink-0">
-            <label for="preview-status"
-                   class="block font-caption-sm text-caption-sm mb-1">
-                Preview status
-            </label>
-            <select id="preview-status"
-                    class="w-full rounded-lg bg-surface-container-lowest px-3 py-2 outline-none focus:ring-2 focus:ring-secondary">
-                <option value="menunggu">Menunggu Pembayaran</option>
-                <option value="lunas">Lunas</option>
-                <option value="gagal">Gagal</option>
-                <option value="kedaluwarsa">Kedaluwarsa</option>
-            </select>
+
+    {{-- Informasi pendaftaran --}}
+    <div class="rounded-xl bg-surface-container p-space-md
+                flex items-start gap-3">
+
+        <span class="material-symbols-outlined text-secondary">
+            info
+        </span>
+
+        <div>
+            @if (!$pendaftaran)
+
+                Silakan
+                <a href="{{ route('pendaftaran.create') }}"
+                   class="underline text-secondary">
+                    mendaftar hunian
+                </a>
+                terlebih dahulu.
+
+            @elseif (!$terverifikasi)
+
+                Tagihan belum tersedia karena pendaftaran
+                belum terverifikasi.
+
+            @elseif ($pesan)
+
+                {{ $pesan }}
+
+            @else
+
+                Tarif hunian ditentukan berdasarkan gedung,
+                tipe kamar, kategori penghuni, dan satuan
+                penyewaan yang berlaku.
+
+            @endif
         </div>
     </div>
 
-    {{-- Hero --}}
-    <section class="rounded-2xl bg-primary-container text-on-primary p-space-lg lg:p-space-xl shadow-sm">
-        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-space-lg">
+    {{-- Hero pembayaran --}}
+    <section class="rounded-2xl bg-primary-container
+                    text-on-primary p-space-lg lg:p-space-xl shadow-sm">
+
+        <div class="flex flex-col lg:flex-row lg:items-center
+                    justify-between gap-space-lg">
+
             <div>
+
                 <span id="status-badge"
                       role="status"
-                      class="inline-flex items-center gap-1 rounded-full bg-surface-container-lowest text-primary px-3 py-1 font-caption-sm-medium text-caption-sm-medium">
+                      class="inline-flex items-center gap-1 rounded-full
+                             px-3 py-1 font-caption-sm-medium
+                             text-caption-sm-medium {{ $warnaBadge }}">
+
                     <span id="status-icon"
                           class="material-symbols-outlined text-[16px]">
-                        hourglass_top
+                        {{ $ikon }}
                     </span>
-                    <span id="status-label">Menunggu Pembayaran</span>
+
+                    <span id="status-label">
+                        {{ $label }}
+                    </span>
                 </span>
 
                 <h1 class="font-headline-lg text-headline-lg mt-space-md">
@@ -77,575 +227,680 @@
                 </h1>
 
                 <p class="text-secondary-fixed-dim mt-space-sm">
-                    Kode tagihan contoh:
-                    <strong>DEMO-INV-0001</strong>
+                    Referensi pembayaran:
+                    <strong>
+                        {{ $pembayaran && $terverifikasi
+                            ? $pembayaran->id_pembayaran
+                            : 'Belum tersedia' }}
+                    </strong>
                 </p>
 
                 <p id="status-description"
                    class="text-secondary-fixed-dim mt-space-xs max-w-2xl">
-                    Tinjau rincian tagihan dan pilihan metode pembayaran.
+                    {{ $deskripsi }}
                 </p>
+
             </div>
 
             <div class="rounded-xl bg-primary/40 p-space-lg lg:min-w-56">
-                <p class="font-caption-sm text-caption-sm text-secondary-fixed-dim">
-                    Total Tagihan Contoh
+
+                <p class="font-caption-sm text-caption-sm
+                          text-secondary-fixed-dim">
+                    {{ $statusBayar === 'menunggu_kipk' && $terverifikasi ? 'Invoice Sementara KIP-K' : 'Total Tagihan Tercatat' }}
                 </p>
+
                 <p class="font-headline-md text-headline-md mt-1">
-                    Rp {{ number_format($total, 0, ',', '.') }}
+
+                    @if ($total !== null)
+
+                        Rp {{ number_format($total, 0, ',', '.') }}
+
+                    @elseif ($pembiayaanKhusus)
+
+                        Skema Khusus
+
+                    @else
+
+                        Belum diterbitkan
+
+                    @endif
+
                 </p>
-                <p class="font-caption-sm text-caption-sm text-secondary-fixed-dim mt-space-sm">
-                    Batas pembayaran belum diterbitkan
+
+                <p class="font-caption-sm text-caption-sm
+                          text-secondary-fixed-dim mt-space-sm">
+                    Kanal pembayaran belum terintegrasi
                 </p>
+
             </div>
+
         </div>
     </section>
 
-    <div class="grid grid-cols-1 xl:grid-cols-5 gap-space-lg items-start">
+    <div class="grid grid-cols-1 xl:grid-cols-5
+                gap-space-lg items-start">
+
+        {{-- Kolom utama --}}
         <div class="xl:col-span-3 min-w-0 flex flex-col gap-space-lg">
+
             {{-- Rincian tagihan --}}
-            <section class="rounded-2xl bg-surface-container-lowest p-space-lg shadow-sm">
-                <h2 class="flex items-center gap-space-sm font-title-md text-title-md">
+            <section class="rounded-2xl bg-surface-container-lowest
+                            p-space-lg shadow-sm">
+
+                <h2 class="flex items-center gap-space-sm
+                           font-title-md text-title-md">
+
                     <span class="material-symbols-outlined text-secondary">
                         receipt_long
                     </span>
+
                     Rincian Tagihan
                 </h2>
 
-                <p class="font-caption-sm text-caption-sm text-on-surface-variant mt-1">
-                    Seluruh komponen di bawah merupakan data simulasi.
-                </p>
+                <div class="mt-space-lg divide-y divide-outline-variant">
 
-                <div class="flex flex-col gap-space-sm mt-space-lg">
-                    @foreach ($rincian as $item)
-                        <div class="flex items-start justify-between gap-space-md rounded-xl bg-surface-container-low p-space-md">
-                            <div>
-                                <p class="font-label-md text-label-md">
-                                    {{ $item['nama'] }}
-                                </p>
-                                <p class="font-caption-sm text-caption-sm text-on-surface-variant mt-1">
-                                    {{ $item['keterangan'] }}
-                                </p>
-                            </div>
-
-                            <p class="whitespace-nowrap font-label-md text-label-md">
-                                Rp {{ number_format($item['nominal'], 0, ',', '.') }}
-                            </p>
-                        </div>
-                    @endforeach
-                </div>
-
-                <div class="flex items-center justify-between gap-space-md rounded-xl bg-surface-container p-space-lg mt-space-md">
-                    <div>
-                        <p class="font-caption-sm text-caption-sm text-on-surface-variant">
-                            Total Pembayaran Contoh
-                        </p>
-                        <p class="font-headline-md text-headline-md text-primary mt-1">
-                            Rp {{ number_format($total, 0, ',', '.') }}
-                        </p>
+                    <div class="flex justify-between gap-4 py-3">
+                        <span class="text-on-surface-variant">
+                            Kategori penghuni
+                        </span>
+                        <span class="font-medium text-right">
+                            {{ $namaKategori }}
+                        </span>
                     </div>
 
-                    <span class="rounded-full bg-surface-container-lowest px-3 py-1 text-secondary font-caption-sm text-caption-sm">
-                        Simulasi
-                    </span>
+                    <div class="flex justify-between gap-4 py-3">
+                        <span class="text-on-surface-variant">
+                            Gedung
+                        </span>
+                        <span class="font-medium text-right">
+                            {{ $pendaftaran?->kamar?->gedung?->nama_gedung
+                                ?? 'Belum tersedia' }}
+                        </span>
+                    </div>
+
+                    <div class="flex justify-between gap-4 py-3">
+                        <span class="text-on-surface-variant">
+                            Tipe kamar
+                        </span>
+                        <span class="font-medium text-right">
+                            {{ $pendaftaran?->tipeKamar?->nama_tipe
+                                ?? 'Belum tersedia' }}
+                        </span>
+                    </div>
+
+                    <div class="flex justify-between gap-4 py-3">
+                        <span class="text-on-surface-variant">
+                            Nomor kamar
+                        </span>
+                        <span class="font-medium text-right">
+                            {{ $pendaftaran?->kamar?->nomor_kamar
+                                ?? 'Belum tersedia' }}
+                        </span>
+                    </div>
+
+                    <div class="flex justify-between gap-4 py-3">
+                        <span class="text-on-surface-variant">
+                            Skema pembayaran
+                        </span>
+                        <span class="font-medium text-right">
+
+                            {{ $skema['satuan'] ?? 'Menunggu ketentuan' }}
+
+                        </span>
+                    </div>
+
                 </div>
+
+                @if ($kategori === 'guest' && $terverifikasi)
+                    <div class="mt-space-md text-sm text-on-surface-variant">
+                        <p>Tanggal masuk: {{ $pendaftaran->tanggal_masuk ?? 'Belum tersedia' }}</p>
+                        <p>Rencana keluar: {{ $pendaftaran->rencana_keluar ?? 'Belum tersedia' }}</p>
+                    </div>
+                @endif
+
+                <div class="rounded-xl bg-surface-container-low
+                            p-space-md mt-space-lg">
+
+                    <p class="font-label-md text-label-md">
+                        {{ $total !== null
+                            ? ($statusBayar === 'menunggu_kipk' ? 'Invoice Sementara KIP-K' : 'Nominal Tagihan')
+                            : 'Estimasi Biaya Hunian' }}
+                    </p>
+
+                    <p class="font-headline-md text-headline-md
+                              text-primary mt-2">
+
+                        @if ($total !== null)
+
+                            Rp {{ number_format($total, 0, ',', '.') }}
+
+                        @elseif ($tarif !== null)
+
+                            Rp {{ number_format($tarif, 0, ',', '.') }}
+
+                        @elseif ($pembiayaanKhusus)
+
+                            Pembiayaan Khusus
+
+                        @else
+
+                            Belum tersedia
+
+                        @endif
+
+                    </p>
+
+                    <p class="text-on-surface-variant mt-2">
+
+                        @if ($total !== null)
+
+                            @if ($statusBayar === 'menunggu_kipk')
+                                Nominal Rp0 bersifat sementara, bukan bukti pelunasan.
+                            @else
+                                Nominal mengikuti tagihan yang telah tersimpan dalam sistem.
+                            @endif
+
+                        @elseif ($pembiayaanKhusus)
+
+                            {{ $pesan }}
+
+                        @elseif ($tarif !== null)
+
+                            Nominal berdasarkan tarif gedung
+                            dan tipe kamar yang berlaku.
+
+                        @else
+
+                            Biaya hunian belum dapat ditampilkan.
+
+                        @endif
+
+                    </p>
+
+                </div>
+
             </section>
 
             {{-- Metode pembayaran --}}
-            <section class="rounded-2xl bg-surface-container-lowest p-space-lg shadow-sm">
-                <h2 class="flex items-center gap-space-sm font-title-md text-title-md">
+            <section class="rounded-2xl bg-surface-container-lowest
+                            p-space-lg shadow-sm">
+
+                <h2 class="flex items-center gap-space-sm
+                           font-title-md text-title-md">
+
                     <span class="material-symbols-outlined text-secondary">
                         payments
                     </span>
+
                     Metode Pembayaran
                 </h2>
 
-                <p class="font-caption-sm text-caption-sm text-on-surface-variant mt-1">
-                    Preview kanal pembayaran yang akan diintegrasikan.
-                </p>
+                @if ($pembiayaanKhusus)
 
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 bg-surface-container-low rounded-xl p-1 mt-space-lg"
-                     role="tablist"
-                     aria-label="Metode pembayaran">
-                    <button type="button"
-                            id="tab-va"
-                            role="tab"
-                            aria-selected="true"
-                            aria-controls="panel-va"
-                            data-method="va"
-                            class="method-tab flex items-center justify-center gap-2 rounded-lg px-3 py-3 font-label-md text-label-md bg-secondary text-on-secondary">
-                        <span class="material-symbols-outlined text-[18px]">
-                            account_balance
+                    <div class="mt-space-lg rounded-xl bg-blue-50
+                                text-blue-800 p-4 flex items-start gap-3">
+
+                        <span class="material-symbols-outlined">
+                            verified_user
                         </span>
-                        Virtual Account
-                    </button>
 
-                    <button type="button"
-                            id="tab-qris"
-                            role="tab"
-                            aria-selected="false"
-                            aria-controls="panel-qris"
-                            data-method="qris"
-                            class="method-tab flex items-center justify-center gap-2 rounded-lg px-3 py-3 font-label-md text-label-md text-on-surface-variant">
-                        <span class="material-symbols-outlined text-[18px]">
-                            qr_code_scanner
-                        </span>
-                        QRIS
-                    </button>
+                        <div>
+                            <p class="font-semibold">
+                                {{ $label }}
+                            </p>
 
-                    <button type="button"
-                            id="tab-loket"
-                            role="tab"
-                            aria-selected="false"
-                            aria-controls="panel-loket"
-                            data-method="loket"
-                            class="method-tab flex items-center justify-center gap-2 rounded-lg px-3 py-3 font-label-md text-label-md text-on-surface-variant">
-                        <span class="material-symbols-outlined text-[18px]">
-                            storefront
-                        </span>
-                        Loket
-                    </button>
-                </div>
+                            <p class="mt-1">
+                                {{ $pesan }}
+                            </p>
 
-                {{-- Panel VA --}}
-                <div id="panel-va"
-                     role="tabpanel"
-                     aria-labelledby="tab-va"
-                     class="method-panel mt-space-lg">
-                    <label for="pilihan-bank"
-                           class="block font-label-md text-label-md mb-space-sm">
-                        Contoh Pilihan Bank
-                    </label>
-
-                    <select id="pilihan-bank"
-                            class="w-full rounded-xl bg-surface-container-low px-4 py-3 outline-none focus:ring-2 focus:ring-secondary">
-                        <option value="NAGARI">Bank Nagari</option>
-                        <option value="BNI">BNI</option>
-                        <option value="MANDIRI">Mandiri</option>
-                        <option value="BRI">BRI</option>
-                        <option value="BSI">BSI</option>
-                    </select>
-
-                    <div class="rounded-xl bg-surface-container-low p-space-lg mt-space-md">
-                        <p class="font-caption-sm text-caption-sm text-on-surface-variant">
-                            Kode Demo — Bukan Nomor Virtual Account
-                        </p>
-
-                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-md mt-space-sm">
-                            <code id="kode-demo"
-                                  class="font-semibold text-primary break-all">
-                                DEMO-NAGARI-0001
-                            </code>
-
-                            <button id="salin-kode"
-                                    type="button"
-                                    class="inline-flex items-center justify-center gap-2 rounded-lg bg-secondary text-on-secondary px-3 py-2 font-label-md text-label-md">
-                                <span class="material-symbols-outlined text-[18px]">
-                                    content_copy
-                                </span>
-                                Salin Kode Contoh
-                            </button>
+                            <p class="mt-2 text-sm">
+                                Hubungi Admin Layanan untuk
+                                konfirmasi ketentuan pembiayaan.
+                            </p>
                         </div>
 
-                        <p class="font-caption-sm text-caption-sm text-on-surface-variant mt-space-md">
-                            Nomor VA dan bank yang tersedia akan mengikuti
-                            hasil integrasi layanan pembayaran.
-                        </p>
                     </div>
-                </div>
 
-                {{-- Panel QRIS --}}
-                <div id="panel-qris"
-                     role="tabpanel"
-                     aria-labelledby="tab-qris"
-                     class="method-panel mt-space-lg"
-                     hidden>
-                    <div class="rounded-xl bg-surface-container-low p-space-xl text-center">
-                        <span class="material-symbols-outlined text-secondary text-[72px]"
-                              aria-hidden="true">
-                            qr_code_2
+                    @if ($kategori === 'kipk' && $dapatTerbitkanTagihan && $isLocal)
+                        <form method="POST" action="{{ route('pembayaran.terbitkan') }}" class="mt-space-lg">
+                            @csrf
+                            <input type="hidden" name="id_pendaftaran" value="{{ $pendaftaran->id_pendaftaran }}">
+                            <button type="submit" class="w-full rounded-xl bg-secondary text-on-secondary px-4 py-3 font-medium">
+                                Terbitkan Invoice Sementara KIP-K (Pengujian)
+                            </button>
+                        </form>
+                    @endif
+
+                @elseif ($status === 'pembayaran_belum_diaktifkan')
+
+                    <div class="mt-space-lg rounded-xl bg-amber-50
+                                text-amber-800 p-4">
+
+                        <p class="font-semibold">
+                            Pembayaran belum tersedia
+                        </p>
+
+                        <p class="mt-1">
+                            {{ $pesan }}
+                        </p>
+
+                    </div>
+
+                @elseif (!$terverifikasi)
+
+                    <div class="mt-space-lg rounded-xl
+                                bg-surface-container-low p-4">
+
+                        Pembayaran belum dapat dilakukan sebelum
+                        pendaftaran terverifikasi.
+
+                    </div>
+
+                @elseif ($status === 'tarif_belum_tersedia'
+                    || $status === 'kategori_belum_dikenali')
+
+                    <div class="mt-space-lg rounded-xl bg-amber-50
+                                text-amber-800 p-4">
+
+                        {{ $pesan ?? 'Pembayaran belum tersedia.' }}
+
+                    </div>
+
+                @elseif ($statusBayar === 'simulasi_lunas')
+
+                    <div class="mt-space-lg rounded-xl bg-green-50
+                                text-green-800 p-4 flex items-start gap-3">
+
+                        <span class="material-symbols-outlined text-3xl">
+                            check_circle
                         </span>
 
-                        <h3 class="font-title-md text-title-md mt-space-sm">
-                            Area Kode QRIS
-                        </h3>
+                        <div>
+                            <p class="font-semibold">
+                                Simulasi Pembayaran Berhasil
+                            </p>
 
-                        <p class="font-caption-sm text-caption-sm text-on-surface-variant mt-space-sm">
-                            Ini ikon placeholder, bukan kode pembayaran.
-                            QR pembayaran akan ditampilkan setelah integrasi.
-                        </p>
+                            <p class="mt-1">
+                                Hasil simulasi telah tersimpan
+                                dalam sistem.
+                            </p>
+
+                            <p class="mt-2 text-sm">
+                                Ini bukan bukti pelunasan resmi.
+                                Tidak ada uang yang ditransfer.
+                            </p>
+                        </div>
+
                     </div>
-                </div>
 
-                {{-- Panel loket --}}
-                <div id="panel-loket"
-                     role="tabpanel"
-                     aria-labelledby="tab-loket"
-                     class="method-panel mt-space-lg"
-                     hidden>
-                    <div class="rounded-xl bg-surface-container-low p-space-lg">
-                        <h3 class="flex items-center gap-space-sm font-title-md text-title-md">
-                            <span class="material-symbols-outlined text-secondary">
-                                storefront
+                @elseif (!$isLocal)
+                    <div class="mt-space-lg rounded-xl bg-surface-container-low p-4">
+                        Kanal pembayaran belum terintegrasi. Simulasi hanya tersedia di lingkungan lokal.
+                    </div>
+
+                @elseif ($dapatTerbitkanTagihan)
+
+                    <div class="mt-space-lg rounded-xl bg-amber-50
+                                text-amber-800 p-4">
+
+                        Mode pengujian. Jangan melakukan
+                        transfer uang sungguhan.
+
+                    </div>
+
+                    <form method="POST"
+                          action="{{ route('pembayaran.terbitkan') }}"
+                          class="mt-space-lg">
+
+                        @csrf
+
+                        <input type="hidden"
+                               name="id_pendaftaran"
+                               value="{{ $pendaftaran->id_pendaftaran }}">
+
+                        <button type="submit"
+                                class="w-full rounded-xl bg-secondary
+                                       text-on-secondary px-4 py-3
+                                       font-medium flex items-center
+                                       justify-center gap-2">
+
+                            <span class="material-symbols-outlined">
+                                receipt_long
                             </span>
-                            Pembayaran Melalui Loket
-                        </h3>
 
-                        <p class="text-on-surface-variant mt-space-sm">
-                            Informasi lokasi, jadwal layanan, dan ketentuan
-                            pembayaran akan mengikuti arahan pengelola.
-                        </p>
+                            Terbitkan Tagihan Pengujian
 
-                        <p class="font-label-md text-label-md text-secondary mt-space-md">
-                            Kode invoice contoh: DEMO-INV-0001
-                        </p>
+                        </button>
+
+                    </form>
+
+                @elseif ($dapatSimulasi)
+
+                    @if ($statusBayar === 'simulasi_gagal')
+
+                        <div class="mt-space-lg rounded-xl bg-red-50
+                                    text-red-800 p-4">
+
+                            Simulasi sebelumnya gagal.
+                            Kamu dapat mencoba kembali.
+
+                        </div>
+
+                    @endif
+
+                    <div class="mt-space-lg rounded-xl bg-amber-50
+                                text-amber-800 p-4">
+
+                        Pembayaran ini hanya simulasi.
+                        Sistem belum terhubung ke bank
+                        atau Payment Gateway.
+
                     </div>
-                </div>
 
-                <p id="pesan-salin"
-                   role="status"
-                   class="font-caption-sm text-caption-sm text-secondary mt-space-md"></p>
+                    <form method="POST"
+                          action="{{ route('pembayaran.simulasi') }}"
+                          class="flex flex-col gap-space-md mt-space-lg">
+
+                        @csrf
+
+                        <input type="hidden"
+                               name="id_pendaftaran"
+                               value="{{ $pendaftaran->id_pendaftaran }}">
+
+                        <label for="metode" class="font-medium">
+                            Metode pembayaran simulasi
+                        </label>
+
+                        <select id="metode"
+                                name="metode"
+                                required
+                                class="rounded-xl bg-surface-container-low
+                                       px-4 py-3">
+
+                            <option value="va">
+                                Virtual Account
+                            </option>
+
+                            <option value="qris">
+                                QRIS
+                            </option>
+
+                            <option value="loket">
+                                Loket
+                            </option>
+
+                        </select>
+
+                        <label for="hasil" class="font-medium">
+                            Skenario pengujian
+                        </label>
+
+                        <select id="hasil"
+                                name="hasil"
+                                required
+                                class="rounded-xl bg-surface-container-low
+                                       px-4 py-3">
+
+                            <option value="berhasil">
+                                Berhasil
+                            </option>
+
+                            <option value="gagal">
+                                Gagal
+                            </option>
+
+                        </select>
+
+                        <button type="submit"
+                                class="rounded-xl bg-secondary
+                                       text-on-secondary px-4 py-3
+                                       font-medium flex items-center
+                                       justify-center gap-2">
+
+                            <span class="material-symbols-outlined">
+                                payments
+                            </span>
+
+                            Simulasikan Pembayaran
+
+                        </button>
+
+                    </form>
+
+                @else
+
+                    <div class="mt-space-lg rounded-xl
+                                bg-surface-container-low p-4">
+
+                        Tidak ada tindakan pembayaran
+                        yang tersedia saat ini.
+
+                    </div>
+
+                @endif
+
+                @if ($pembayaran && $terverifikasi)
+
+                    <div class="mt-space-lg border-t
+                                border-outline-variant pt-4">
+
+                        <p class="text-on-surface-variant">
+                            Metode pembayaran tercatat
+                        </p>
+
+                        <p class="font-medium mt-1">
+                            {{ $namaMetode }}
+                        </p>
+
+                    </div>
+
+                @endif
+
             </section>
 
-            {{-- Panduan --}}
-            <section class="rounded-2xl bg-surface-container-lowest p-space-lg shadow-sm">
-                <h2 class="flex items-center gap-space-sm font-title-md text-title-md mb-space-lg">
-                    <span class="material-symbols-outlined text-secondary">
-                        help_outline
-                    </span>
-                    Panduan Pembayaran
-                </h2>
+            {{-- Panduan pembayaran --}}
+            @if (($skema['jenis'] ?? null) === 'mandiri')
 
-                <div class="flex flex-col gap-space-sm">
-                    <details class="rounded-xl bg-surface-container-low p-space-md" open>
-                        <summary class="font-label-md text-label-md cursor-pointer">
-                            Virtual Account
-                        </summary>
-                        <p class="text-on-surface-variant mt-space-sm">
-                            Setelah tagihan diterbitkan, nomor VA dan
-                            petunjuk sesuai bank akan ditampilkan di sini.
-                        </p>
-                    </details>
+                <section class="rounded-2xl bg-surface-container-lowest
+                                p-space-lg shadow-sm">
 
-                    <details class="rounded-xl bg-surface-container-low p-space-md">
-                        <summary class="font-label-md text-label-md cursor-pointer">
-                            QRIS
-                        </summary>
-                        <p class="text-on-surface-variant mt-space-sm">
-                            Kode QR, nominal, dan batas pembayaran akan
-                            mengikuti data transaksi dari layanan pembayaran.
-                        </p>
-                    </details>
+                    <h2 class="flex items-center gap-space-sm
+                               font-title-md text-title-md mb-space-lg">
 
-                    <details class="rounded-xl bg-surface-container-low p-space-md">
-                        <summary class="font-label-md text-label-md cursor-pointer">
-                            Status Pembayaran
-                        </summary>
-                        <p class="text-on-surface-variant mt-space-sm">
-                            Pada versi terintegrasi, status pembayaran
-                            diperbarui setelah backend memverifikasi
-                            informasi transaksi.
-                        </p>
-                    </details>
-                </div>
-            </section>
+                        <span class="material-symbols-outlined text-secondary">
+                            help_outline
+                        </span>
+
+                        Panduan Pembayaran
+
+                    </h2>
+
+                    <div class="flex flex-col gap-space-sm">
+
+                        <details class="rounded-xl
+                                        bg-surface-container-low p-space-md">
+
+                            <summary class="font-label-md text-label-md
+                                            cursor-pointer">
+                                Virtual Account
+                            </summary>
+
+                            <p class="text-on-surface-variant mt-space-sm">
+                                Nomor Virtual Account akan tersedia
+                                setelah integrasi layanan pembayaran.
+                                Saat ini hanya tersedia simulasi.
+                            </p>
+
+                        </details>
+
+                        <details class="rounded-xl
+                                        bg-surface-container-low p-space-md">
+
+                            <summary class="font-label-md text-label-md
+                                            cursor-pointer">
+                                QRIS
+                            </summary>
+
+                            <p class="text-on-surface-variant mt-space-sm">
+                                Kode QR pembayaran akan diterbitkan
+                                oleh layanan pembayaran setelah
+                                integrasi dilakukan.
+                            </p>
+
+                        </details>
+
+                        <details class="rounded-xl
+                                        bg-surface-container-low p-space-md">
+
+                            <summary class="font-label-md text-label-md
+                                            cursor-pointer">
+                                Pembayaran melalui Loket
+                            </summary>
+
+                            <p class="text-on-surface-variant mt-space-sm">
+                                Pembayaran melalui loket masih
+                                berupa simulasi pengujian sistem.
+                            </p>
+
+                        </details>
+
+                        <details class="rounded-xl
+                                        bg-surface-container-low p-space-md">
+
+                            <summary class="font-label-md text-label-md
+                                            cursor-pointer">
+                                Status Pembayaran
+                            </summary>
+
+                            <p class="text-on-surface-variant mt-space-sm">
+                                Status simulasi tidak menunjukkan
+                                pelunasan resmi. Pada versi terintegrasi,
+                                status pembayaran akan diperbarui
+                                setelah transaksi diverifikasi.
+                            </p>
+
+                        </details>
+
+                    </div>
+
+                </section>
+
+            @endif
+
         </div>
 
+        {{-- Kolom informasi pendaftar --}}
         <div class="xl:col-span-2 min-w-0 flex flex-col gap-space-lg">
-            {{-- Preview konfirmasi --}}
-            <section class="rounded-2xl bg-surface-container-lowest p-space-lg shadow-sm">
-                <h2 class="flex items-center gap-space-sm font-title-md text-title-md">
-                    <span class="material-symbols-outlined text-secondary">
-                        cloud_upload
-                    </span>
-                    Konfirmasi Pembayaran
-                </h2>
 
-                <p class="font-caption-sm text-caption-sm text-on-surface-variant mt-space-sm">
-                    Preview formulir konfirmasi manual.
-                    Berkas belum diunggah atau disimpan ke server.
-                </p>
+            <section class="rounded-2xl bg-surface-container-lowest
+                            p-space-lg shadow-sm">
 
-                <form id="form-konfirmasi"
-                      onsubmit="return false"
-                      class="flex flex-col gap-space-md mt-space-lg">
-                    <div>
-                        <label for="nama-penyetor"
-                               class="block font-label-md text-label-md mb-space-xs">
-                            Nama Pemilik Rekening / Penyetor
-                        </label>
-                        <input id="nama-penyetor"
-                               type="text"
-                               maxlength="150"
-                               required
-                               placeholder="Masukkan nama penyetor"
-                               class="w-full rounded-xl bg-surface-container-low px-4 py-3 outline-none focus:ring-2 focus:ring-secondary">
-                    </div>
-
-                    <div>
-                        <label for="waktu-transfer"
-                               class="block font-label-md text-label-md mb-space-xs">
-                            Tanggal dan Waktu Transfer
-                        </label>
-                        <input id="waktu-transfer"
-                               type="datetime-local"
-                               required
-                               class="w-full rounded-xl bg-surface-container-low px-4 py-3 outline-none focus:ring-2 focus:ring-secondary">
-                    </div>
-
-                    <div>
-                        <label for="bukti-transfer"
-                               class="block font-label-md text-label-md mb-space-xs">
-                            Pilih Bukti Transfer
-                        </label>
-                        <input id="bukti-transfer"
-                               type="file"
-                               accept=".pdf,.jpg,.jpeg,.png"
-                               required
-                               class="block w-full rounded-xl bg-surface-container-low p-space-md">
-
-                        <p class="font-caption-sm text-caption-sm text-on-surface-variant mt-space-sm">
-                            PDF, JPG, JPEG, PNG. Maksimal 10 MB.
-                        </p>
-
-                        <p id="nama-bukti"
-                           class="font-caption-sm text-caption-sm text-secondary mt-space-sm break-all"
-                           aria-live="polite"></p>
-                    </div>
-
-                    <button id="tombol-konfirmasi"
-                            type="submit"
-                            class="flex items-center justify-center gap-space-xs rounded-xl bg-secondary text-on-secondary px-4 py-3 font-label-md text-label-md disabled:opacity-40 disabled:cursor-not-allowed">
-                        <span class="material-symbols-outlined text-[20px]">
-                            task_alt
-                        </span>
-                        Preview Konfirmasi
-                    </button>
-
-                    <p id="pesan-konfirmasi"
-                       role="status"
-                       class="font-caption-sm text-caption-sm text-secondary"></p>
-                </form>
-            </section>
-
-            {{-- Identitas akun --}}
-            <section class="rounded-2xl bg-surface-container-lowest p-space-lg shadow-sm">
                 <h2 class="font-title-md text-title-md mb-space-lg">
                     Data Pendaftar
                 </h2>
 
                 <dl class="flex flex-col gap-space-md">
+
                     <div>
-                        <dt class="font-caption-sm text-caption-sm text-on-surface-variant">
+                        <dt class="font-caption-sm text-caption-sm
+                                   text-on-surface-variant">
                             Nama Akun
                         </dt>
+
                         <dd class="font-label-md text-label-md mt-1">
                             {{ auth()->user()->nama_lengkap }}
                         </dd>
                     </div>
 
                     <div>
-                        <dt class="font-caption-sm text-caption-sm text-on-surface-variant">
+                        <dt class="font-caption-sm text-caption-sm
+                                   text-on-surface-variant">
                             Email
                         </dt>
+
                         <dd class="mt-1 break-all">
                             {{ auth()->user()->email }}
                         </dd>
                     </div>
 
                     <div>
-                        <dt class="font-caption-sm text-caption-sm text-on-surface-variant">
-                            Kamar
+                        <dt class="font-caption-sm text-caption-sm
+                                   text-on-surface-variant">
+                            Nomor Identitas
                         </dt>
+
                         <dd class="mt-1">
-                            Belum dihubungkan ke data penempatan
+                            {{ $client->nomor_identitas ?? '-' }}
                         </dd>
                     </div>
+
+                    <div>
+                        <dt class="font-caption-sm text-caption-sm
+                                   text-on-surface-variant">
+                            Kategori Penghuni
+                        </dt>
+
+                        <dd class="mt-1">
+                            {{ $namaKategori }}
+                        </dd>
+                    </div>
+
+                    <div>
+                        <dt class="font-caption-sm text-caption-sm
+                                   text-on-surface-variant">
+                            Kamar
+                        </dt>
+
+                        <dd class="mt-1">
+                            {{ $pendaftaran?->kamar?->gedung?->nama_gedung
+                                ?? 'Belum tersedia' }}
+
+                            —
+
+                            {{ $pendaftaran?->kamar?->nomor_kamar
+                                ?? 'Belum tersedia' }}
+                        </dd>
+                    </div>
+
                 </dl>
 
                 <img src="{{ asset('images/asramaunand.png') }}"
                      alt="Kawasan asrama Universitas Andalas"
                      class="w-full h-40 object-cover rounded-xl mt-space-lg"
                      loading="lazy">
+
             </section>
 
-            <section class="rounded-2xl bg-surface-container-low p-space-lg">
-                <h2 class="flex items-center gap-space-sm font-label-md text-label-md">
+            {{-- Bantuan --}}
+            <section class="rounded-2xl bg-surface-container-low
+                            p-space-lg">
+
+                <h2 class="flex items-center gap-space-sm
+                           font-label-md text-label-md">
+
                     <span class="material-symbols-outlined text-secondary">
                         support_agent
                     </span>
+
                     Bantuan Pembayaran
+
                 </h2>
 
-                <p class="font-caption-sm text-caption-sm text-on-surface-variant mt-space-sm">
-                    Hubungi Admin Layanan untuk pertanyaan mengenai
-                    tagihan. Kontak resmi akan ditambahkan setelah
-                    dikonfirmasi pengelola.
+                <p class="font-caption-sm text-caption-sm
+                          text-on-surface-variant mt-space-sm">
+
+                    Hubungi Admin Layanan untuk informasi
+                    mengenai tarif, tagihan, dan ketentuan
+                    pembiayaan hunian.
+
                 </p>
+
             </section>
+
         </div>
+
     </div>
+
 </div>
+
 @endsection
-
-@push('scripts')
-<script>
-    (() => {
-        const tabs = Array.from(
-            document.querySelectorAll('.method-tab')
-        );
-
-        function pilihMetode(method, fokus = false) {
-            tabs.forEach(tab => {
-                const aktif = tab.dataset.method === method;
-
-                tab.setAttribute('aria-selected', String(aktif));
-                tab.tabIndex = aktif ? 0 : -1;
-
-                tab.classList.toggle('bg-secondary', aktif);
-                tab.classList.toggle('text-on-secondary', aktif);
-                tab.classList.toggle('text-on-surface-variant', !aktif);
-
-                document.getElementById(
-                    `panel-${tab.dataset.method}`
-                ).hidden = !aktif;
-
-                if (aktif && fokus) tab.focus();
-            });
-        }
-
-        tabs.forEach((tab, index) => {
-            tab.addEventListener('click', () => {
-                pilihMetode(tab.dataset.method);
-            });
-
-            tab.addEventListener('keydown', event => {
-                let target = index;
-
-                if (event.key === 'ArrowRight') {
-                    target = (index + 1) % tabs.length;
-                } else if (event.key === 'ArrowLeft') {
-                    target = (index - 1 + tabs.length) % tabs.length;
-                } else if (event.key === 'Home') {
-                    target = 0;
-                } else if (event.key === 'End') {
-                    target = tabs.length - 1;
-                } else {
-                    return;
-                }
-
-                event.preventDefault();
-                pilihMetode(tabs[target].dataset.method, true);
-            });
-        });
-
-        pilihMetode('va');
-
-        const bank = document.getElementById('pilihan-bank');
-        const kode = document.getElementById('kode-demo');
-        const pesanSalin = document.getElementById('pesan-salin');
-
-        bank.addEventListener('change', () => {
-            kode.textContent = `DEMO-${bank.value}-0001`;
-            pesanSalin.textContent = '';
-        });
-
-        document.getElementById('salin-kode')
-            .addEventListener('click', async () => {
-                try {
-                    await navigator.clipboard.writeText(
-                        kode.textContent.trim()
-                    );
-
-                    pesanSalin.textContent =
-                        'Kode contoh disalin. Ini bukan nomor pembayaran.';
-                } catch {
-                    pesanSalin.textContent =
-                        'Tidak dapat menyalin otomatis. Pilih teks kode dan salin secara manual.';
-                }
-            });
-
-        const bukti = document.getElementById('bukti-transfer');
-        const namaBukti = document.getElementById('nama-bukti');
-        const pesanKonfirmasi = document.getElementById('pesan-konfirmasi');
-
-        bukti.addEventListener('change', () => {
-            const file = bukti.files[0];
-
-            bukti.setCustomValidity('');
-            namaBukti.textContent = '';
-            pesanKonfirmasi.textContent = '';
-
-            if (!file) return;
-
-            namaBukti.textContent =
-                `${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`;
-
-            if (!/\.(pdf|jpe?g|png)$/i.test(file.name)) {
-                bukti.setCustomValidity(
-                    'Pilih file PDF, JPG, JPEG, atau PNG.'
-                );
-            } else if (file.size > 10 * 1024 * 1024) {
-                bukti.setCustomValidity(
-                    'Ukuran file maksimal 10 MB.'
-                );
-            }
-        });
-
-        document.getElementById('form-konfirmasi')
-            .addEventListener('submit', event => {
-                event.preventDefault();
-
-                pesanKonfirmasi.textContent =
-                    'Preview berhasil. Data dan berkas belum dikirim ke server; status pembayaran tidak berubah.';
-            });
-
-        const statusSelect = document.getElementById('preview-status');
-        const statusLabel = document.getElementById('status-label');
-        const statusIcon = document.getElementById('status-icon');
-        const statusDescription = document.getElementById('status-description');
-        const tombolKonfirmasi = document.getElementById('tombol-konfirmasi');
-
-        const statusData = {
-            menunggu: {
-                label: 'Menunggu Pembayaran',
-                icon: 'hourglass_top',
-                deskripsi:
-                    'Tinjau rincian tagihan dan pilihan metode pembayaran.',
-            },
-            lunas: {
-                label: 'Lunas — Simulasi',
-                icon: 'check_circle',
-                deskripsi:
-                    'Contoh tampilan pembayaran lunas. Tidak ada transaksi yang diproses.',
-            },
-            gagal: {
-                label: 'Gagal — Simulasi',
-                icon: 'error_outline',
-                deskripsi:
-                    'Contoh tampilan transaksi gagal. Petunjuk percobaan ulang akan mengikuti layanan pembayaran.',
-            },
-            kedaluwarsa: {
-                label: 'Kedaluwarsa — Simulasi',
-                icon: 'timer_off',
-                deskripsi:
-                    'Contoh tampilan tagihan melewati batas pembayaran. Belum ada tagihan baru yang diterbitkan.',
-            },
-        };
-
-        statusSelect.addEventListener('change', () => {
-            const value = statusSelect.value;
-            const data = statusData[value];
-
-            statusLabel.textContent = data.label;
-            statusIcon.textContent = data.icon;
-            statusDescription.textContent = data.deskripsi;
-
-            tombolKonfirmasi.disabled =
-                value === 'lunas' || value === 'kedaluwarsa';
-
-            pesanKonfirmasi.textContent = '';
-        });
-    })();
-</script>
-@endpush
