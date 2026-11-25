@@ -11,6 +11,12 @@ class PengajuanCheckout extends Model
 {
     use HasFactory;
 
+    public const STATUS_DIAJUKAN = 'diajukan';
+    public const STATUS_AUDIT_GO = 'audit_go';
+    public const STATUS_MENUNGGU_PERSETUJUAN = 'menunggu_persetujuan';
+    public const STATUS_DISETUJUI = 'disetujui';
+    public const STATUS_DITOLAK = 'ditolak';
+
     protected $table = 'pengajuan_checkout';
     protected $primaryKey = 'id_pengajuan';
     public $timestamps = false;
@@ -21,9 +27,16 @@ class PengajuanCheckout extends Model
         'tanggal_pengajuan',
         'tanggal_rencanaKeluar',
         'alasan',
+        'nama_bank',
+        'nomor_rekening',
+        'nama_pemilik_rekening',
+        'nominal_deposit',
+        'status_deposit',
+        'denda_kerusakan',
         'status_pengajuan',
         'tangal_verifikasi',
         'catatan',
+        'alasan_penolakan',
     ];
 
     protected function casts(): array
@@ -32,7 +45,19 @@ class PengajuanCheckout extends Model
             'tanggal_pengajuan' => 'date',
             'tanggal_rencanaKeluar' => 'date',
             'tangal_verifikasi' => 'date',
+            'nominal_deposit' => 'decimal:2',
+            'denda_kerusakan' => 'decimal:2',
         ];
+    }
+
+    public function isApproved(): bool
+    {
+        return in_array($this->status_pengajuan, [self::STATUS_DISETUJUI, 'selesai'], true);
+    }
+
+    public function isRejected(): bool
+    {
+        return $this->status_pengajuan === self::STATUS_DITOLAK;
     }
 
     public function penempatanKamar(): BelongsTo

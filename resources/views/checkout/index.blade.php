@@ -27,7 +27,7 @@
         <div class="flex items-center gap-space-sm">
             <button type="button" onclick="openCheckoutModal()" class="inline-flex items-center gap-2 px-space-md py-2.5 rounded-xl border border-outline-variant/40 bg-surface-container-lowest hover:bg-surface-container-low text-on-surface-variant font-label-md text-label-md transition-colors cursor-pointer shadow-xs">
                 <span class="material-symbols-outlined text-[18px]">edit_calendar</span>
-                <span>Formulir Rencana Check-out</span>
+                <span>{{ $checkout ? 'Perbarui Rencana Check-out' : 'Formulir Rencana Check-out' }}</span>
             </button>
             <button type="button" onclick="openSkbaModal()" class="inline-flex items-center gap-2 px-space-lg py-2.5 rounded-xl bg-secondary hover:bg-secondary/90 text-on-secondary font-label-md text-label-md font-medium shadow-brand-action transition-all cursor-pointer">
                 <span class="material-symbols-outlined text-[18px]">workspace_premium</span>
@@ -35,6 +35,47 @@
             </button>
         </div>
     </div>
+
+    {{-- Alert Tunggakan Pembayaran --}}
+    @if(!$hunian['bebas_tunggakan'])
+        <div class="rounded-2xl bg-amber-500/10 border-2 border-amber-500/40 p-space-md sm:p-space-lg flex items-start gap-space-md">
+            <div class="w-11 h-11 rounded-2xl bg-amber-500/20 text-amber-700 flex items-center justify-center shrink-0">
+                <span class="material-symbols-outlined text-[26px]">warning</span>
+            </div>
+            <div class="flex-1 min-w-0">
+                <h4 class="font-headline-sm text-[16px] font-bold text-amber-950 flex items-center gap-2">
+                    <span>Tunggakan Pembayaran Terdeteksi</span>
+                    <span class="px-2 py-0.5 rounded-full bg-amber-200 text-amber-900 text-[10px] font-bold uppercase">Wajib Lunas</span>
+                </h4>
+                <p class="text-body-md text-on-surface-variant mt-1 leading-relaxed">
+                    Sistem mendeteksi adanya tagihan iuran/sewa hunian yang belum terselesaikan. Sesuai prosedur operasional, seluruh kewajiban finansial harus dilunasi terlebih dahulu sebelum pengajuan check-out dan penerbitan Surat Bebas Asrama (SKBA) dapat disetujui.
+                </p>
+                <div class="mt-3 flex items-center gap-3">
+                    <a href="{{ route('pembayaran.index') }}" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-700 hover:bg-amber-800 text-white font-label-md text-label-md font-bold transition-all shadow-sm">
+                        <span class="material-symbols-outlined text-[18px]">payments</span>
+                        <span>Buka Menu Pembayaran</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    {{-- Alert Penolakan Check-out --}}
+    @if($checkout && $checkout->status_pengajuan === 'ditolak')
+        <div class="rounded-2xl bg-error-container/40 border-2 border-error/40 p-space-md sm:p-space-lg flex items-start gap-space-md">
+            <div class="w-11 h-11 rounded-2xl bg-error/15 text-error flex items-center justify-center shrink-0">
+                <span class="material-symbols-outlined text-[26px]">cancel</span>
+            </div>
+            <div class="flex-1 min-w-0">
+                <h4 class="font-headline-sm text-[16px] font-bold text-error flex items-center gap-2">
+                    <span>Pengajuan Check-out Ditolak</span>
+                </h4>
+                <p class="text-body-md text-on-surface-variant mt-1 leading-relaxed">
+                    {{ $checkout->alasan_penolakan ?: 'Terdapat kendala fisik fasilitas kamar atau kelengkapan administrasi yang belum terpenuhi. Silakan hubungi pengelola asrama atau ajukan ulang setelah kendala diselesaikan.' }}
+                </p>
+            </div>
+        </div>
+    @endif
 
     {{-- Notice Sesuai Business Process Terbaru --}}
     <div class="rounded-2xl bg-secondary-fixed/50 border border-secondary/20 p-space-md sm:p-space-lg flex items-start gap-space-md">
@@ -527,19 +568,27 @@
         <form action="{{ route('checkout.store') }}" method="POST" class="flex flex-col gap-space-md">
             @csrf
 
+            @if(!$hunian['bebas_tunggakan'])
+                <div class="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-900 text-caption-sm flex items-center gap-2">
+                    <span class="material-symbols-outlined text-[20px] text-amber-700">warning</span>
+                    <span>Anda masih memiliki tunggakan tagihan pembayaran. Pengajuan hanya dapat diproses setelah tagihan diselesaikan.</span>
+                </div>
+            @endif
+
             <div class="flex flex-col gap-1.5">
                 <label for="tanggal_rencanaKeluar" class="font-label-md text-label-md font-bold text-primary">Rencana Tanggal Keluar Hunian <span class="text-error">*</span></label>
-                <input type="date" id="tanggal_rencanaKeluar" name="tanggal_rencanaKeluar" value="2026-11-24" required class="w-full px-3.5 py-2.5 rounded-xl border border-outline-variant/40 bg-surface-container-lowest focus:border-secondary focus:ring-2 focus:ring-secondary/20 outline-none text-on-surface text-body-md transition-all">
-                <span class="text-caption-sm text-on-surface-variant">Pilih tanggal rencana Anda mengosongkan kamar dan menyerahkan kunci ke GO.</span>
+                <input type="date" id="tanggal_rencanaKeluar" name="tanggal_rencanaKeluar" min="{{ now()->addDays(2)->format('Y-m-d') }}" value="{{ old('tanggal_rencanaKeluar', $checkout?->tanggal_rencanaKeluar ? \Carbon\Carbon::parse($checkout->tanggal_rencanaKeluar)->format('Y-m-d') : now()->addDays(2)->format('Y-m-d')) }}" required class="w-full px-3.5 py-2.5 rounded-xl border border-outline-variant/40 bg-surface-container-lowest focus:border-secondary focus:ring-2 focus:ring-secondary/20 outline-none text-on-surface text-body-md transition-all">
+                <span class="text-caption-sm text-on-surface-variant">Minimal H+2 dari hari ini untuk memberikan waktu penjadwalan audit fisik oleh tim GO.</span>
             </div>
 
             <div class="flex flex-col gap-1.5">
                 <label for="alasan" class="font-label-md text-label-md font-bold text-primary">Alasan Pengajuan Check-out <span class="text-error">*</span></label>
                 <select id="alasan" name="alasan" required class="w-full px-3.5 py-2.5 rounded-xl border border-outline-variant/40 bg-surface-container-lowest focus:border-secondary focus:ring-2 focus:ring-secondary/20 outline-none text-on-surface text-body-md transition-all">
-                    <option value="Selesai masa studi / semester" selected>Selesai masa studi / semester</option>
-                    <option value="Kelulusan / Wisuda">Kelulusan / Wisuda</option>
-                    <option value="Pindah domisili / tempat tinggal">Pindah domisili / tempat tinggal</option>
-                    <option value="Alasan pribadi atau keluarga">Alasan pribadi atau keluarga</option>
+                    @php $selectedAlasan = old('alasan', $checkout?->alasan ?? 'Selesai masa studi / semester'); @endphp
+                    <option value="Selesai masa studi / semester" {{ $selectedAlasan === 'Selesai masa studi / semester' ? 'selected' : '' }}>Selesai masa studi / semester</option>
+                    <option value="Kelulusan / Wisuda" {{ $selectedAlasan === 'Kelulusan / Wisuda' ? 'selected' : '' }}>Kelulusan / Wisuda</option>
+                    <option value="Pindah domisili / tempat tinggal" {{ $selectedAlasan === 'Pindah domisili / tempat tinggal' ? 'selected' : '' }}>Pindah domisili / tempat tinggal</option>
+                    <option value="Alasan pribadi atau keluarga" {{ $selectedAlasan === 'Alasan pribadi atau keluarga' ? 'selected' : '' }}>Alasan pribadi atau keluarga</option>
                 </select>
             </div>
 
@@ -552,17 +601,17 @@
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div class="flex flex-col gap-1">
                         <label for="nama_bank" class="text-caption-sm font-medium text-on-surface-variant">Bank Tujuan</label>
-                        <input type="text" id="nama_bank" name="nama_bank" value="Bank Nagari" class="px-3 py-2 rounded-lg border border-outline-variant/40 bg-white text-body-md">
+                        <input type="text" id="nama_bank" name="nama_bank" value="{{ old('nama_bank', $checkout?->nama_bank ?? 'Bank Nagari') }}" class="px-3 py-2 rounded-lg border border-outline-variant/40 bg-white text-body-md">
                     </div>
                     <div class="flex flex-col gap-1">
                         <label for="nomor_rekening" class="text-caption-sm font-medium text-on-surface-variant">Nomor Rekening</label>
-                        <input type="text" id="nomor_rekening" name="nomor_rekening" value="2100.0210.45892-1" class="px-3 py-2 rounded-lg border border-outline-variant/40 bg-white text-body-md font-mono">
+                        <input type="text" id="nomor_rekening" name="nomor_rekening" value="{{ old('nomor_rekening', $checkout?->nomor_rekening ?? '2100.0210.45892-1') }}" class="px-3 py-2 rounded-lg border border-outline-variant/40 bg-white text-body-md font-mono">
                     </div>
                 </div>
 
                 <div class="flex flex-col gap-1">
                     <label for="nama_pemilik_rekening" class="text-caption-sm font-medium text-on-surface-variant">Nama Pemilik Rekening</label>
-                    <input type="text" id="nama_pemilik_rekening" name="nama_pemilik_rekening" value="{{ $penghuni['nama'] }}" class="px-3 py-2 rounded-lg border border-outline-variant/40 bg-white text-body-md">
+                    <input type="text" id="nama_pemilik_rekening" name="nama_pemilik_rekening" value="{{ old('nama_pemilik_rekening', $checkout?->nama_pemilik_rekening ?? $penghuni['nama']) }}" class="px-3 py-2 rounded-lg border border-outline-variant/40 bg-white text-body-md">
                 </div>
             </div>
 
@@ -570,7 +619,7 @@
                 <button type="button" onclick="closeCheckoutModal()" class="px-space-md py-2.5 rounded-xl border border-outline-variant/40 bg-surface-container text-on-surface hover:bg-surface-container-high font-label-md text-label-md transition-colors cursor-pointer">
                     Batal
                 </button>
-                <button type="submit" class="px-space-lg py-2.5 rounded-xl bg-secondary hover:bg-secondary/90 text-on-secondary font-label-md text-label-md font-bold shadow-brand-action transition-all cursor-pointer">
+                <button type="submit" {{ !$hunian['bebas_tunggakan'] ? 'disabled' : '' }} class="px-space-lg py-2.5 rounded-xl bg-secondary hover:bg-secondary/90 disabled:opacity-50 disabled:cursor-not-allowed text-on-secondary font-label-md text-label-md font-bold shadow-brand-action transition-all cursor-pointer">
                     Kirim Permohonan Check-out
                 </button>
             </div>

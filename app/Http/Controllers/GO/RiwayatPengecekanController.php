@@ -25,12 +25,13 @@ class RiwayatPengecekanController extends Controller
         $tingkatKelayakan = $totalDiperiksa > 0 ? round(($layakHuni / $totalDiperiksa) * 100) : 0;
         $temuanKerusakan = LaporanKerusakan::count();
 
-        $metrics = [
+        $stats = [
             'total_diperiksa' => $totalDiperiksa,
             'tingkat_kelayakan' => $tingkatKelayakan,
             'temuan_kerusakan' => $temuanKerusakan,
-            'rata_waktu' => 22,
+            'rata_rata_audit' => 20,
         ];
+        $metrics = $stats;
 
         $riwayat = $pengecekans->map(function ($cek) {
             $checkout = $cek->pengajuanCheckout;
@@ -40,30 +41,29 @@ class RiwayatPengecekanController extends Controller
             $client = $penempatan?->pendaftaranHunian?->client;
             $pengguna = $client?->pengguna;
 
-            $kondisiMap = [
-                'baik' => ['label' => 'Layak Huni', 'color' => 'bg-success/10 text-success'],
-                'rusak_ringan' => ['label' => 'Rusak Ringan', 'color' => 'bg-[#C97D1A]/10 text-[#C97D1A]'],
-                'rusak_berat' => ['label' => 'Rusak Berat', 'color' => 'bg-error/10 text-error'],
+            $item = new \stdClass();
+            $item->id = $cek->id_pengecekan;
+            $item->pengguna = (object)[
+                'nama_lengkap' => $pengguna?->nama_lengkap ?? 'N/A',
+            ];
+            $item->gedung = (object)[
+                'nama_gedung' => $gedung?->nama_gedung ?? '-',
+            ];
+            $item->kamar = (object)[
+                'nomor_kamar' => $kamar?->nomor_kamar ?? '-',
+            ];
+            $item->tanggal_audit = $cek->tanggal_cek ?? now();
+            $item->kondisi = $cek->kondisi_kamar ?? 'baik';
+            $item->kunci_fisik = !empty($checkout?->suratCheckout);
+            $item->rfid_valid = !empty($checkout?->suratBebasAsrama);
+            $item->validasi = !empty($checkout?->suratBebasAsrama);
+            $item->petugas = (object)[
+                'nama_lengkap' => $cek->pengguna?->nama_lengkap ?? '-',
             ];
 
-            $k = $kondisiMap[$cek->kondisi_kamar] ?? ['label' => 'Dalam Pengecekan', 'color' => 'bg-surface-container text-on-surface'];
-
-            return [
-                'id' => $cek->id_pengecekan,
-                'nama' => $pengguna?->nama_lengkap ?? 'N/A',
-                'kamar' => $kamar?->nomor_kamar ?? '-',
-                'gedung' => $gedung?->nama_gedung ?? '-',
-                'tanggal_cek' => $cek->tanggal_cek?->format('d M Y') ?? '-',
-                'kondisi_label' => $k['label'],
-                'kondisi_color' => $k['color'],
-                'catatan' => $cek->catatan,
-                'kunci_fisik' => $checkout?->suratCheckout ? 'Dikembalikan' : 'Belum',
-                'rfid' => $checkout?->suratBebasAsrama ? 'Dikembalikan' : 'Belum',
-                'validasi' => $checkout?->suratBebasAsrama ? 'Tervalidasi' : 'Menunggu',
-                'petugas' => $cek->pengguna?->nama_lengkap ?? '-',
-            ];
+            return $item;
         });
 
-        return view('go.riwayat-pengecekan', compact('metrics', 'riwayat'));
+        return view('go.riwayat-pengecekan', compact('stats', 'metrics', 'riwayat'));
     }
 }

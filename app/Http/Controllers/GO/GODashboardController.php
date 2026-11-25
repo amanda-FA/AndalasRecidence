@@ -11,11 +11,18 @@ class GODashboardController extends Controller
 {
     public function index()
     {
-        $menungguPengecekan = PengajuanCheckout::where('status_pengajuan', 'disetujui')
-            ->whereDoesntHave('pengecekan')
+        $menungguPengecekan = PengajuanCheckout::where('status_pengajuan', PengajuanCheckout::STATUS_DIAJUKAN)
+            ->whereDoesntHave('pengecekan', function ($q) {
+                $q->where('status_verifikasi', 'selesai');
+            })
             ->count();
 
-        $sedangDiperiksa = Pengecekan::where('status_verifikasi', 'dalam_pengecekan')->count();
+        $sedangDiperiksa = PengajuanCheckout::whereIn('status_pengajuan', [PengajuanCheckout::STATUS_AUDIT_GO, 'dalam_pengecekan'])
+            ->orWhereHas('pengecekan', function ($q) {
+                $q->where('status_verifikasi', 'draft');
+            })
+            ->count();
+
         $pengecekanSelesai = Pengecekan::where('status_verifikasi', 'selesai')->count();
         $kerusakanDitemukan = LaporanKerusakan::count();
 
@@ -31,7 +38,6 @@ class GODashboardController extends Controller
             'penempatanKamar.pendaftaranHunian.client.pengguna',
             'pengecekan',
         ])
-        ->where('status_pengajuan', 'disetujui')
         ->orderByDesc('tanggal_pengajuan')
         ->limit(10)
         ->get()
@@ -47,7 +53,7 @@ class GODashboardController extends Controller
                 $status = 'selesai';
                 $statusLabel = 'Selesai Pengecekan';
                 $statusColor = 'bg-success/10 text-success';
-            } elseif ($pengecekan) {
+            } elseif ($checkout->status_pengajuan === PengajuanCheckout::STATUS_AUDIT_GO || ($pengecekan && $pengecekan->status_verifikasi === 'draft')) {
                 $status = 'dalam_pengecekan';
                 $statusLabel = 'Sedang Diperiksa';
                 $statusColor = 'bg-[#C97D1A]/10 text-[#C97D1A]';
