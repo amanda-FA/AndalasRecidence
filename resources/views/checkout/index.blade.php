@@ -24,7 +24,7 @@
             <p class="text-body-md text-on-surface-variant mt-1">Pantau status pengajuan check-out hunian, hasil audit fisik kamar oleh General Officer, dan perolehan Surat Bebas Asrama.</p>
         </div>
 
-        <div class="flex items-center gap-space-sm">
+        <div class="flex flex-wrap items-center gap-space-sm">
             <button type="button" onclick="openCheckoutModal()" class="inline-flex items-center gap-2 px-space-md py-2.5 rounded-xl border border-outline-variant/40 bg-surface-container-lowest hover:bg-surface-container-low text-on-surface-variant font-label-md text-label-md transition-colors cursor-pointer shadow-xs">
                 <span class="material-symbols-outlined text-[18px]">edit_calendar</span>
                 <span>{{ $checkout ? 'Perbarui Rencana Check-out' : 'Formulir Rencana Check-out' }}</span>
@@ -111,8 +111,8 @@
             </div>
 
             {{-- Main Room & Occupant Info --}}
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
-                <div class="lg:col-span-7 flex items-center gap-4 sm:gap-6">
+            <div class="checkout-identity-grid grid grid-cols-1 gap-6 items-center">
+                <div class="flex items-center gap-4 sm:gap-6 min-w-0">
                     <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center shrink-0 shadow-inner">
                         <span class="material-symbols-outlined text-[36px] sm:text-[44px] text-primary-fixed">meeting_room</span>
                     </div>
@@ -130,7 +130,7 @@
                     </div>
                 </div>
 
-                <div class="lg:col-span-5 bg-white/10 backdrop-blur-md rounded-2xl p-space-md border border-white/15 flex flex-col gap-2">
+                <div class="bg-white/10 backdrop-blur-md rounded-2xl p-space-md border border-white/15 flex flex-col gap-2 min-w-0">
                     <div class="flex items-center gap-2 text-primary-fixed-dim text-caption-sm">
                         <span class="material-symbols-outlined text-[16px]">badge</span>
                         <span class="uppercase tracking-wider font-semibold text-[11px]">Identitas Penghuni</span>
@@ -190,7 +190,7 @@
         </div>
 
         {{-- Stepper Grid --}}
-        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 relative">
+        <div class="checkout-stepper-grid grid grid-cols-1 md:grid-cols-2 gap-4 relative">
             @foreach($tahapan as $t)
                 <div class="rounded-2xl p-space-md border transition-all duration-200 relative flex flex-col justify-between {{ $t['status'] === 'done' ? 'bg-surface-container-lowest border-emerald-200/80 shadow-xs' : 'bg-surface-container-low/50 border-outline-variant/20' }}">
                     <div>
@@ -230,10 +230,10 @@
     </section>
 
     {{-- 3 & 4. Grid Dua Kolom: Hasil Inspeksi Fisik (GO) & Penerbitan Otomatis SKBA --}}
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-space-xl items-start">
+    <div class="checkout-details-grid grid grid-cols-1 gap-space-xl items-start">
 
         {{-- Kolom Kiri (Lg:col-span-7): Hasil Inspeksi Kamar Fisik --}}
-        <section class="lg:col-span-7 rounded-3xl bg-surface-container-lowest border border-outline-variant/15 p-space-lg sm:p-space-xl shadow-brand-card flex flex-col gap-space-lg" aria-labelledby="inspection-card-title">
+        <section class="rounded-3xl bg-surface-container-lowest border border-outline-variant/15 p-space-lg sm:p-space-xl shadow-brand-card flex flex-col gap-space-lg" aria-labelledby="inspection-card-title">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-space-sm border-b border-surface-container">
                 <div class="flex items-center gap-3">
                     <div class="w-11 h-11 rounded-2xl bg-secondary/10 text-secondary flex items-center justify-center shrink-0">
@@ -354,7 +354,7 @@
         </section>
 
         {{-- Kolom Kanan (Lg:col-span-5): Penerbitan Otomatis Surat Bebas Asrama (SKBA) --}}
-        <section class="lg:col-span-5 rounded-3xl bg-surface-container-lowest border-2 border-secondary/30 p-space-lg sm:p-space-xl shadow-brand-card flex flex-col gap-space-lg relative overflow-hidden" aria-labelledby="skba-card-title">
+        <section class="rounded-3xl bg-surface-container-lowest border-2 border-secondary/30 p-space-lg sm:p-space-xl shadow-brand-card flex flex-col gap-space-lg relative overflow-hidden" aria-labelledby="skba-card-title">
             {{-- Decorative seal watermark --}}
             <span class="material-symbols-outlined absolute -right-6 -bottom-10 text-[180px] text-secondary/[0.04] pointer-events-none select-none">verified</span>
 

@@ -380,3 +380,78 @@
 @media (prefers-reduced-motion: reduce) { .landing-document { scroll-behavior: auto; } .landing-page *, .landing-page *::before, .landing-page *::after { animation: none !important; transition: none !important; } }
 @media (max-width: 380px) { .landing-header-actions .landing-button-small .material-symbols-outlined { display: none; } .landing-header-actions .landing-button-small { gap: 0; } }
 @media (max-width: 600px) { .landing-header .landing-brand-logo { width: 50px; height: 54px; } }
+
+
+/* Check-out & Bebas Asrama: responsive layout safeguards */
+#checkout-bebas-page,
+#checkout-bebas-page * {
+    box-sizing: border-box;
+}
+
+#checkout-bebas-page {
+    width: 100%;
+    min-width: 0;
+}
+
+#checkout-bebas-page .checkout-identity-grid,
+#checkout-bebas-page .checkout-details-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    min-width: 0;
+}
+
+#checkout-bebas-page .checkout-stepper-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    min-width: 0;
+}
+
+#checkout-bebas-page .checkout-stepper-grid > *,
+#checkout-bebas-page .checkout-identity-grid > *,
+#checkout-bebas-page .checkout-details-grid > * {
+    min-width: 0;
+}
+
+#checkout-bebas-page h1,
+#checkout-bebas-page h2,
+#checkout-bebas-page h3,
+#checkout-bebas-page h4,
+#checkout-bebas-page p,
+#checkout-bebas-page span {
+    overflow-wrap: anywhere;
+}
+
+#checkout-bebas-page button,
+#checkout-bebas-page a {
+    max-width: 100%;
+}
+
+@media (min-width: 768px) {
+    #checkout-bebas-page .checkout-stepper-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (min-width: 1440px) {
+    #checkout-bebas-page .checkout-identity-grid {
+        grid-template-columns: minmax(0, 7fr) minmax(340px, 5fr);
+    }
+
+    #checkout-bebas-page .checkout-details-grid {
+        grid-template-columns: minmax(0, 7fr) minmax(360px, 5fr);
+    }
+
+    #checkout-bebas-page .checkout-stepper-grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 767px) {
+    #checkout-bebas-page .checkout-details-grid > section {
+        padding: 1rem;
+    }
+
+    #checkout-bebas-page .checkout-stepper-grid > * {
+        min-height: 0;
+    }
+}

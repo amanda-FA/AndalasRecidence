@@ -42,6 +42,7 @@
 
         {{-- Navigation Links --}}
         <nav class="flex flex-col px-space-sm gap-space-xs">
+
             {{-- Menu Pimpinan --}}
             @role('Pimpinan')
                 @if (Route::has('dashboard.okupansi'))
@@ -59,6 +60,7 @@
 
             {{-- Menu Fasilitator --}}
             @role('Fasilitator')
+
                 @if (Route::has('gedung.index'))
                     <a href="{{ route('gedung.index') }}"
                        class="flex items-center gap-space-sm px-space-md py-space-sm rounded-xl transition-all {{ request()->routeIs('gedung.*', 'kamar.*') ? $activeClass : $inactiveClass }}">
@@ -70,6 +72,20 @@
                         </span>
                     </a>
                 @endif
+
+                {{-- Verifikasi Check-out --}}
+                @if (Route::has('fasilitator.verifikasi-checkout.index'))
+                    <a href="{{ route('fasilitator.verifikasi-checkout.index') }}"
+                       class="flex items-center gap-space-sm px-space-md py-space-sm rounded-xl transition-all {{ request()->routeIs('fasilitator.verifikasi-checkout.*') ? $activeClass : $inactiveClass }}">
+                        <span class="material-symbols-outlined text-[20px]">
+                            assignment_turned_in
+                        </span>
+                        <span class="font-body-md text-body-md">
+                            Verifikasi Check-out
+                        </span>
+                    </a>
+                @endif
+
             @endrole
 
             {{-- Menu Admin Layanan --}}
@@ -103,7 +119,7 @@
             @role('Client')
                 @if (Route::has('pendaftaran.create'))
                     <a href="{{ route('pendaftaran.create') }}"
-                    class="flex items-center gap-space-sm px-space-md py-space-sm rounded-xl transition-all {{ request()->routeIs('pendaftaran.*') ? $activeClass : $inactiveClass }}">
+                       class="flex items-center gap-space-sm px-space-md py-space-sm rounded-xl transition-all {{ request()->routeIs('pendaftaran.*') ? $activeClass : $inactiveClass }}">
                         <span class="material-symbols-outlined text-[20px]">
                             assignment
                         </span>
@@ -144,7 +160,7 @@
 
             @if (auth()->user()?->hasRole('Client') && Route::has('pembayaran.index'))
                 <a href="{{ route('pembayaran.index') }}"
-                class="flex items-center gap-space-sm px-space-md py-space-sm rounded-xl transition-all {{ request()->routeIs('pembayaran.*') ? $activeClass : $inactiveClass }}">
+                   class="flex items-center gap-space-sm px-space-md py-space-sm rounded-xl transition-all {{ request()->routeIs('pembayaran.*') ? $activeClass : $inactiveClass }}">
                     <span class="material-symbols-outlined text-[20px]">
                         payments
                     </span>

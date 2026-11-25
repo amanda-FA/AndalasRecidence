@@ -4,10 +4,7 @@ namespace App\Http\Controllers\Checkout;
 
 use App\Http\Controllers\Controller;
 use App\Models\Client;
-use App\Models\PenempatanKamar;
 use App\Models\PengajuanCheckout;
-use App\Models\Pengecekan;
-use App\Models\SuratBebasAsrama;
 use App\Services\CheckoutService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -24,102 +21,110 @@ class PengajuanCheckoutController extends Controller
     }
 
     /**
+     * Mengambil data Client berdasarkan akun yang sedang login.
+     */
+    private function getClientLogin(): Client
+    {
+        $user = Auth::user();
+
+        abort_unless($user, 401, 'Silakan login terlebih dahulu.');
+
+        $client = Client::with(['pengguna', 'jenisClient'])
+            ->where('id_pengguna', $user->id_pengguna)
+            ->first();
+
+        abort_if(!$client, 404, 'Data Client tidak ditemukan.');
+
+        return $client;
+    }
+
+    /**
      * Tampilan utama Client - Check-out & Bebas Asrama.
      */
     public function index(Request $request)
     {
-        $user = Auth::user();
-        
-        // Ambil data client dari user login atau fallback data demo client pertama
-        $client = null;
-        if ($user) {
-            $client = Client::with(['pengguna', 'jenisClient'])
-                ->where('id_pengguna', $user->id_pengguna)
-                ->first();
-        }
+        $client = $this->getClientLogin();
 
-        if (!$client) {
-            $client = Client::with(['pengguna', 'jenisClient'])->first();
-        }
+        $kelayakan = $this->checkoutService
+            ->cekKelayakanCheckout($client);
 
-        // Cek kelayakan dan status finansial melalui CheckoutService
-        $kelayakan = $client ? $this->checkoutService->cekKelayakanCheckout($client) : [
-            'eligible' => true,
-            'penempatan' => null,
-            'finansial' => ['bebas_tunggakan' => true, 'status_label' => 'Bebas Tunggakan / Lunas', 'tunggakan_nominal' => 0],
-            'checkout_aktif' => null,
-            'pesan' => 'Siap mengajukan check-out.',
-        ];
+        $penempatan = $kelayakan['penempatan'] ?? null;
+        $checkout = $kelayakan['checkout_aktif'] ?? null;
 
-        $penempatan = $kelayakan['penempatan'];
-        if (!$penempatan) {
-            $penempatan = PenempatanKamar::with([
-                'kamar.gedung',
-                'pendaftaranHunian.client.pengguna',
-                'pengajuanCheckout.pengecekan.pengguna',
-                'pengajuanCheckout.suratBebasAsrama',
-            ])->latest('id_penempatan')->first();
-        }
-
-        // Data Penghuni
-        $clientModel = $penempatan?->pendaftaranHunian?->client ?? $client;
-        $penggunaModel = $clientModel?->pengguna ?? $user;
+        // Data penghuni
+        $penggunaModel = $client->pengguna;
 
         $penghuni = [
-            'nama' => $penggunaModel?->nama_lengkap ?? 'Muhammad Fadhil Ar-Rayyan',
-            'nim' => $clientModel?->nomor_identitas ?? '2211522004',
-            'prodi' => $clientModel?->pekerjaan ?? 'S1 Sistem Informasi',
-            'fakultas' => 'Fakultas Teknologi Informasi',
-            'kontak' => $penggunaModel?->no_hp ?? '0812-3456-7806',
-            'email' => $penggunaModel?->email ?? 'fadhil.arrayyan@student.unand.ac.id',
-            'alamat' => $clientModel?->alamat_asal ?? 'Kota Padang, Sumatera Barat',
+            'nama' => $penggunaModel?->nama_lengkap ?? '-',
+            'nim' => $client->nomor_identitas ?? '-',
+            'prodi' => $client->pekerjaan ?? '-',
+            'fakultas' => '-',
+            'kontak' => $penggunaModel?->no_hp ?? '-',
+            'email' => $penggunaModel?->email ?? '-',
+            'alamat' => $client->alamat_asal ?? '-',
         ];
 
-        // Data Hunian & Kamar
+        // Data hunian dan kamar
         $kamar = $penempatan?->kamar;
         $gedung = $kamar?->gedung;
-        $finansial = $kelayakan['finansial'];
-
-        $checkout = $kelayakan['checkout_aktif'] ?? $penempatan?->pengajuanCheckout ?? PengajuanCheckout::with(['pengecekan.pengguna', 'suratBebasAsrama'])->first();
+        $finansial = $kelayakan['finansial'] ?? [];
 
         $tglKeluarRencana = $checkout?->tanggal_rencanaKeluar
-            ? Carbon::parse($checkout->tanggal_rencanaKeluar)->translatedFormat('d F Y')
-            : ($penempatan?->rencana_keluar ? Carbon::parse($penempatan->rencana_keluar)->translatedFormat('d F Y') : '24 November 2026');
+            ? Carbon::parse($checkout->tanggal_rencanaKeluar)
+                ->translatedFormat('d F Y')
+            : ($penempatan?->rencana_keluar
+                ? Carbon::parse($penempatan->rencana_keluar)
+                    ->translatedFormat('d F Y')
+                : '-');
 
         $hunian = [
-            'id_penempatan' => $penempatan?->id_penempatan ?? 1,
-            'gedung' => $gedung?->nama_gedung ?? 'Gedung Menpora Putra',
-            'nomor_kamar' => $kamar?->nomor_kamar ?? '202',
-            'bed' => $penempatan?->nomor_bed ? 'Bed ' . chr(64 + $penempatan->nomor_bed) : 'Bed A',
-            'lantai' => $kamar?->lantai ?? 2,
-            'tipe_kamar' => 'Standar Mahasiswa (2 Orang / Kamar)',
-            'periode' => 'Semester Ganjil 2026/2027',
-            'tanggal_masuk' => $penempatan?->tanggal_masuk ? Carbon::parse($penempatan->tanggal_masuk)->translatedFormat('d F Y') : '15 Agustus 2025',
+            'id_penempatan' => $penempatan?->id_penempatan,
+            'gedung' => $gedung?->nama_gedung ?? '-',
+            'nomor_kamar' => $kamar?->nomor_kamar ?? '-',
+            'bed' => $penempatan?->nomor_bed
+                ? 'Bed ' . chr(64 + $penempatan->nomor_bed)
+                : '-',
+            'lantai' => $kamar?->lantai ?? '-',
+            'tipe_kamar' => '-',
+            'periode' => '-',
+            'tanggal_masuk' => $penempatan?->tanggal_masuk
+                ? Carbon::parse($penempatan->tanggal_masuk)
+                    ->translatedFormat('d F Y')
+                : '-',
             'tanggal_berakhir_sewa' => $tglKeluarRencana,
-            'status_finansial' => $finansial['status_label'] ?? 'Bebas Tunggakan / Lunas',
-            'bebas_tunggakan' => $finansial['bebas_tunggakan'] ?? true,
-            'nominal_deposit' => $checkout?->nominal_deposit ?? 50000,
-            'status_deposit' => $checkout?->status_deposit ?? 'Tercatat Aktif & Siap Dikembalikan',
+            'status_finansial' => $finansial['status_label'] ?? 'Belum tersedia',
+            'bebas_tunggakan' => $finansial['bebas_tunggakan'] ?? false,
+            'nominal_deposit' => $checkout?->nominal_deposit ?? 0,
+            'status_deposit' => $checkout?->status_deposit ?? 'Belum ada pengajuan',
         ];
 
-        // Pemetaan Dinamis 4 Tahapan Automasi Check-out
-        $statusCurrent = $checkout?->status_pengajuan ?? 'belum_diajukan';
+        // Status tahapan Check-out
+        $statusCurrent = $checkout?->status_pengajuan;
+        $suratBebasModel = $checkout?->suratBebasAsrama;
 
         $tahap1Status = $checkout ? 'done' : 'pending';
         $tahap2Status = 'pending';
         $tahap3Status = 'pending';
-        $tahap4Status = 'pending';
+        $tahap4Status = $suratBebasModel ? 'done' : 'pending';
 
         if (in_array($statusCurrent, ['audit_go', 'dalam_pengecekan'], true)) {
             $tahap2Status = 'in_progress';
-        } elseif (in_array($statusCurrent, ['menunggu_persetujuan'], true)) {
+        } elseif ($statusCurrent === 'menunggu_persetujuan') {
             $tahap2Status = 'done';
             $tahap3Status = 'in_progress';
-        } elseif (in_array($statusCurrent, [PengajuanCheckout::STATUS_DISETUJUI, 'selesai'], true)) {
+        } elseif ($statusCurrent === PengajuanCheckout::STATUS_DISETUJUI) {
             $tahap2Status = 'done';
             $tahap3Status = 'done';
-            $tahap4Status = 'done';
         }
+
+        $jumlahTahapSelesai = collect([
+            $tahap1Status,
+            $tahap2Status,
+            $tahap3Status,
+            $tahap4Status,
+        ])->filter(fn ($status) => $status === 'done')->count();
+
+        $progressCheckout = (int) round(($jumlahTahapSelesai / 4) * 100);
 
         $tahapan = [
             [
@@ -127,91 +132,128 @@ class PengajuanCheckoutController extends Controller
                 'judul' => 'Pengajuan Dikirim',
                 'subjudul' => 'Permohonan Check-out Mahasiswa',
                 'status' => $tahap1Status,
-                'waktu' => $checkout?->tanggal_pengajuan ? Carbon::parse($checkout->tanggal_pengajuan)->translatedFormat('d M Y') : 'Menunggu Pengajuan',
+                'waktu' => $checkout?->tanggal_pengajuan
+                    ? Carbon::parse($checkout->tanggal_pengajuan)
+                        ->translatedFormat('d M Y')
+                    : 'Belum diajukan',
                 'ikon' => 'assignment_turned_in',
-                'keterangan' => $checkout ? 'Pengajuan formulir check-out mandiri telah berhasil dikirim ke sistem.' : 'Formulir check-out mandiri belum dikirim oleh mahasiswa.',
+                'keterangan' => $checkout
+                    ? 'Pengajuan check-out telah tercatat di sistem.'
+                    : 'Formulir check-out belum dikirim oleh mahasiswa.',
             ],
             [
                 'urutan' => 2,
                 'judul' => 'Pengecekan GO (Fisik Kamar & Kunci)',
                 'subjudul' => 'Audit Lapangan & Serah Terima Kunci',
                 'status' => $tahap2Status,
-                'waktu' => $checkout?->pengecekan?->tanggal_cek ? Carbon::parse($checkout->pengecekan->tanggal_cek)->translatedFormat('d M Y') : 'Jadwal H-1 Keluar',
+                'waktu' => $checkout?->pengecekan?->tanggal_cek
+                    ? Carbon::parse($checkout->pengecekan->tanggal_cek)
+                        ->translatedFormat('d M Y')
+                    : 'Belum dijadwalkan',
                 'ikon' => 'fact_check',
                 'keterangan' => $tahap2Status === 'done'
-                    ? 'Pemeriksaan fisik 9 fasilitas kamar dan serah terima kartu RFID telah selesai diverifikasi oleh staf GO.'
-                    : ($tahap2Status === 'in_progress' ? 'Staf General Officer (GO) sedang melakukan audit fisik kamar dan inventaris.' : 'Menunggu penjadwalan inspeksi fisik kamar oleh staf GO.'),
+                    ? 'Pemeriksaan kamar telah selesai.'
+                    : ($tahap2Status === 'in_progress'
+                        ? 'Pemeriksaan kamar sedang berlangsung.'
+                        : 'Menunggu pemeriksaan oleh petugas GO.'),
             ],
             [
                 'urutan' => 3,
                 'judul' => 'Approval Fasilitator',
                 'subjudul' => 'Verifikasi Final & Bebas Kewajiban',
                 'status' => $tahap3Status,
-                'waktu' => $checkout?->tangal_verifikasi ? Carbon::parse($checkout->tangal_verifikasi)->translatedFormat('d M Y') : 'Menunggu Audit Selesai',
+                'waktu' => $checkout?->tangal_verifikasi
+                    ? Carbon::parse($checkout->tangal_verifikasi)
+                        ->translatedFormat('d M Y')
+                    : 'Menunggu verifikasi',
                 'ikon' => 'verified_user',
                 'keterangan' => $tahap3Status === 'done'
-                    ? 'Fasilitator asrama menyetujui hasil audit, menetapkan denda Rp 0, dan meneruskan pencairan deposit jaminan.'
-                    : 'Persetujuan akhir oleh Fasilitator Asrama sebelum penerbitan SKBA.',
+                    ? 'Pengajuan telah disetujui oleh Fasilitator.'
+                    : 'Menunggu persetujuan akhir Fasilitator.',
             ],
             [
                 'urutan' => 4,
                 'judul' => 'Surat Bebas Terbit',
-                'subjudul' => 'Penerbitan SKBA Otomatis',
+                'subjudul' => 'Penerbitan SKBA',
                 'status' => $tahap4Status,
-                'waktu' => $checkout?->suratBebasAsrama?->tanggal_terbit ? Carbon::parse($checkout->suratBebasAsrama->tanggal_terbit)->translatedFormat('d M Y') : 'Terbit Otomatis',
+                'waktu' => $checkout?->suratBebasAsrama?->tanggal_terbit
+                    ? Carbon::parse($checkout->suratBebasAsrama->tanggal_terbit)
+                        ->translatedFormat('d M Y')
+                    : 'Belum terbit',
                 'ikon' => 'workspace_premium',
                 'keterangan' => $tahap4Status === 'done'
-                    ? 'Surat Bebas Asrama (SKBA) telah resmi terbit ber-seal digital dan terhubung ke Portal Akademik UNAND.'
-                    : 'Dokumen SKBA akan otomatis terbit begitu Fasilitator menyetujui check-out.',
+                    ? 'Surat Bebas Asrama telah diterbitkan.'
+                    : 'SKBA akan tersedia setelah persetujuan selesai.',
             ],
         ];
 
-        // Hasil Inspeksi Kamar Fisik oleh GO
+        // Data hasil pemeriksaan GO
         $pengecekanModel = $checkout?->pengecekan;
         $petugasGo = $pengecekanModel?->pengguna;
 
+        $nomorAudit = $checkout
+            ? '#CHK-' . now()->format('Y') . '-'
+                . str_pad($checkout->id_pengajuan, 4, '0', STR_PAD_LEFT)
+            : '-';
+
+        $denda = $checkout?->denda_kerusakan ?? 0;
+        $deposit = $checkout?->nominal_deposit ?? 0;
+
         $inspeksi = [
-            'petugas' => $petugasGo?->nama_lengkap ?? 'Rahardian Pratama, A.Md.',
-            'role_petugas' => 'General Officer (GO) Lapangan',
-            'nip_petugas' => 'GO-2024-0012',
-            'no_registrasi' => '#CHK-' . now()->format('Y') . '-' . str_pad($checkout?->id_pengajuan ?? 1, 4, '0', STR_PAD_LEFT),
-            'tanggal_cek' => $pengecekanModel?->tanggal_cek ? Carbon::parse($pengecekanModel->tanggal_cek)->translatedFormat('d F Y') : '22 November 2026 (14:30 WIB)',
-            'kondisi_aset' => $pengecekanModel?->kondisi_kamar === 'baik' || !$pengecekanModel ? 'Lengkap & Bersih' : ucwords(str_replace('_', ' ', $pengecekanModel->kondisi_kamar)),
-            'total_komponen' => 9,
-            'komponen_baik' => 9,
-            'komponen_rusak' => 0,
-            'temuan_denda' => $checkout?->denda_kerusakan ?? 0,
-            'temuan_denda_formatted' => 'Rp ' . number_format($checkout?->denda_kerusakan ?? 0, 0, ',', '.'),
-            'catatan' => $pengecekanModel?->catatan ?: 'Kondisi ruangan sangat rapi dan bersih. Tidak ada kerusakan aset yang disebabkan kelalaian. Seluruh inventaris fisik kamar lengkap.',
+            'petugas' => $petugasGo?->nama_lengkap ?? 'Belum ditugaskan',
+            'role_petugas' => 'General Officer (GO)',
+            'nip_petugas' => '-',
+            'no_registrasi' => $nomorAudit,
+            'tanggal_cek' => $pengecekanModel?->tanggal_cek
+                ? Carbon::parse($pengecekanModel->tanggal_cek)
+                    ->translatedFormat('d F Y')
+                : 'Belum diperiksa',
+            'kondisi_aset' => $pengecekanModel?->kondisi_kamar
+                ? ucwords(str_replace('_', ' ', $pengecekanModel->kondisi_kamar))
+                : 'Belum diperiksa',
+            'total_komponen' => null,
+            'komponen_baik' => null,
+            'komponen_rusak' => null,
+            'temuan_denda' => $denda,
+            'temuan_denda_formatted' => 'Rp ' . number_format($denda, 0, ',', '.'),
+            'catatan' => $pengecekanModel?->catatan ?? 'Belum ada catatan pemeriksaan.',
             'serah_terima_akses' => [
-                'kartu_rfid' => 'RFID-MNP-0202A (Diserahkan & Terbaca Valid)',
-                'kunci_fisik' => 'Kunci Fisik Master Kamar (Diserahkan Lengkap)',
-                'status' => 'Lengkap & Tervalidasi',
+                'kartu_rfid' => 'Belum ada data serah terima',
+                'kunci_fisik' => 'Belum ada data serah terima',
+                'status' => 'Belum diverifikasi',
             ],
             'deposit_refund' => [
-                'nominal' => $checkout?->nominal_deposit ?? 50000,
-                'nominal_formatted' => 'Rp ' . number_format($checkout?->nominal_deposit ?? 50000, 0, ',', '.'),
-                'bank' => $checkout?->nama_bank ?? 'Bank Nagari',
-                'nomor_rekening' => $checkout?->nomor_rekening ?? '2100.0210.45892-1',
-                'atas_nama' => $checkout?->nama_pemilik_rekening ?? $penghuni['nama'],
-                'status' => $checkout?->status_deposit === 'dikembalikan' ? 'Dana Dikembalikan / Sukses' : 'Diproses Otomatis / Dikembalikan',
-                'keterangan' => 'Dana jaminan dikembalikan penuh tanpa potongan karena tidak terdapat denda kerusakan fasilitas.',
+                'nominal' => $deposit,
+                'nominal_formatted' => 'Rp ' . number_format($deposit, 0, ',', '.'),
+                'bank' => $checkout?->nama_bank ?? '-',
+                'nomor_rekening' => $checkout?->nomor_rekening ?? '-',
+                'atas_nama' => $checkout?->nama_pemilik_rekening ?? '-',
+                'status' => $checkout?->status_deposit ?? 'Belum ada pengajuan',
+                'keterangan' => $checkout
+                    ? 'Informasi pengembalian mengikuti status pengajuan.'
+                    : 'Belum terdapat pengajuan pengembalian deposit.',
             ],
         ];
 
-        // Surat Bebas Asrama (SKBA)
+        // Data SKBA
         $suratBebasModel = $checkout?->suratBebasAsrama;
+
         $suratBebas = [
-            'nomor_surat' => $suratBebasModel?->nomor_surat ?? 'SKBA/UNAND/ASR/2026/0892',
-            'tanggal_terbit' => $suratBebasModel?->tanggal_terbit ? Carbon::parse($suratBebasModel->tanggal_terbit)->translatedFormat('d F Y') : '23 November 2026',
-            'status' => $tahap4Status === 'done' ? 'Dokumen Sah & Aktif' : 'Menunggu Approval Fasilitator',
-            'integrasi_portal' => 'Terkoneksi langsung ke Portal Akademik UNAND (Syarat KRS & Wisuda)',
-            'pejabat_nama' => 'Dr. Ir. H. Syamsul Bahri, M.T.',
-            'pejabat_jabatan' => 'Kepala UPT Asrama Mahasiswa Universitas Andalas',
-            'pejabat_nip' => '19750814 200212 1 002',
-            'seal_text' => 'UNIVERSITAS ANDALAS - UPT ASRAMA MAHASISWA - DIGITAL SEALED',
-            'verification_code' => 'SKBA-2026-UNAND-0892-VALID',
-            'is_ready' => $tahap4Status === 'done',
+            'nomor_surat' => $suratBebasModel?->nomor_surat ?? '-',
+            'tanggal_terbit' => $suratBebasModel?->tanggal_terbit
+                ? Carbon::parse($suratBebasModel->tanggal_terbit)
+                    ->translatedFormat('d F Y')
+                : '-',
+            'status' => $suratBebasModel
+                ? 'Dokumen Telah Diterbitkan'
+                : 'Menunggu Penerbitan',
+            'integrasi_portal' => '-',
+            'pejabat_nama' => '-',
+            'pejabat_jabatan' => '-',
+            'pejabat_nip' => '-',
+            'seal_text' => '-',
+            'verification_code' => '-',
+            'is_ready' => (bool) $suratBebasModel,
         ];
 
         return view('checkout.index', compact(
@@ -219,6 +261,7 @@ class PengajuanCheckoutController extends Controller
             'hunian',
             'checkout',
             'tahapan',
+            'progressCheckout',
             'inspeksi',
             'suratBebas',
             'kelayakan'
@@ -226,90 +269,178 @@ class PengajuanCheckoutController extends Controller
     }
 
     /**
-     * Simpan pengajuan check-out mandiri (single submission).
+     * Simpan pengajuan check-out mandiri.
      */
     public function store(Request $request)
     {
-        $minDate = Carbon::today('Asia/Jakarta')->addDays(2)->format('Y-m-d');
+        $minDate = Carbon::today('Asia/Jakarta')
+            ->addDays(2)
+            ->format('Y-m-d');
 
         $validated = $request->validate([
-            'tanggal_rencanaKeluar' => 'required|date|after_or_equal:' . $minDate,
-            'alasan' => 'required|string|max:1000',
-            'nama_bank' => 'nullable|string|max:50',
-            'nomor_rekening' => 'nullable|string|max:50',
-            'nama_pemilik_rekening' => 'nullable|string|max:100',
+            'tanggal_rencanaKeluar' => [
+                'required',
+                'date',
+                'after_or_equal:' . $minDate,
+            ],
+            'alasan' => [
+                'required',
+                'string',
+                'max:1000',
+            ],
+            'nama_bank' => [
+                'required',
+                'string',
+                'max:50',
+            ],
+            'nomor_rekening' => [
+                'required',
+                'string',
+                'max:50',
+            ],
+            'nama_pemilik_rekening' => [
+                'required',
+                'string',
+                'max:100',
+            ],
         ], [
-            'tanggal_rencanaKeluar.after_or_equal' => 'Rencana tanggal keluar minimal H+2 dari hari ini (' . Carbon::parse($minDate)->translatedFormat('d F Y') . ') untuk penjadwalan audit GO.',
-            'alasan.required' => 'Harap isi alasan pengajuan check-out Anda.',
+            'tanggal_rencanaKeluar.after_or_equal' =>
+                'Rencana tanggal keluar minimal H+2 dari hari ini ('
+                . Carbon::parse($minDate)->translatedFormat('d F Y')
+                . ') untuk penjadwalan audit GO.',
+            'alasan.required' =>
+                'Harap isi alasan pengajuan check-out Anda.',
+            'nama_bank.required' =>
+                'Harap isi nama bank tujuan pengembalian deposit.',
+            'nomor_rekening.required' =>
+                'Harap isi nomor rekening tujuan pengembalian deposit.',
+            'nama_pemilik_rekening.required' =>
+                'Harap isi nama pemilik rekening.',
         ]);
 
-        $user = Auth::user();
-        $client = null;
-        if ($user) {
-            $client = Client::where('id_pengguna', $user->id_pengguna)->first();
-        }
-        if (!$client) {
-            $client = Client::first();
-        }
-
-        if (!$client) {
-            return redirect()->route('checkout.index')->with('error', 'Profil data Client tidak ditemukan.');
-        }
+        $client = $this->getClientLogin();
 
         try {
             $this->checkoutService->ajukanCheckout($client, $validated);
 
             return redirect()->route('checkout.index')
-                ->with('success', 'Permohonan Check-out & Bebas Asrama berhasil diajukan! Sistem otomatis meneruskan jadwal audit fisik kamar ke Petugas General Officer (GO).');
+                ->with(
+                    'success',
+                    'Permohonan Check-out & Bebas Asrama berhasil diajukan! Sistem meneruskan pengajuan ke Petugas General Officer (GO).'
+                );
         } catch (ValidationException $e) {
             return redirect()->route('checkout.index')
                 ->withErrors($e->errors())
                 ->withInput();
         } catch (\Exception $e) {
+            report($e);
+
             return redirect()->route('checkout.index')
-                ->with('error', 'Gagal memproses pengajuan: ' . $e->getMessage());
+                ->with(
+                    'error',
+                    'Gagal memproses pengajuan. Silakan coba kembali.'
+                );
         }
     }
 
     /**
-     * Unduh Surat Bebas Asrama (.PDF / Printable Document).
+     * Mengambil data pengajuan dan surat milik Client yang login.
      */
-    public function downloadSurat(Request $request)
+    private function getCheckoutClient(Client $client): PengajuanCheckout
     {
-        $user = Auth::user();
-        $client = $user ? Client::with('pengguna')->where('id_pengguna', $user->id_pengguna)->first() : null;
-        if (!$client) {
-            $client = Client::with('pengguna')->first();
-        }
+        $kelayakan = $this->checkoutService
+            ->cekKelayakanCheckout($client);
 
-        $checkout = PengajuanCheckout::with(['penempatanKamar.kamar.gedung', 'suratBebasAsrama'])->latest('id_pengajuan')->first();
-        $penempatan = $checkout?->penempatanKamar;
+        $checkout = $kelayakan['checkout_aktif'] ?? null;
+
+        abort_if(
+            !$checkout,
+            404,
+            'Pengajuan check-out tidak ditemukan.'
+        );
+
+        $checkout->load([
+            'penempatanKamar.kamar.gedung',
+            'suratBebasAsrama',
+        ]);
+
+        abort_if(
+            !$checkout->suratBebasAsrama,
+            404,
+            'Surat Bebas Asrama belum diterbitkan.'
+        );
+
+        return $checkout;
+    }
+
+    /**
+     * Menyiapkan data penghuni dan hunian untuk dokumen SKBA.
+     */
+    private function dataSurat(
+        PengajuanCheckout $checkout,
+        Client $client
+    ): array {
+        $penempatan = $checkout->penempatanKamar;
+        $suratModel = $checkout->suratBebasAsrama;
 
         $penghuni = [
-            'nama' => $client?->pengguna?->nama_lengkap ?? 'Muhammad Fadhil Ar-Rayyan',
-            'nim' => $client?->nomor_identitas ?? '2211522004',
-            'prodi' => $client?->pekerjaan ?? 'S1 Sistem Informasi',
-            'fakultas' => 'Fakultas Teknologi Informasi',
+            'nama' => $client->pengguna?->nama_lengkap ?? '-',
+            'nim' => $client->nomor_identitas ?? '-',
+            'prodi' => $client->pekerjaan ?? '-',
+            'fakultas' => '-',
         ];
 
         $hunian = [
-            'gedung' => $penempatan?->kamar?->gedung?->nama_gedung ?? 'Gedung Menpora Putra',
-            'kamar' => ($penempatan?->kamar?->nomor_kamar ?? '202') . ' - Bed A',
-            'periode' => 'Semester Ganjil 2026/2027',
+            'gedung' => $penempatan?->kamar?->gedung?->nama_gedung ?? '-',
+            'kamar' => $penempatan?->kamar?->nomor_kamar
+                ? $penempatan->kamar->nomor_kamar
+                    . ($penempatan->nomor_bed
+                        ? ' - Bed ' . chr(64 + $penempatan->nomor_bed)
+                        : '')
+                : '-',
+            'periode' => '-',
         ];
 
         $suratBebas = [
-            'nomor_surat' => $checkout?->suratBebasAsrama?->nomor_surat ?? 'SKBA/UNAND/ASR/2026/0892',
-            'tanggal_terbit' => $checkout?->suratBebasAsrama?->tanggal_terbit ? Carbon::parse($checkout->suratBebasAsrama->tanggal_terbit)->translatedFormat('d F Y') : '23 November 2026',
-            'pejabat_nama' => 'Dr. Ir. H. Syamsul Bahri, M.T.',
-            'pejabat_jabatan' => 'Kepala UPT Asrama Mahasiswa Universitas Andalas',
-            'pejabat_nip' => '19750814 200212 1 002',
-            'verification_code' => 'SKBA-2026-UNAND-0892-VALID',
+            'nomor_surat' => $suratModel->nomor_surat ?? '-',
+            'tanggal_terbit' => $suratModel->tanggal_terbit
+                ? Carbon::parse($suratModel->tanggal_terbit)
+                    ->translatedFormat('d F Y')
+                : '-',
+            'pejabat_nama' => '-',
+            'pejabat_jabatan' => '-',
+            'pejabat_nip' => '-',
+            'verification_code' => '-',
         ];
 
-        return response()->view('checkout.print-skba', compact('penghuni', 'hunian', 'suratBebas'), 200, [
-            'Content-Disposition' => 'inline; filename="SKBA_' . str_replace('/', '_', $suratBebas['nomor_surat']) . '.html"',
-        ]);
+        return compact('penghuni', 'hunian', 'suratBebas');
+    }
+
+    /**
+     * Unduh / tampilkan Surat Bebas Asrama.
+     */
+    public function downloadSurat(Request $request)
+    {
+        $client = $this->getClientLogin();
+        $checkout = $this->getCheckoutClient($client);
+
+        $data = $this->dataSurat($checkout, $client);
+
+        return response()->view(
+            'checkout.print-skba',
+            $data,
+            200,
+            [
+                'Content-Disposition' =>
+                    'inline; filename="SKBA_'
+                    . str_replace(
+                        '/',
+                        '_',
+                        $data['suratBebas']['nomor_surat']
+                    )
+                    . '.html"',
+            ]
+        );
     }
 
     /**
@@ -317,37 +448,11 @@ class PengajuanCheckoutController extends Controller
      */
     public function previewSurat(Request $request)
     {
-        $user = Auth::user();
-        $client = $user ? Client::with('pengguna')->where('id_pengguna', $user->id_pengguna)->first() : null;
-        if (!$client) {
-            $client = Client::with('pengguna')->first();
-        }
+        $client = $this->getClientLogin();
+        $checkout = $this->getCheckoutClient($client);
 
-        $checkout = PengajuanCheckout::with(['penempatanKamar.kamar.gedung', 'suratBebasAsrama'])->latest('id_pengajuan')->first();
-        $penempatan = $checkout?->penempatanKamar;
+        $data = $this->dataSurat($checkout, $client);
 
-        $penghuni = [
-            'nama' => $client?->pengguna?->nama_lengkap ?? 'Muhammad Fadhil Ar-Rayyan',
-            'nim' => $client?->nomor_identitas ?? '2211522004',
-            'prodi' => $client?->pekerjaan ?? 'S1 Sistem Informasi',
-            'fakultas' => 'Fakultas Teknologi Informasi',
-        ];
-
-        $hunian = [
-            'gedung' => $penempatan?->kamar?->gedung?->nama_gedung ?? 'Gedung Menpora Putra',
-            'kamar' => ($penempatan?->kamar?->nomor_kamar ?? '202') . ' - Bed A',
-            'periode' => 'Semester Ganjil 2026/2027',
-        ];
-
-        $suratBebas = [
-            'nomor_surat' => $checkout?->suratBebasAsrama?->nomor_surat ?? 'SKBA/UNAND/ASR/2026/0892',
-            'tanggal_terbit' => $checkout?->suratBebasAsrama?->tanggal_terbit ? Carbon::parse($checkout->suratBebasAsrama->tanggal_terbit)->translatedFormat('d F Y') : '23 November 2026',
-            'pejabat_nama' => 'Dr. Ir. H. Syamsul Bahri, M.T.',
-            'pejabat_jabatan' => 'Kepala UPT Asrama Mahasiswa Universitas Andalas',
-            'pejabat_nip' => '19750814 200212 1 002',
-            'verification_code' => 'SKBA-2026-UNAND-0892-VALID',
-        ];
-
-        return view('checkout.print-skba', compact('penghuni', 'hunian', 'suratBebas'));
+        return view('checkout.print-skba', $data);
     }
 }
