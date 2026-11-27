@@ -10,6 +10,7 @@ require __DIR__.'/modules/verifikasi_pendaftaran.php';
 require __DIR__.'/modules/pendaftaran.php';
 require __DIR__.'/modules/penempatan.php';
 require __DIR__.'/modules/kerusakan.php';
+require __DIR__.'/modules/teknisi.php';
 require __DIR__.'/modules/pembayaran.php';
 require __DIR__.'/modules/checkout.php';
 require __DIR__.'/modules/verifikasi_checkout.php';

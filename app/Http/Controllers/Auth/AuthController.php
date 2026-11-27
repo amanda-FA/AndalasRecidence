@@ -84,6 +84,14 @@ class AuthController extends Controller
             return route('periode.index');
         }
 
+        if ($user->hasRole('Teknisi')) {
+            return route('teknisi.kerusakan.index');
+        }
+
+        if ($user->hasRole(['GO', 'General Officer'])) {
+            return route('go.dashboard');
+        }
+
         return '/';
     }
 

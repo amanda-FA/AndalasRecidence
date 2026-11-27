@@ -88,6 +88,21 @@
 
             @endrole
 
+            {{-- Menu Teknisi --}}
+            @role('Teknisi')
+                @if (Route::has('teknisi.kerusakan.index'))
+                    <a href="{{ route('teknisi.kerusakan.index') }}"
+                       class="flex items-center gap-space-sm px-space-md py-space-sm rounded-xl transition-all {{ request()->routeIs('teknisi.kerusakan.*') ? $activeClass : $inactiveClass }}">
+                        <span class="material-symbols-outlined text-[20px]">
+                            build_circle
+                        </span>
+                        <span class="font-body-md text-body-md">
+                            Laporan Kerusakan
+                        </span>
+                    </a>
+                @endif
+            @endrole
+
             {{-- Menu Admin Layanan --}}
             @role('Admin Layanan')
                 @if (Route::has('periode.index'))
