@@ -61,7 +61,7 @@
         {{-- Header / Kop Surat Resmi --}}
         <div class="flex items-center justify-between border-b-2 border-gray-900 pb-4 mb-6">
             <div class="flex items-center gap-4">
-                <img src="{{ asset('images/logo_andalasresidence.png') }}" alt="Logo Universitas Andalas" class="w-16 h-16 object-contain">
+                <img src="{{ asset('images/logo_unand.png') }}" alt="Logo Universitas Andalas" class="w-16 h-20 object-contain shrink-0">
                 <div>
                     <h2 class="text-base font-bold uppercase tracking-wider text-gray-900">Universitas Andalas</h2>
                     <h3 class="text-lg font-extrabold uppercase text-indigo-950">Unit Pelaksana Teknis Asrama Mahasiswa (Andalas Residence)</h3>

@@ -47,12 +47,36 @@
             @role('Pimpinan')
                 @if (Route::has('dashboard.okupansi'))
                     <a href="{{ route('dashboard.okupansi') }}"
-                       class="flex items-center gap-space-sm px-space-md py-space-sm rounded-xl transition-all {{ request()->routeIs('dashboard.okupansi') ? $activeClass : $inactiveClass }}">
+                       class="flex items-center gap-space-sm px-space-md py-space-sm rounded-xl transition-all {{ request()->routeIs('dashboard.okupansi*') ? $activeClass : $inactiveClass }}">
                         <span class="material-symbols-outlined text-[20px]">
                             space_dashboard
                         </span>
                         <span class="font-body-md text-body-md">
                             Dashboard Okupansi
+                        </span>
+                    </a>
+                @endif
+
+                @if (Route::has('pimpinan.monitoring-kerusakan.index'))
+                    <a href="{{ route('pimpinan.monitoring-kerusakan.index') }}"
+                       class="flex items-center gap-space-sm px-space-md py-space-sm rounded-xl transition-all {{ request()->routeIs('pimpinan.monitoring-kerusakan.*') ? $activeClass : $inactiveClass }}">
+                        <span class="material-symbols-outlined text-[20px]">
+                            monitoring
+                        </span>
+                        <span class="font-body-md text-body-md">
+                            Monitoring Kerusakan
+                        </span>
+                    </a>
+                @endif
+
+                @if (Route::has('pimpinan.kinerja-teknisi.index'))
+                    <a href="{{ route('pimpinan.kinerja-teknisi.index') }}"
+                       class="flex items-center gap-space-sm px-space-md py-space-sm rounded-xl transition-all {{ request()->routeIs('pimpinan.kinerja-teknisi.*') ? $activeClass : $inactiveClass }}">
+                        <span class="material-symbols-outlined text-[20px]">
+                            engineering
+                        </span>
+                        <span class="font-body-md text-body-md">
+                            Kinerja Teknisi
                         </span>
                     </a>
                 @endif
